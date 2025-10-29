@@ -474,6 +474,6 @@ If migrating from Workers AI to OpenAI:
 ## See Also
 
 - [Main Skill Documentation](../SKILL.md)
-- [Embedding Models Reference](../reference/embedding-models.md)
+- [Embedding Models Reference](../references/embedding-models.md)
 - [Workers AI Example](./workers-ai-bge-base.md)
 - [OpenAI Embeddings API](https://platform.openai.com/docs/guides/embeddings)

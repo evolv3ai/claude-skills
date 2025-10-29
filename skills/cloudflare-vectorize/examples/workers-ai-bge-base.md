@@ -384,5 +384,5 @@ npx wrangler tail
 
 - [Main Skill Documentation](../SKILL.md)
 - [RAG Chat Template](../templates/rag-chat.ts)
-- [Embedding Models Reference](../reference/embedding-models.md)
+- [Embedding Models Reference](../references/embedding-models.md)
 - [Workers AI Docs](https://developers.cloudflare.com/workers-ai/models/bge-base-en-v1.5/)

@@ -586,7 +586,7 @@ All working code examples are in `./templates/`:
 
 ## Reference Documentation
 
-Detailed guides in `./reference/`:
+Detailed guides in `./references/`:
 - `wrangler-commands.md` - Complete CLI reference
 - `index-operations.md` - Index creation and management
 - `vector-operations.md` - Insert, query, delete operations
