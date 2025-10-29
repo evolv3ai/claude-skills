@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed - YAML Frontmatter Compliance: 100% Standards Alignment 🎯
+
+**Date**: 2025-10-29
+
+**Critical Fix**: Achieved 100% compliance with official Anthropic standards across all 51 skills.
+
+#### Impact
+- **Before**: 29/51 skills compliant (57%)
+- **After**: 51/51 skills compliant (100%)
+- **Critical Issue Resolved**: Name mismatches prevented Claude Code from discovering 22 skills
+
+#### Changes Made
+
+**1. Fixed 22 YAML Name Mismatches** (display names → directory names):
+- ai-sdk-core, ai-sdk-ui, auth-js, cloudflare-browser-rendering
+- cloudflare-cron-triggers, cloudflare-d1, cloudflare-email-routing
+- cloudflare-full-stack-integration, cloudflare-full-stack-scaffold
+- cloudflare-hyperdrive, cloudflare-kv, cloudflare-queues, cloudflare-r2
+- cloudflare-vectorize, cloudflare-worker-base, cloudflare-workers-ai
+- cloudflare-workflows, firecrawl-scraper, google-gemini-api, openai-api
+- tailwind-v4-shadcn, thesys-generative-ui
+
+**2. Added 9 Missing License Fields** (`license: MIT`):
+- cloudflare-d1, cloudflare-kv, cloudflare-queues, cloudflare-r2
+- cloudflare-vectorize, cloudflare-worker-base, cloudflare-workers-ai
+- firecrawl-scraper, tailwind-v4-shadcn
+
+**3. Updated Documentation** (skill count 50 → 51):
+- CLAUDE.md: Directory structure + status section
+- README.md: Available skills heading + subagent verification results
+
+**4. Added Subagent Workflow Documentation**:
+- planning/subagent-workflow.md: Complete guide for using Explore/Plan subagents
+- README.md: Added "Using Subagents" section with practical examples
+
+#### Verification
+- ✅ Automated verification via Explore subagent (all 51 skills pass)
+- ✅ Manual spot-checks on 12 previously problematic skills
+- ✅ All skills now properly discoverable by Claude Code
+
+#### Standards Compliance
+- ✅ Official Anthropic agent_skills_spec.md
+- ✅ Project standards (claude-code-skill-standards.md)
+- ✅ ONE_PAGE_CHECKLIST.md requirements
+
+---
+
 ### Updated - Complete Documentation Refresh ✅
 
 **Date**: 2025-10-29
