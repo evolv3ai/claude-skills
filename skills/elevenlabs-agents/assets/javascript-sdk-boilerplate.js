@@ -1,4 +1,4 @@
-import { Conversation } from '@11labs/client';
+import { Conversation } from '@elevenlabs/client';
 
 // Configuration
 const AGENT_ID = 'your-agent-id';

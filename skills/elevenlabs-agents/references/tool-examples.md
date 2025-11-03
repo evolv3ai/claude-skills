@@ -4,7 +4,7 @@
 
 ### Update Shopping Cart
 ```typescript
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 import { z } from 'zod';
 
 clientTools: {

@@ -1,28 +1,28 @@
 ---
 name: elevenlabs-agents
 description: |
-  Use this skill when building AI voice agents with the ElevenLabs Agents Platform. This skill covers the complete platform including agent configuration (system prompts, turn-taking, workflows), voice & language features (multi-voice, pronunciation, speed control), knowledge base (RAG), tools (client/server/MCP/system), SDKs (React, JavaScript, React Native, Swift, Widget), testing & evaluation, analytics, privacy/compliance (GDPR/HIPAA/SOC 2), cost optimization, CLI workflows ("agents as code"), and DevOps integration. Prevents 15+ common errors including missing dynamic variables, case-sensitive tool names, webhook authentication failures, voice consistency issues, and RAG configuration mistakes. Provides production-tested templates for React, Next.js, React Native, Swift, and Cloudflare Workers. Token savings: ~73% (22k → 6k tokens). Production tested.
+  Use this skill when building AI voice agents with the ElevenLabs Agents Platform. This skill covers the complete platform including agent configuration (system prompts, turn-taking, workflows), voice & language features (multi-voice, pronunciation, speed control), knowledge base (RAG), tools (client/server/MCP/system), SDKs (React, JavaScript, React Native, Swift, Widget), Scribe (real-time STT), WebRTC/WebSocket connections, testing & evaluation, analytics, privacy/compliance (GDPR/HIPAA/SOC 2), cost optimization, CLI workflows ("agents as code"), and DevOps integration. Prevents 17+ common errors including package deprecation, Android audio cutoff, CSP violations, missing dynamic variables, case-sensitive tool names, webhook authentication failures, and WebRTC configuration issues. Provides production-tested templates for React, Next.js, React Native, Swift, and Cloudflare Workers. Token savings: ~73% (22k → 6k tokens). Production tested.
 license: MIT
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   last_updated: 2025-11-03
   production_tested: true
   packages:
-    - name: elevenlabs
-      version: 1.59.0
-    - name: "@elevenlabs/cli"
+    - name: "@elevenlabs/elevenlabs-js"
+      version: 2.21.0
+    - name: "@elevenlabs/agents-cli"
       version: 0.2.0
-    - name: "@11labs/react"
-      version: latest
-    - name: "@11labs/client"
-      version: latest
+    - name: "@elevenlabs/react"
+      version: 0.9.1
+    - name: "@elevenlabs/client"
+      version: 0.9.1
     - name: "@elevenlabs/react-native"
-      version: latest
+      version: 0.5.2
   documentation:
     - https://elevenlabs.io/docs/agents-platform/overview
     - https://elevenlabs.io/docs/api-reference
     - https://github.com/elevenlabs/elevenlabs-examples
-  errors_prevented: 15+
+  errors_prevented: 17+
   token_savings: ~73%
 ---
 
@@ -36,6 +36,28 @@ ElevenLabs Agents Platform is a comprehensive solution for building production-r
 2. **LLM (Large Language Model)** - Reasoning and response generation (GPT, Claude, Gemini, custom models)
 3. **TTS (Text-to-Speech)** - Converts text to speech (5000+ voices, 31 languages, low latency)
 4. **Turn-Taking Model** - Proprietary model that handles conversation timing and interruptions
+
+### 🚨 Package Updates (November 2025)
+
+ElevenLabs migrated to new scoped packages in August 2025:
+
+**DEPRECATED (Do not use):**
+- `@11labs/react` → **DEPRECATED**
+- `@11labs/client` → **DEPRECATED**
+
+**Current packages:**
+```bash
+npm install @elevenlabs/react@0.9.1        # React SDK
+npm install @elevenlabs/client@0.9.1       # JavaScript SDK
+npm install @elevenlabs/react-native@0.5.2 # React Native SDK
+npm install @elevenlabs/elevenlabs-js@2.21.0 # Base SDK
+npm install -g @elevenlabs/agents-cli@0.2.0  # CLI
+```
+
+If you have old packages installed, uninstall them first:
+```bash
+npm uninstall @11labs/react @11labs/client
+```
 
 ### When to Use This Skill
 
@@ -63,12 +85,13 @@ Use this skill when:
 - Dynamic variables and personalization
 
 **Connect & Deploy**:
-- React SDK (`@11labs/react`)
-- JavaScript SDK (`@11labs/client`)
-- React Native SDK (Expo)
+- React SDK (`@elevenlabs/react`)
+- JavaScript SDK (`@elevenlabs/client`)
+- React Native SDK (`@elevenlabs/react-native`)
 - Swift SDK (iOS/macOS)
 - Embeddable widget
 - Telephony integration (Twilio, SIP)
+- Scribe (Real-Time Speech-to-Text) - Beta
 
 **Operate & Optimize**:
 - Automated testing (scenario, tool call, load)
@@ -88,12 +111,12 @@ For building voice chat interfaces in React applications.
 
 **Installation**:
 ```bash
-npm install @11labs/react zod
+npm install @elevenlabs/react zod
 ```
 
 **Basic Example**:
 ```typescript
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 import { z } from 'zod';
 
 export default function VoiceChat() {
@@ -156,9 +179,9 @@ For managing agents via code with version control and CI/CD.
 
 **Installation**:
 ```bash
-npm install -g @elevenlabs/cli
+npm install -g @elevenlabs/agents-cli
 # or
-pnpm install -g @elevenlabs/cli
+pnpm install -g @elevenlabs/agents-cli
 ```
 
 **Workflow**:
@@ -741,7 +764,7 @@ Execute operations on the client side (browser or mobile app).
 
 **React Example**:
 ```typescript
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 import { z } from 'zod';
 
 const { startConversation } = useConversation({
@@ -921,16 +944,16 @@ Modify the internal state of the conversation without external calls.
 
 ## 6. SDK Integration
 
-### React SDK (`@11labs/react`)
+### React SDK (`@elevenlabs/react`)
 
 **Installation**:
 ```bash
-npm install @11labs/react zod
+npm install @elevenlabs/react zod
 ```
 
 **Complete Example**:
 ```typescript
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 import { z } from 'zod';
 import { useState } from 'react';
 
@@ -1007,18 +1030,18 @@ export default function VoiceAgent() {
 }
 ```
 
-### JavaScript SDK (`@11labs/client`)
+### JavaScript SDK (`@elevenlabs/client`)
 
 For vanilla JavaScript projects (no React).
 
 **Installation**:
 ```bash
-npm install @11labs/client
+npm install @elevenlabs/client
 ```
 
 **Example**:
 ```javascript
-import { Conversation } from '@11labs/client';
+import { Conversation } from '@elevenlabs/client';
 
 const conversation = new Conversation({
   agentId: 'your-agent-id',
@@ -1049,6 +1072,107 @@ document.getElementById('stop-btn').addEventListener('click', async () => {
   await conversation.stop();
 });
 ```
+
+### Connection Types: WebRTC vs WebSocket
+
+ElevenLabs SDKs support two connection types with different characteristics.
+
+**Comparison Table**:
+
+| Feature | WebSocket | WebRTC |
+|---------|-----------|--------|
+| **Authentication** | `signedUrl` | `conversationToken` |
+| **Audio Format** | Configurable | PCM_48000 (hardcoded) |
+| **Sample Rate** | Configurable (16k, 24k, 48k) | 48000 (hardcoded) |
+| **Latency** | Standard | Lower |
+| **Device Switching** | Flexible | Limited (format locked) |
+| **Best For** | General use, flexibility | Low-latency requirements |
+
+**WebSocket Configuration** (default):
+
+```typescript
+import { useConversation } from '@elevenlabs/react';
+
+const { startConversation } = useConversation({
+  agentId: 'your-agent-id',
+
+  // WebSocket uses signed URL
+  signedUrl: async () => {
+    const response = await fetch('/api/elevenlabs/auth');
+    const { signedUrl } = await response.json();
+    return signedUrl;
+  },
+
+  // Connection type (optional, defaults to 'websocket')
+  connectionType: 'websocket',
+
+  // Audio config (flexible)
+  audioConfig: {
+    sampleRate: 24000, // 16000, 24000, or 48000
+    format: 'PCM_24000'
+  }
+});
+```
+
+**WebRTC Configuration**:
+
+```typescript
+const { startConversation } = useConversation({
+  agentId: 'your-agent-id',
+
+  // WebRTC uses conversation token (different auth flow)
+  conversationToken: async () => {
+    const response = await fetch('/api/elevenlabs/token');
+    const { token } = await response.json();
+    return token;
+  },
+
+  // Connection type
+  connectionType: 'webrtc',
+
+  // Audio format is HARDCODED to PCM_48000 (not configurable)
+  // audioConfig ignored for WebRTC
+});
+```
+
+**Backend Token Endpoints**:
+
+```typescript
+// WebSocket signed URL (GET /v1/convai/conversation/get-signed-url)
+app.get('/api/elevenlabs/auth', async (req, res) => {
+  const response = await fetch(
+    `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${AGENT_ID}`,
+    { headers: { 'xi-api-key': ELEVENLABS_API_KEY } }
+  );
+  const { signed_url } = await response.json();
+  res.json({ signedUrl: signed_url });
+});
+
+// WebRTC conversation token (GET /v1/convai/conversation/token)
+app.get('/api/elevenlabs/token', async (req, res) => {
+  const response = await fetch(
+    `https://api.elevenlabs.io/v1/convai/conversation/token?agent_id=${AGENT_ID}`,
+    { headers: { 'xi-api-key': ELEVENLABS_API_KEY } }
+  );
+  const { conversation_token } = await response.json();
+  res.json({ token: conversation_token });
+});
+```
+
+**When to Use Each**:
+
+| Use WebSocket When | Use WebRTC When |
+|--------------------|-----------------|
+| Need flexible audio formats | Need lowest possible latency |
+| Switching between audio devices frequently | Audio format can be locked to 48kHz |
+| Standard latency is acceptable | Building real-time applications |
+| Need maximum configuration control | Performance is critical |
+
+**Gotchas**:
+- WebRTC hardcodes PCM_48000 - no way to change format
+- Device switching in WebRTC limited by fixed format
+- Different authentication methods (signedUrl vs conversationToken)
+- WebRTC may have better performance but less flexibility
 
 ### React Native SDK (Expo)
 
@@ -1153,6 +1277,191 @@ Copy-paste embed code from dashboard or use this template:
 - Customer support chat bubbles
 - Website assistants
 - Lead capture forms
+
+### Scribe (Real-Time Speech-to-Text)
+
+**Status**: Closed Beta (requires sales contact)
+**Release**: 2025
+
+Scribe is ElevenLabs' real-time speech-to-text service for low-latency transcription.
+
+**Capabilities**:
+- Microphone streaming (real-time transcription)
+- Pre-recorded audio file transcription
+- Partial (interim) and final transcripts
+- Word-level timestamps
+- Voice Activity Detection (VAD)
+- Manual and automatic commit strategies
+- Language detection
+- PCM_16000 and PCM_24000 audio formats
+
+**Authentication**:
+Uses single-use tokens (not API keys):
+
+```typescript
+// Fetch token from backend
+const response = await fetch('/api/scribe/token');
+const { token } = await response.json();
+
+// Backend endpoint
+const token = await client.scribe.getToken();
+return { token };
+```
+
+**React Hook (`useScribe`)**:
+
+```typescript
+import { useScribe } from '@elevenlabs/react';
+
+export default function Transcription() {
+  const {
+    connect,
+    disconnect,
+    startRecording,
+    stopRecording,
+    status,
+    transcript,
+    partialTranscript
+  } = useScribe({
+    token: async () => {
+      const response = await fetch('/api/scribe/token');
+      const { token } = await response.json();
+      return token;
+    },
+
+    // Commit strategy
+    commitStrategy: 'vad', // 'vad' (automatic) or 'manual'
+
+    // Audio format
+    sampleRate: 16000, // 16000 or 24000
+
+    // Events
+    onConnect: () => console.log('Connected to Scribe'),
+    onDisconnect: () => console.log('Disconnected'),
+
+    onPartialTranscript: (text) => {
+      console.log('Interim:', text);
+    },
+
+    onFinalTranscript: (text, timestamps) => {
+      console.log('Final:', text);
+      console.log('Timestamps:', timestamps); // Word-level timing
+    },
+
+    onError: (error) => console.error('Error:', error)
+  });
+
+  return (
+    <div>
+      <button onClick={connect}>Connect</button>
+      <button onClick={startRecording}>Start Recording</button>
+      <button onClick={stopRecording}>Stop Recording</button>
+      <button onClick={disconnect}>Disconnect</button>
+
+      <p>Status: {status}</p>
+      <p>Partial: {partialTranscript}</p>
+      <p>Final: {transcript}</p>
+    </div>
+  );
+}
+```
+
+**JavaScript SDK (`Scribe.connect`)**:
+
+```javascript
+import { Scribe } from '@elevenlabs/client';
+
+const connection = await Scribe.connect({
+  token: 'your-single-use-token',
+
+  sampleRate: 16000,
+  commitStrategy: 'vad',
+
+  onPartialTranscript: (text) => {
+    document.getElementById('interim').textContent = text;
+  },
+
+  onFinalTranscript: (text, timestamps) => {
+    const finalDiv = document.getElementById('final');
+    finalDiv.textContent += text + ' ';
+
+    // timestamps: [{ word: 'hello', start: 0.5, end: 0.8 }, ...]
+  },
+
+  onError: (error) => {
+    console.error('Scribe error:', error);
+  }
+});
+
+// Start recording from microphone
+await connection.startRecording();
+
+// Stop recording
+await connection.stopRecording();
+
+// Manual commit (if commitStrategy: 'manual')
+await connection.commit();
+
+// Disconnect
+await connection.disconnect();
+```
+
+**Transcribing Pre-Recorded Files**:
+
+```typescript
+import { Scribe } from '@elevenlabs/client';
+
+const connection = await Scribe.connect({ token });
+
+// Send audio buffer
+const audioBuffer = fs.readFileSync('recording.pcm');
+await connection.sendAudioData(audioBuffer);
+
+// Manually commit to get final transcript
+await connection.commit();
+
+// Wait for final transcript event
+```
+
+**Event Types**:
+- `SESSION_STARTED`: Connection established
+- `PARTIAL_TRANSCRIPT`: Interim transcription (unbuffered)
+- `FINAL_TRANSCRIPT`: Complete sentence/phrase
+- `FINAL_TRANSCRIPT_WITH_TIMESTAMPS`: Final + word timing
+- `ERROR`: Transcription error
+- `AUTH_ERROR`: Authentication failed
+- `OPEN`: WebSocket opened
+- `CLOSE`: WebSocket closed
+
+**Commit Strategies**:
+
+| Strategy | Description | Use When |
+|----------|-------------|----------|
+| `vad` (automatic) | Voice Activity Detection auto-commits on silence | Real-time transcription |
+| `manual` | Call `connection.commit()` explicitly | Pre-recorded files, controlled commits |
+
+**Audio Formats**:
+- `PCM_16000` (16kHz, 16-bit PCM)
+- `PCM_24000` (24kHz, 16-bit PCM)
+
+**Gotchas**:
+- Token is **single-use** (expires after one connection)
+- Closed beta - requires sales contact
+- Language detection automatic (no manual override)
+- No speaker diarization yet
+
+**When to Use Scribe**:
+- Building custom transcription UI
+- Real-time captions/subtitles
+- Voice note apps
+- Meeting transcription
+- Accessibility features
+
+**When NOT to Use**:
+Use **Agents Platform** instead if you need:
+- Conversational AI (LLM + TTS)
+- Two-way voice interaction
+- Agent responses
 
 ---
 
@@ -2037,6 +2346,104 @@ if (index.status !== 'ready') {
 - Verify transport type (SSE vs HTTP)
 - Check authentication token
 - Monitor MCP server logs
+
+### Error 16: First Message Cutoff on Android
+
+**Symptom**: First message from agent gets cut off on Android devices (works fine on iOS/web)
+
+**Cause**: Android devices need time to switch to correct audio mode after connection
+
+**Solution**:
+```typescript
+import { useConversation } from '@elevenlabs/react';
+
+const { startConversation } = useConversation({
+  agentId: 'your-agent-id',
+
+  // Add connection delay for Android
+  connectionDelay: {
+    android: 3_000,  // 3 seconds (default)
+    ios: 0,          // No delay needed
+    default: 0       // Other platforms
+  },
+
+  // Rest of config...
+});
+```
+
+**Explanation**:
+- Android needs 3 seconds to switch audio routing mode
+- Without delay, first audio chunk is lost
+- iOS and web don't have this issue
+- Adjust delay if 3 seconds isn't sufficient
+
+**Testing**:
+```bash
+# Test on Android device
+npm run android
+
+# First message should now be complete
+```
+
+### Error 17: CSP (Content Security Policy) Violations
+
+**Symptom**: "Refused to load the script because it violates the following Content Security Policy directive" errors in browser console
+
+**Cause**: Applications with strict Content Security Policy don't allow `data:` or `blob:` URLs in `script-src` directive. ElevenLabs SDK uses Audio Worklets that are loaded as blobs by default.
+
+**Solution - Self-Host Worklet Files**:
+
+**Step 1**: Copy worklet files to your public directory:
+```bash
+# Copy from node_modules
+cp node_modules/@elevenlabs/client/dist/worklets/*.js public/elevenlabs/
+```
+
+**Step 2**: Configure SDK to use self-hosted worklets:
+```typescript
+import { useConversation } from '@elevenlabs/react';
+
+const { startConversation } = useConversation({
+  agentId: 'your-agent-id',
+
+  // Point to self-hosted worklet files
+  workletPaths: {
+    'rawAudioProcessor': '/elevenlabs/rawAudioProcessor.worklet.js',
+    'audioConcatProcessor': '/elevenlabs/audioConcatProcessor.worklet.js',
+  },
+
+  // Rest of config...
+});
+```
+
+**Step 3**: Update CSP headers to allow self-hosted scripts:
+```nginx
+# nginx example
+add_header Content-Security-Policy "
+  default-src 'self';
+  script-src 'self' https://elevenlabs.io;
+  connect-src 'self' https://api.elevenlabs.io wss://api.elevenlabs.io;
+  worker-src 'self';
+" always;
+```
+
+**Worklet Files Location**:
+```
+node_modules/@elevenlabs/client/dist/worklets/
+├── rawAudioProcessor.worklet.js
+└── audioConcatProcessor.worklet.js
+```
+
+**Gotchas**:
+- Worklet files must be served from same origin (CORS restriction)
+- Update worklet files when upgrading `@elevenlabs/client`
+- Paths must match exactly (case-sensitive)
+
+**When You Need This**:
+- Enterprise applications with strict CSP
+- Government/financial apps
+- Apps with security audits
+- Any app blocking `blob:` URLs
 
 ---
 

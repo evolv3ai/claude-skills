@@ -8,7 +8,7 @@ This skill should be used when working with:
 
 - **ElevenLabs agents**, **ElevenLabs conversational AI**, **ElevenLabs platform**
 - **Voice agent**, **voice chat**, **conversational AI**, **voice interface**
-- **ElevenLabs React**, **ElevenLabs SDK**, **@11labs/react**
+- **ElevenLabs React**, **ElevenLabs SDK**, **@elevenlabs/react**, **@elevenlabs/client**
 - **ElevenLabs CLI**, **agents as code**, **elevenlabs agents**
 - **Agent configuration**, **agent workflow**, **agent behavior**
 - **System prompt**, **turn-taking**, **conversation flow**
@@ -46,11 +46,12 @@ This skill should be used when working with:
 - Tool parameter schemas and validation
 
 **SDKs & Integration**:
-- React SDK (`@11labs/react`)
-- JavaScript SDK (`@11labs/client`)
-- React Native SDK (Expo)
+- React SDK (`@elevenlabs/react`)
+- JavaScript SDK (`@elevenlabs/client`)
+- React Native SDK (`@elevenlabs/react-native`)
 - Swift SDK (iOS/macOS)
 - Embeddable widget
+- Scribe (Real-Time Speech-to-Text) - Beta
 
 **Testing & Analytics**:
 - Scenario testing (LLM-based evaluation)
@@ -81,29 +82,31 @@ This skill should be used when working with:
 
 ## Errors Prevented
 
-This skill prevents 15+ common errors:
+This skill prevents 17+ common errors:
 
-1. Missing required dynamic variables
-2. Case-sensitive tool names mismatch
-3. Webhook authentication failures (HMAC verification)
-4. Voice consistency issues (training data quality)
-5. Wrong language voice (English voice for Spanish, etc.)
-6. Restricted API keys in CLI
-7. Agent configuration push conflicts
-8. Tool parameter schema mismatches
-9. RAG index not ready before use
-10. WebSocket protocol errors (1002)
-11. 401 Unauthorized in production (visibility settings)
-12. Allowlist connection errors
-13. Workflow infinite loops
-14. Burst pricing not enabled
-15. MCP server timeout errors
+1. **Package deprecation** (@11labs/* → @elevenlabs/*)
+2. **Android audio cutoff** (connectionDelay configuration)
+3. **CSP violations** (workletPaths self-hosting)
+4. **WebRTC vs WebSocket** confusion (different auth flows)
+5. Missing required dynamic variables
+6. Case-sensitive tool names mismatch
+7. Webhook authentication failures (HMAC verification)
+8. Voice consistency issues (training data quality)
+9. Wrong language voice (English voice for Spanish, etc.)
+10. Restricted API keys in CLI
+11. Agent configuration push conflicts
+12. Tool parameter schema mismatches
+13. RAG index not ready before use
+14. WebSocket protocol errors (1002)
+15. 401 Unauthorized in production (visibility settings)
+16. Allowlist connection errors
+17. Workflow infinite loops
 
 ## Quick Start Examples
 
 ### React SDK (Voice Chat UI)
 ```typescript
-import { useConversation } from '@11labs/react';
+import { useConversation } from '@elevenlabs/react';
 
 const { startConversation, stopConversation, status } = useConversation({
   agentId: 'your-agent-id',
@@ -135,18 +138,24 @@ const agent = await client.agents.create({
 
 ## Package Versions
 
-- `elevenlabs`: 1.59.0
-- `@elevenlabs/cli`: 0.2.0 (very new, released Oct 30, 2025)
-- `@11labs/react`: latest
-- `@11labs/client`: latest
-- `@elevenlabs/react-native`: latest
+**🚨 IMPORTANT**: ElevenLabs migrated packages in August 2025. Use these current versions:
+
+- `@elevenlabs/elevenlabs-js`: 2.21.0
+- `@elevenlabs/agents-cli`: 0.2.0
+- `@elevenlabs/react`: 0.9.1
+- `@elevenlabs/client`: 0.9.1
+- `@elevenlabs/react-native`: 0.5.2
+
+**DEPRECATED** (do not use):
+- `@11labs/react` - Deprecated August 2025
+- `@11labs/client` - Deprecated August 2025
 
 ## Impact Metrics
 
 - **Token Savings**: ~73% (22k → 6k tokens)
-- **Errors Prevented**: 15+ common issues
+- **Errors Prevented**: 17+ common issues (including v1.1.0 additions)
 - **Time Savings**: 6-8 hours → 6-8 minutes with Claude Code
-- **Coverage**: 29 major features, 100% platform coverage
+- **Coverage**: 31 major features, 100% platform coverage (includes Scribe + WebRTC)
 
 ## Templates Included
 
