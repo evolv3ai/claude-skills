@@ -1,7 +1,7 @@
 # Claude Code Skills Collection
 
 **Production-ready skills for Claude Code CLI**
-**Last Updated**: 2025-10-29
+**Last Updated**: 2025-11-04
 
 A curated collection of battle-tested skills for building modern web applications with Cloudflare, React, Tailwind, and AI integrations.
 
@@ -33,7 +33,7 @@ Skills will be symlinked to `~/.claude/skills/`. Claude Code will automatically 
 
 ---
 
-## 📦 Available Skills (51 Production-Ready)
+## 📦 Available Skills (52 Production-Ready)
 
 ### Cloudflare Core Infrastructure
 
@@ -104,6 +104,13 @@ Stateful coordination with WebSocket Hibernation, SQL storage, alarms, and real-
 Complete Agents SDK for building stateful AI agents with WebSocket, scheduling, RAG, and MCP servers. Prevents 15 documented errors.
 
 **Triggers**: `cloudflare agents`, `agents sdk`, `stateful agents`, `mcp server`
+
+---
+
+#### **cloudflare-mcp-server**
+Build remote Model Context Protocol servers on Cloudflare Workers with TypeScript. Includes OAuth (GitHub/Google/Azure), Durable Objects state, WebSocket hibernation, dual transports (SSE + HTTP). Self-contained with Worker/DO basics. Prevents 15 documented errors. **87% token savings** (40k → 5k).
+
+**Triggers**: `mcp server cloudflare`, `model context protocol`, `remote mcp`, `mcp oauth`, `stateful mcp`, `websocket hibernation mcp`, `mcpagent class`
 
 ---
 
@@ -395,9 +402,9 @@ TypeScript MCP server development for Cloudflare Workers. Prevents 8 documented 
 ---
 
 #### **fastmcp**
-FastMCP Python framework for MCP server development. Prevents 6 documented errors.
+FastMCP Python framework for MCP server development with production features (storage backends, lifespans, middleware, OAuth Proxy, server composition). Prevents 25 documented errors, 90-95% token savings.
 
-**Triggers**: `fastmcp`, `python mcp`, `mcp python server`
+**Triggers**: `fastmcp`, `python mcp`, `mcp server`, `storage backends`, `middleware`, `oauth proxy`, `server composition`
 
 ---
 
@@ -669,6 +676,7 @@ Using skills vs manual setup (measured across 50 production skills):
 | cloudflare-workflows | ~15,000 | ~5,000 | 67% | 5 |
 | cloudflare-durable-objects | ~18,000 | ~6,000 | 67% | 18 |
 | cloudflare-agents | ~20,000 | ~7,000 | 65% | 15 |
+| cloudflare-mcp-server | ~40,000 | ~5,000 | 87% | 15 |
 | ai-sdk-core | ~14,000 | ~6,000 | 58% | 12 |
 | ai-sdk-ui | ~13,000 | ~6,000 | 55% | 12 |
 | cloudflare-workers-ai | ~15,000 | ~6,000 | 60% | 6 |

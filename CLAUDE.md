@@ -93,16 +93,16 @@ claude-skills/
 
 ---
 
-## Current Status (2025-10-29)
+## Current Status (2025-11-04)
 
-### ✅ Completed Skills (51)
+### ✅ Completed Skills (52)
 
-All 51 skills are production-ready and organized by domain:
+All 52 skills are production-ready and organized by domain:
 
-**Cloudflare Platform** (26 skills):
+**Cloudflare Platform** (27 skills):
 - cloudflare-worker-base, cloudflare-d1, cloudflare-r2, cloudflare-kv
 - cloudflare-workers-ai, cloudflare-vectorize, cloudflare-queues, cloudflare-workflows
-- cloudflare-durable-objects, cloudflare-agents, cloudflare-turnstile
+- cloudflare-durable-objects, cloudflare-agents, cloudflare-mcp-server, cloudflare-turnstile
 - cloudflare-nextjs, cloudflare-cron-triggers, cloudflare-email-routing
 - cloudflare-hyperdrive, cloudflare-images, cloudflare-browser-rendering
 - cloudflare-zero-trust-access, cloudflare-full-stack-scaffold, cloudflare-full-stack-integration
@@ -133,7 +133,7 @@ All 51 skills are production-ready and organized by domain:
 - ✅ Fully compliant with official Anthropic standards
 - ✅ Package versions verified current
 - ✅ Average token savings: 60-70%
-- ✅ 380+ documented errors prevented across all skills
+- ✅ 395+ documented errors prevented across all skills
 
 ---
 
