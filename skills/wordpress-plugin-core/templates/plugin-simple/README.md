@@ -101,6 +101,75 @@ my-simple-plugin/
    - Custom taxonomies
    - WP-CLI commands
 
+## Distribution & Auto-Updates
+
+### Enabling GitHub Auto-Updates
+
+You can provide automatic updates from GitHub without submitting to WordPress.org:
+
+**1. Install Plugin Update Checker library:**
+
+```bash
+cd your-plugin/
+git submodule add https://github.com/YahnisElsts/plugin-update-checker.git
+```
+
+**2. Add to your main plugin file:**
+
+```php
+// Include Plugin Update Checker
+require plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+// Initialize update checker
+$updateChecker = PucFactory::buildUpdateChecker(
+    'https://github.com/yourusername/your-plugin/',
+    __FILE__,
+    'your-plugin-slug'
+);
+
+// Set branch (default: main)
+$updateChecker->setBranch( 'main' );
+
+// Use GitHub Releases (recommended)
+$updateChecker->getVcsApi()->enableReleaseAssets();
+```
+
+**3. For private repos, add token to wp-config.php:**
+
+```php
+define( 'YOUR_PLUGIN_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxxx' );
+```
+
+Then in your plugin:
+
+```php
+if ( defined( 'YOUR_PLUGIN_GITHUB_TOKEN' ) ) {
+    $updateChecker->setAuthentication( YOUR_PLUGIN_GITHUB_TOKEN );
+}
+```
+
+**4. Create releases:**
+
+```bash
+# Update version in plugin header
+git add my-simple-plugin.php
+git commit -m "Bump version to 1.0.1"
+git tag 1.0.1
+git push origin main
+git push origin 1.0.1
+
+# Create GitHub Release (optional but recommended)
+# - Upload pre-built ZIP file
+# - Add release notes
+```
+
+### Resources
+
+- **Complete Guide**: See `references/github-auto-updates.md`
+- **Implementation Examples**: See `examples/github-updater.php`
+- **Plugin Update Checker**: https://github.com/YahnisElsts/plugin-update-checker
+
 ## Resources
 
 - [WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)

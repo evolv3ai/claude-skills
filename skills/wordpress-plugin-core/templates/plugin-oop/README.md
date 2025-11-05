@@ -191,6 +191,89 @@ register_rest_route(
 - One-person project
 - Unlikely to grow significantly
 
+## Distribution & Auto-Updates
+
+### Enabling GitHub Auto-Updates
+
+You can provide automatic updates from GitHub without submitting to WordPress.org:
+
+**1. Install Plugin Update Checker library:**
+
+```bash
+cd your-plugin/
+git submodule add https://github.com/YahnisElsts/plugin-update-checker.git
+```
+
+**2. Add to `init_hooks()` method:**
+
+```php
+/**
+ * Include and initialize update checker
+ */
+private function init_updater() {
+    $updater_path = plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
+
+    if ( ! file_exists( $updater_path ) ) {
+        return;
+    }
+
+    require $updater_path;
+
+    $updateChecker = YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+        'https://github.com/yourusername/your-plugin/',
+        __FILE__,
+        'your-plugin-slug'
+    );
+
+    $updateChecker->setBranch( 'main' );
+    $updateChecker->getVcsApi()->enableReleaseAssets();
+}
+```
+
+Then call it in `init_hooks()`:
+
+```php
+private function init_hooks() {
+    // Existing hooks...
+
+    // Initialize auto-updates
+    $this->init_updater();
+}
+```
+
+**3. For private repos, add token to wp-config.php:**
+
+```php
+define( 'YOUR_PLUGIN_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxxx' );
+```
+
+Then update `init_updater()`:
+
+```php
+if ( defined( 'MYOP_GITHUB_TOKEN' ) ) {
+    $updateChecker->setAuthentication( MYOP_GITHUB_TOKEN );
+}
+```
+
+**4. Create releases:**
+
+```bash
+# Update version in plugin header
+git add my-oop-plugin.php
+git commit -m "Bump version to 1.0.1"
+git tag 1.0.1
+git push origin main
+git push origin 1.0.1
+
+# Create GitHub Release with pre-built ZIP
+```
+
+### Resources
+
+- **Complete Guide**: See `references/github-auto-updates.md`
+- **Implementation Examples**: See `examples/github-updater.php`
+- **Plugin Update Checker**: https://github.com/YahnisElsts/plugin-update-checker
+
 ## Resources
 
 - [WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)

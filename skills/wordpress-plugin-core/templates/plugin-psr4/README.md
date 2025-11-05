@@ -272,6 +272,128 @@ Edit `composer.json` scripts:
 }
 ```
 
+## Distribution & Auto-Updates
+
+### Enabling GitHub Auto-Updates
+
+You can provide automatic updates from GitHub without submitting to WordPress.org:
+
+**1. Install Plugin Update Checker via Composer:**
+
+```bash
+composer require yahnis-elsts/plugin-update-checker
+```
+
+Or as git submodule:
+
+```bash
+git submodule add https://github.com/YahnisElsts/plugin-update-checker.git
+```
+
+**2. Create Updater class:**
+
+Create `src/Updater.php`:
+
+```php
+<?php
+namespace MyPSR4Plugin;
+
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+class Updater {
+    private static $instance = null;
+    private $updateChecker;
+
+    public static function get_instance() {
+        if ( null === self::$instance ) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function __construct() {
+        $this->init_updater();
+    }
+
+    private function init_updater() {
+        $updater_path = plugin_dir_path( __DIR__ ) . 'vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+
+        if ( ! file_exists( $updater_path ) ) {
+            return;
+        }
+
+        require $updater_path;
+
+        $this->updateChecker = PucFactory::buildUpdateChecker(
+            'https://github.com/yourusername/your-plugin/',
+            plugin_dir_path( __DIR__ ) . 'my-psr4-plugin.php',
+            'your-plugin-slug'
+        );
+
+        $this->updateChecker->setBranch( 'main' );
+        $this->updateChecker->getVcsApi()->enableReleaseAssets();
+
+        // Private repo authentication
+        if ( defined( 'MYPP_GITHUB_TOKEN' ) ) {
+            $this->updateChecker->setAuthentication( MYPP_GITHUB_TOKEN );
+        }
+    }
+}
+```
+
+**3. Initialize in Plugin.php:**
+
+Add to `src/Plugin.php` `init()` method:
+
+```php
+Updater::get_instance();
+```
+
+**4. For private repos, add token to wp-config.php:**
+
+```php
+define( 'MYPP_GITHUB_TOKEN', 'ghp_xxxxxxxxxxxxx' );
+```
+
+**5. Create releases:**
+
+```bash
+# Update version in plugin header
+git add my-psr4-plugin.php
+git commit -m "Bump version to 1.0.1"
+git tag 1.0.1
+git push origin main
+git push origin 1.0.1
+
+# Create GitHub Release with pre-built ZIP
+```
+
+**6. Build release ZIP:**
+
+```bash
+#!/bin/bash
+# build-release.sh
+
+VERSION="1.0.1"
+PLUGIN_SLUG="my-psr4-plugin"
+
+# Install dependencies (no dev packages)
+composer install --no-dev --optimize-autoloader
+
+# Create ZIP
+zip -r "${PLUGIN_SLUG}-${VERSION}.zip" \
+    "${PLUGIN_SLUG}/" \
+    -x "*.git*" "*.github/*" "tests/*" "node_modules/*"
+
+echo "Built: ${PLUGIN_SLUG}-${VERSION}.zip"
+```
+
+### Resources
+
+- **Complete Guide**: See `references/github-auto-updates.md`
+- **Implementation Examples**: See `examples/github-updater.php`
+- **Plugin Update Checker**: https://github.com/YahnisElsts/plugin-update-checker
+
 ## Resources
 
 - [WordPress Plugin Handbook](https://developer.wordpress.org/plugins/)

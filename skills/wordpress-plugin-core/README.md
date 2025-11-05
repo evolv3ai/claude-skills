@@ -45,6 +45,21 @@ Claude Code automatically discovers this skill when you mention:
 - check_ajax_referer
 - current_user_can
 
+### Distribution & Updates Keywords
+- github auto-updates
+- github updates
+- plugin auto-update
+- plugin update checker
+- wordpress plugin distribution
+- git updater
+- custom update server
+- plugin versioning
+- github releases
+- private plugin updates
+- license key updates
+- plugin update api
+- wordpress transients updates
+
 ### Error-Based Keywords
 - "wordpress sql injection"
 - "wordpress xss"
@@ -71,6 +86,7 @@ This skill provides comprehensive knowledge for building secure, standards-compl
 ✅ **Database Patterns** - Secure $wpdb queries, custom tables, transients
 ✅ **Standards Compliance** - WordPress Coding Standards, prefixing, ABSPATH checks
 ✅ **Lifecycle Management** - Activation, deactivation, uninstall hooks
+✅ **Distribution & Updates** - GitHub auto-updates, Plugin Update Checker, versioning, releases
 ✅ **Advanced Features** - WP-CLI commands, scheduled events, internationalization
 
 ---
@@ -106,6 +122,9 @@ This skill provides comprehensive knowledge for building secure, standards-compl
 - Handling AJAX requests
 - Debugging plugin activation/deactivation issues
 - Preventing security vulnerabilities
+- Setting up auto-updates from GitHub or custom servers
+- Distributing plugins outside WordPress.org
+- Implementing license key validation for premium plugins
 
 ### ❌ Don't Use When:
 - **Building Gutenberg blocks** → Use `wordpress-gutenberg-blocks` skill

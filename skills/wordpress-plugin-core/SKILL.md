@@ -1318,6 +1318,109 @@ add_action( 'admin_init', function() {
 
 ---
 
+## Distribution & Auto-Updates
+
+### Enabling GitHub Auto-Updates
+
+Plugins hosted outside WordPress.org can still provide automatic updates using **Plugin Update Checker** by YahnisElsts. This is the recommended solution for most use cases.
+
+**Quick Start:**
+
+```php
+// 1. Install library (git submodule or Composer)
+git submodule add https://github.com/YahnisElsts/plugin-update-checker.git
+
+// 2. Add to main plugin file
+require plugin_dir_path( __FILE__ ) . 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$updateChecker = PucFactory::buildUpdateChecker(
+    'https://github.com/yourusername/your-plugin/',
+    __FILE__,
+    'your-plugin-slug'
+);
+
+// Use GitHub Releases (recommended)
+$updateChecker->getVcsApi()->enableReleaseAssets();
+
+// For private repos, use token from wp-config.php
+if ( defined( 'YOUR_PLUGIN_GITHUB_TOKEN' ) ) {
+    $updateChecker->setAuthentication( YOUR_PLUGIN_GITHUB_TOKEN );
+}
+```
+
+**Deployment:**
+
+```bash
+# 1. Update version in plugin header
+# 2. Commit and tag
+git add my-plugin.php
+git commit -m "Bump version to 1.0.1"
+git tag 1.0.1
+git push origin main
+git push origin 1.0.1
+
+# 3. Create GitHub Release (optional but recommended)
+# - Upload pre-built ZIP file (exclude .git, tests, etc.)
+# - Add release notes for users
+```
+
+**Key Features:**
+
+✅ Works with GitHub, GitLab, BitBucket, or custom servers
+✅ Supports public and private repositories
+✅ Uses GitHub Releases or tags for versioning
+✅ Secure HTTPS-based updates
+✅ Optional license key integration
+✅ Professional release notes and changelogs
+✅ ~100KB library footprint
+
+**Alternative Solutions:**
+
+1. **Git Updater** (user-installable plugin, no coding required)
+2. **Custom Update Server** (full control, requires hosting)
+3. **Freemius** (commercial, includes licensing and payments)
+
+**Comprehensive Resources:**
+
+- **Complete Guide**: See `references/github-auto-updates.md` (21 pages, all approaches)
+- **Implementation Examples**: See `examples/github-updater.php` (10 examples)
+- **Security Best Practices**: Checksums, signing, token storage, rate limiting
+- **Template Integration**: All 3 plugin templates include setup instructions
+
+**Security Considerations:**
+
+- ✅ Always use HTTPS for repository URLs
+- ✅ Never hardcode authentication tokens (use wp-config.php)
+- ✅ Implement license validation before offering updates
+- ✅ Optional: Add checksums for file verification
+- ✅ Rate limit update checks to avoid API throttling
+- ✅ Clear cached update data after installation
+
+**When to Use Each Approach:**
+
+| Use Case | Recommended Solution |
+|----------|---------------------|
+| Open source, public repo | Plugin Update Checker |
+| Private plugin, client work | Plugin Update Checker + private repo |
+| Commercial plugin | Freemius or Custom Server |
+| Multi-platform Git hosting | Git Updater |
+| Custom licensing needs | Custom Update Server |
+
+**ZIP Structure Requirement:**
+
+```
+plugin.zip
+└── my-plugin/       ← Plugin folder MUST be inside ZIP
+    ├── my-plugin.php
+    ├── readme.txt
+    └── ...
+```
+
+Incorrect structure will cause WordPress to create a random folder name and break the plugin!
+
+---
+
 ## Dependencies
 
 **Required**:
