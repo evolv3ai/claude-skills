@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["Cloudflare Email Routing","Email Workers","send email","receive email","email forwarding","email allowlist","email blocklist","postal-mime","mimetext","cloudflare:email","EmailMessage","ForwardableEmailMessage","EmailEvent","MX records","SPF"]
 }

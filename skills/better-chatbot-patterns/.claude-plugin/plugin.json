@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["AI chatbot patterns","server action validators","tool abstraction","multi-AI providers","workflow execution","MCP integration","validated actions","tool type checking","Vercel AI SDK patterns","chatbot architecture"]
 }

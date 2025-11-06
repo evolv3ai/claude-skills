@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["Auth.js","NextAuth.js","authentication","OAuth","credentials","magic links","D1 adapter","Cloudflare Workers","Next.js middleware","JWT session","database session","refresh tokens","RBAC","edge compatibility","AUTH_SECRET"]
 }

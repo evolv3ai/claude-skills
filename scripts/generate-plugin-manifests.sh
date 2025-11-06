@@ -57,26 +57,38 @@ for skill_dir in "$SKILLS_DIR"/*; do
     ' "$skill_md")
   fi
 
-  # Limit to 500 chars
-  description=$(echo "$description" | head -c 500)
-
   # If description is still empty or problematic, use a default
   if [ -z "$description" ] || [ "$description" = "|" ] || [ "$description" = ">" ]; then
     description="Production-ready skill for $skill_name"
   fi
 
-  # Clean up description (remove extra spaces, escape quotes)
-  # Use tr to remove problematic quotes, then clean up spaces
-  description=$(echo "$description" | tr -d '"' | tr -d "'" | sed 's/  */ /g' | sed 's/^ *//;s/ *$//')
+  # Extract keywords BEFORE truncating description
+  # Keywords are in the format "Keywords: keyword1, keyword2, ..."
+  keywords_raw=$(echo "$description" | grep -oP 'Keywords:\s*\K[^$]*' | tr -d '"' | tr -d "'")
 
-  # Extract keywords if present
-  keywords=$(awk '/^keywords:/{flag=1; next} /^[a-z-]+:/{flag=0} flag && /^  - /{gsub(/^  - /, ""); print}' "$skill_md" | tr '\n' ',' | sed 's/,$//')
-
-  # Convert comma-separated keywords to JSON array
-  keywords_json="[]"
-  if [ -n "$keywords" ]; then
-    keywords_json="[\"$(echo "$keywords" | sed 's/,/\",\"/g')\"]"
+  # If no keywords found in description, try YAML format
+  if [ -z "$keywords_raw" ]; then
+    keywords_raw=$(awk '/^keywords:/{flag=1; next} /^[a-z-]+:/{flag=0} flag && /^  - /{gsub(/^  - /, ""); print}' "$skill_md" | tr '\n' ',' | sed 's/,$//')
   fi
+
+  # Clean up and convert keywords to JSON array
+  keywords_json="[]"
+  if [ -n "$keywords_raw" ]; then
+    # Split by comma, trim whitespace, limit to first 15 keywords
+    keywords_json=$(echo "$keywords_raw" | sed 's/,/\n/g' | sed 's/^ *//;s/ *$//' | grep -v '^$' | head -15 | awk '
+      BEGIN { printf "[" }
+      {
+        gsub(/\\/, "\\\\")
+        gsub(/"/, "")
+        if (NR > 1) printf ","
+        printf "\"%s\"", $0
+      }
+      END { printf "]" }
+    ')
+  fi
+
+  # Now clean up description (remove Keywords line, trim, limit to 500 chars)
+  description=$(echo "$description" | sed 's/Keywords:.*$//' | tr -d '"' | tr -d "'" | sed 's/  */ /g' | sed 's/^ *//;s/ *$//' | head -c 500)
 
   # Generate plugin.json
   cat > "$plugin_json" << EOF

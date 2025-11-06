@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["hono","hono routing","hono middleware","hono rpc","hono validator","zod validator","valibot validator","type-safe api","hono context","hono error handling","HTTPException","c.req.valid","middleware composition","hono hooks","typed routes"]
 }

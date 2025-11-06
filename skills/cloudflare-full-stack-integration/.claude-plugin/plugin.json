@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["frontend backend integration","Cloudflare Workers","Hono","Clerk auth","JWT verification","CORS","React API client","race conditions","auth loading","connection issues","full-stack integration","vite plugin","@cloudflare/vite-plugin","D1 database","environment variables"]
 }

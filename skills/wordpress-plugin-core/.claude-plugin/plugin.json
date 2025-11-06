@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["wordpress plugin development","wordpress security","wordpress hooks","wordpress filters","wordpress database","wpdb prepare","sanitize_text_field","esc_html","wp_nonce","custom post type","register_post_type","settings api","rest api","admin-ajax","wordpress sql injection"]
 }

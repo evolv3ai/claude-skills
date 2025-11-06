@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["TanStack Query","React Query","useQuery","useMutation","useInfiniteQuery","useSuspenseQuery","QueryClient","QueryClientProvider","data fetching","server state","caching","staleTime","gcTime","query invalidation","prefetching"]
 }

@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["vercel kv","@vercel/kv","vercel redis","upstash vercel","kv vercel","redis vercel edge","key-value vercel","vercel cache","vercel sessions","vercel rate limit","redis upstash","kv storage","edge kv","serverless redis","vercel ttl"]
 }

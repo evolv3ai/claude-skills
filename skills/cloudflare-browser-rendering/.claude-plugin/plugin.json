@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["browser rendering cloudflare","@cloudflare/puppeteer","@cloudflare/playwright","puppeteer workers","playwright workers","screenshot cloudflare","pdf generation workers","web scraping cloudflare","headless chrome workers","browser automation","puppeteer.launch","playwright.chromium.launch","browser binding","session management","puppeteer.sessions"]
 }

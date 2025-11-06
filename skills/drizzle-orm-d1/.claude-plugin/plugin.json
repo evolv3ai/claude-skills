@@ -1,6 +1,6 @@
 {
   "name": "drizzle-orm-d1",
-  "description": "Type-safe ORM for Cloudflare D1 databases using Drizzle. This skill provides comprehensive patterns for schema definition, migrations management, type-safe queries, relations, and Cloudflare Workers integration. Use when: building D1 database schemas, writing type-safe SQL queries, managing database migrations with Drizzle Kit, defining table relations, implementing prepared statements, using D1 batch API for transactions, or encountering D1_ERROR, transaction errors, foreign key constraint fa",
+  "description": "Type-safe ORM for Cloudflare D1 databases using Drizzle. This skill provides comprehensive patterns for schema definition, migrations management, type-safe queries, relations, and Cloudflare Workers integration. Use when: building D1 database schemas, writing type-safe SQL queries, managing database migrations with Drizzle Kit, defining table relations, implementing prepared statements, using D1 batch API for transactions, or encountering D1_ERROR, transaction errors, foreign key constraint fail",
   "version": "1.0.0",
   "author": {
     "name": "Jeremy Dawes",
@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["drizzle orm","drizzle d1","type-safe sql","drizzle schema","drizzle migrations","drizzle kit","orm cloudflare","d1 orm","drizzle typescript","drizzle relations","drizzle transactions","drizzle query builder","schema definition","prepared statements","drizzle batch"]
 }

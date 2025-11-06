@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["clerk","clerk auth","clerk authentication","@clerk/nextjs","@clerk/backend","@clerk/clerk-react","clerkMiddleware","createRouteMatcher","verifyToken","useUser","useAuth","useClerk","JWT template","JWT claims","JWT shortcodes"]
 }

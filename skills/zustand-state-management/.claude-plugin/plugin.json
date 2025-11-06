@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["zustand","state management","React state","TypeScript state","persist middleware","devtools","slices pattern","global state","React hooks","create store","useBoundStore","StateCreator","hydration error","text content mismatch","infinite render"]
 }

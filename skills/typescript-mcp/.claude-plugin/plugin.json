@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["mcp","model context protocol","typescript mcp","cloudflare workers mcp","mcp server","mcp tools","mcp resources","mcp sdk","@modelcontextprotocol/sdk","hono mcp","streamablehttpservertransport","mcp authentication","mcp cloudflare","edge mcp server","serverless mcp"]
 }

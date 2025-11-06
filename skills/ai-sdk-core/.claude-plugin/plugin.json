@@ -8,5 +8,5 @@
   },
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
-  "keywords": []
+  "keywords": ["ai sdk core","vercel ai sdk","generateText","streamText","generateObject","streamObject","ai sdk node","ai sdk server","zod ai schema","ai tools calling","ai agent class","openai sdk","anthropic sdk","google gemini sdk","workers-ai-provider"]
 }
