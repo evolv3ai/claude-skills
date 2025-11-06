@@ -1,7 +1,7 @@
 # Claude Code Skills Collection
 
 **Production-ready skills for Claude Code CLI**
-**Last Updated**: 2025-11-04
+**Last Updated**: 2025-11-06
 
 A curated collection of battle-tested skills for building modern web applications with Cloudflare, React, Tailwind, and AI integrations.
 
@@ -367,6 +367,15 @@ Sveltia CMS for lightweight, Git-based content editing. Prevents 6 documented er
 
 ---
 
+### WordPress Development
+
+#### **wordpress-plugin-core**
+Comprehensive WordPress plugin development with security foundation, 3 architecture patterns (Simple, OOP, PSR-4), GitHub auto-updates, and distribution. Prevents 20+ documented security vulnerabilities (SQL injection, XSS, CSRF). Includes complete templates, Settings API, REST API, AJAX, Custom Post Types, and auto-update integration via Plugin Update Checker.
+
+**Triggers**: `wordpress plugin`, `wordpress development`, `plugin security`, `wordpress rest api`, `wordpress ajax`, `custom post type`, `github auto-updates`, `plugin update checker`, `wordpress distribution`, `sanitize_text_field`, `wp_verify_nonce`, `sql injection`, `xss prevention`, `csrf protection`
+
+---
+
 ### Database & ORM
 
 #### **drizzle-orm-d1**
@@ -551,15 +560,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
 ## 📋 Skill Categories
 
-All 50 skills are production-ready and organized by domain:
+All 52 skills are production-ready and organized by domain:
 
 - **Cloudflare Platform** (26 skills) - Workers, D1, R2, KV, AI, Queues, Workflows, Durable Objects, etc.
 - **AI & Machine Learning** (10 skills) - OpenAI, Claude, Gemini, Vercel AI SDK, Thesys
 - **Frontend & UI** (7 skills) - React, Tailwind v4, Forms, State Management, Next.js
 - **Auth & Security** (3 skills) - Clerk, Auth.js, Zero Trust
 - **Content Management** (2 skills) - TinaCMS, Sveltia CMS
+- **WordPress Development** (1 skill) - Plugin core with security, auto-updates, distribution
 - **Database & ORM** (4 skills) - Drizzle, Neon Postgres, Vercel KV/Blob
-- **Tooling & Planning** (4 skills) - MCP servers, Project Planning, Scraping
+- **Tooling & Planning** (5 skills) - MCP servers, FastMCP, Project Planning, Scraping
 
 ---
 
