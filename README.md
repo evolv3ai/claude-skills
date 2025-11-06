@@ -26,7 +26,7 @@ A curated collection of battle-tested skills for building modern web application
 /plugin install tailwind-v4-shadcn@claude-skills openai-agents@claude-skills
 ```
 
-See [MARKETPLACE.md](MARKETPLACE.md) for complete marketplace documentation including all 60 available skills.
+See [MARKETPLACE.md](MARKETPLACE.md) for complete marketplace documentation including all 61 available skills.
 
 ### Option B: Direct Installation (For Contributors & Development)
 
@@ -50,9 +50,9 @@ Skills will be available in Claude Code and automatically suggested when relevan
 
 ---
 
-## 📦 Available Skills (60 Production-Ready)
+## 📦 Available Skills (61 Production-Ready)
 
-**📋 Full Catalog**: See [MARKETPLACE.md](MARKETPLACE.md) for the complete organized list of all 60 skills by category.
+**📋 Full Catalog**: See [MARKETPLACE.md](MARKETPLACE.md) for the complete organized list of all 61 skills by category.
 
 **Below**: Featured skills with detailed descriptions and trigger keywords.
 

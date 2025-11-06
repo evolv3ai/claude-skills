@@ -3,8 +3,8 @@
 **Repository**: https://github.com/jezweb/claude-skills
 **Purpose**: Production-ready skills for Claude Code CLI
 **Owner**: Jeremy Dawes (Jez) | Jezweb
-**Status**: Active Development | 50 Skills Complete
-**Last Updated**: 2025-10-29
+**Status**: Active Development | 53 Skills Complete
+**Last Updated**: 2025-11-07
 
 ---
 
@@ -436,6 +436,6 @@ See [planning/COMMON_MISTAKES.md](planning/COMMON_MISTAKES.md) for detailed exam
 
 ---
 
-**Last Updated**: 2025-10-29
+**Last Updated**: 2025-11-07
 **Next Review**: 2026-01-29 (Quarterly)
 **Maintainer**: Jeremy Dawes | jeremy@jezweb.net | https://jezweb.com.au

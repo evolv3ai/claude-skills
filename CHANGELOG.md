@@ -9,6 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - claude-code-bash-patterns Skill ✅
+
+**Date**: 2025-11-07
+
+**New Skill**: Comprehensive Bash tool usage patterns for Claude Code CLI
+
+#### claude-code-bash-patterns v1.0.0 (New Skill)
+- **Token Savings**: 55% (8,500 → 3,800 tokens)
+- **Errors Prevented**: 12 documented issues with sources
+- **Files Created**: 14 total (SKILL.md, README.md, 5 references, 5 templates, 3 scripts)
+
+**What This Skill Provides**:
+- ✅ **5 Core Patterns**: Command chaining, parallel execution, HEREDOC, output capture, conditional execution
+- ✅ **3 Hook Types**: PreToolUse (security guards), PostToolUse (cleanup), SessionStart (env setup)
+- ✅ **Git Workflows**: Intelligent commits, PR automation, branch management
+- ✅ **CLI Tool Integration**: wrangler, gh, npm, docker, terraform, custom tools
+- ✅ **Security Configurations**: Dangerous command blocking, audit logging, allowlisting
+- ✅ **Custom Commands**: Reusable workflows in .claude/commands/
+- ✅ **5 Reference Guides**: git-workflows.md, hooks-examples.md, cli-tool-integration.md, security-best-practices.md, troubleshooting-guide.md
+- ✅ **5 Templates**: settings.json, dangerous-commands.json, custom-command-template.md, github-workflow.yml, .envrc.example
+- ✅ **3 Hook Scripts**: dangerous-command-guard.py, bash-audit-logger.sh, package-manager-enforcer.sh
+
+**Issues Prevented**:
+1. Git Bash cygpath command not found (Windows) - [Issue #9883](https://github.com/anthropics/claude-code/issues/9883)
+2. Pipe command failures - [Issue #774](https://github.com/anthropics/claude-code/issues/774)
+3. Command timeout (hanging promises) - Default 2 min timeout
+4. Output truncation loss - 30k char limit
+5. "No suitable shell found" (Windows) - [Issue #3461](https://github.com/anthropics/claude-code/issues/3461)
+6. Bash tool access loss - [Issue #1888](https://github.com/anthropics/claude-code/issues/1888)
+7. Interactive prompt hangs - Non-interactive flags required
+8. Permission denied errors - chmod +x required
+9. Environment variables not persisting - Agent thread CWD reset
+10. Git commit hook modifications - Pre-commit hook patterns
+11. Wildcard permission matching - [Issue #462](https://github.com/anthropics/claude-code/issues/462)
+12. Dangerous command execution - No guardrails by default
+
+**Production Tested**: wordpress-auditor, claude-skills repo, multiple client projects
+
+**Official Documentation Used**:
+- Claude Code Best Practices: https://www.anthropic.com/engineering/claude-code-best-practices
+- Code Execution with MCP: https://www.anthropic.com/engineering/code-execution-with-mcp
+- Cloudflare Code Mode: https://blog.cloudflare.com/code-mode/
+
+**Meta-Skill**: This skill teaches effective CLI orchestration for development workflows using Claude Code's Bash tool.
+
+---
+
 ### Added - github-project-automation Skill ✅
 
 **Date**: 2025-11-06
