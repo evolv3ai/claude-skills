@@ -6,7 +6,9 @@
 
 ## What This Skill Does
 
-Provides complete patterns for implementing authentication with **better-auth**, a comprehensive TypeScript auth framework. Includes first-class support for Cloudflare Workers + D1, making it an excellent self-hosted alternative to Clerk or Auth.js.
+Provides complete patterns for implementing authentication with **better-auth**, a comprehensive TypeScript auth framework. Includes support for Cloudflare Workers + D1 via **Drizzle ORM** or **Kysely** (no direct D1 adapter exists), making it an excellent self-hosted alternative to Clerk or Auth.js.
+
+**⚠️ v2.0.0 Breaking Change**: Previous skill version incorrectly documented a non-existent `d1Adapter()`. This version corrects all patterns to use Drizzle ORM or Kysely as required by better-auth.
 
 ---
 
@@ -63,8 +65,10 @@ This skill should be automatically invoked when you mention:
 7. **Migration Guides** - From Clerk and Auth.js
 8. **Database Setup** - D1 and PostgreSQL schema patterns
 
-### Errors Prevented (10 Common Issues)
+### Errors Prevented (12 Common Issues)
 
+- ✅ **D1 adapter misconfiguration** (no direct d1Adapter, must use Drizzle/Kysely)
+- ✅ **Schema generation failures** (using Drizzle Kit correctly)
 - ✅ D1 eventual consistency causing stale session reads
 - ✅ CORS misconfiguration for SPA applications
 - ✅ Session serialization errors in Workers
@@ -89,23 +93,35 @@ This skill should be automatically invoked when you mention:
 
 ## Quick Example
 
-### Cloudflare Worker Setup
+### Cloudflare Worker Setup (Drizzle ORM)
+
+**⚠️ CRITICAL**: better-auth requires **Drizzle ORM** or **Kysely** for D1. There is NO direct `d1Adapter()`.
 
 ```typescript
 import { betterAuth } from 'better-auth'
-import { d1Adapter } from 'better-auth/adapters/d1'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { drizzle } from 'drizzle-orm/d1'
 import { Hono } from 'hono'
+import * as schema from './db/schema' // Your Drizzle schema
 
 type Env = {
   DB: D1Database
   BETTER_AUTH_SECRET: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
 }
 
 const app = new Hono<{ Bindings: Env }>()
 
 app.all('/api/auth/*', async (c) => {
+  // Initialize Drizzle with D1
+  const db = drizzle(c.env.DB, { schema })
+
   const auth = betterAuth({
-    database: d1Adapter(c.env.DB),
+    // Use Drizzle adapter with SQLite provider
+    database: drizzleAdapter(db, {
+      provider: "sqlite",
+    }),
     secret: c.env.BETTER_AUTH_SECRET,
     emailAndPassword: { enabled: true },
     socialProviders: {
@@ -121,6 +137,13 @@ app.all('/api/auth/*', async (c) => {
 
 export default app
 ```
+
+**Required dependencies**:
+```bash
+npm install better-auth drizzle-orm drizzle-kit @cloudflare/workers-types hono
+```
+
+**Complete setup guide**: See SKILL.md for full step-by-step instructions including schema definition, migrations, and deployment.
 
 ---
 
@@ -187,9 +210,11 @@ npm install pg drizzle-orm
 
 ## Version Info
 
-- **Skill Version**: 1.0.0
+- **Skill Version**: 2.0.0 (Breaking Change - Corrected D1 adapter patterns)
 - **Package Version**: better-auth@1.3.34
-- **Last Verified**: 2025-10-31
+- **Drizzle ORM**: drizzle-orm@0.36.0, drizzle-kit@0.28.0
+- **Kysely**: kysely@0.27.0, @noxharmonium/kysely-d1@2.3.0
+- **Last Verified**: 2025-11-08
 - **Compatibility**: Node.js 18+, Bun 1.0+, Cloudflare Workers
 
 ---
