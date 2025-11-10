@@ -2,7 +2,7 @@
 
 A custom status line for Claude Code CLI that displays real-time context tracking, git information, and session metrics with a beautiful brick visualization.
 
-![Status Line Example](https://via.placeholder.com/800x100/1a1a1a/00ff00?text=Screenshot+Coming+Soon)
+![ContextBricks Status Line](assets/context-bricks.png)
 
 ## ✨ Features
 

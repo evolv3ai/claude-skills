@@ -7,7 +7,7 @@
 
 A custom status line for Claude Code that displays accurate token usage with a beautiful brick visualization, plus git integration and session metrics.
 
-![Status Line Example](https://via.placeholder.com/800x80/1a1a1a/00ff00?text=Screenshot+Coming+Soon)
+![ContextBricks Status Line](https://raw.githubusercontent.com/jezweb/claude-skills/main/tools/statusline/assets/context-bricks.png)
 
 ## ✨ Features
 
