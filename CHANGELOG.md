@@ -16,8 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **New Tool**: `contextbricks` - Custom status line for Claude Code CLI
 
 **NPM Package**: https://www.npmjs.com/package/contextbricks
-**Version**: 1.0.0
-**Install**: `npx contextbricks init`
+**Version**: 1.0.1
+**Install**: `npx contextbricks` (defaults to interactive install)
+
+**v1.0.1 Changes** (2025-11-10):
+- Default to interactive install when no command given
+- `npx contextbricks` now runs installer automatically (more intuitive UX)
 
 **Features**:
 - **Real-time context tracking** from Claude Code transcript files

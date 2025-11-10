@@ -97,10 +97,19 @@ function main() {
 
     default:
       if (command) {
+        // Unknown command - show error + help
         console.error(`${colors.red}❌ Unknown command: ${command}${colors.reset}\n`);
+        showHelp();
+        process.exit(1);
+      } else {
+        // No command - run interactive install as default
+        checkDependencies();
+        const defaultInstallResult = spawnSync('bash', [path.join(scriptsDir, 'install.sh')], {
+          stdio: 'inherit',
+          env: { ...process.env, NPM_INSTALL: '1' }
+        });
+        process.exit(defaultInstallResult.status || 0);
       }
-      showHelp();
-      process.exit(command ? 1 : 0);
   }
 }
 
