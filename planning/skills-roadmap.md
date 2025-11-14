@@ -1876,16 +1876,17 @@ Calculate:
 ## 📈 Progress Tracking
 
 ### Overall Progress:
-- **Completed**: 50 skills ✅
-- **In Main Table Below**: 39 skills detailed
-- **Not in Table** (11 skills): vercel-kv, vercel-blob, neon-vercel-postgres, fastmcp, typescript-mcp, project-planning, project-session-management, nextjs, sveltia-cms, zustand-state-management, open-source-contributions
+- **Completed**: 65 skills ✅
+- **In Main Table Below**: 43 skills detailed
+- **Not in Table** (22 skills): vercel-kv, vercel-blob, neon-vercel-postgres, fastmcp, typescript-mcp, project-planning, project-session-management, nextjs, sveltia-cms, zustand-state-management, open-source-contributions, tinacms, cloudflare-full-stack-scaffold, cloudflare-full-stack-integration, cloudflare-mcp-server, cloudflare-turnstile, cloudflare-email-routing, google-gemini-embeddings, openai-agents, openai-batch, openai-realtime, better-auth
 - **Batch 1 - Cloudflare Foundation**: 9/9 complete (100%) 🎯
 - **Batch 2 - AI SDK & Auth & Frameworks**: 6/6 complete (100%) 🎯
 - **Batch 3 - Cloudflare Advanced**: 6/6 complete (100%) 🎯
 - **Batch 4 - Data & Utilities**: 2/2 complete (100%) 🎯
 - **Batch 5 - AI API/SDK Suite**: 9/9 complete (100%) 🎯
 - **Batch 6 - UI & Generative UI**: 1/1 complete (100%) 🎯
-- **Batch 7 - Development & Contribution Tools**: 1/1 complete (100%) 🎯
+- **Batch 7 - Infrastructure & Deployment**: 4/4 complete (100%) 🎯
+- **Batch 8 - Development & Contribution Tools**: 1/1 complete (100%) 🎯
 - **New Planned**: 1 skill (cloudflare-sandboxing)
 
 ### Skills by Status:
@@ -1926,10 +1927,14 @@ Calculate:
 | **google-gemini-api** | **✅ Complete** | **8h** | **~65%** | **8** | Critical |
 | **google-gemini-embeddings** | **✅ Complete** | **4h** | **~60%** | **6** | Medium |
 | **thesys-generative-ui** | **✅ Complete** | **6h** | **~62%** | **8** | High |
+| **cloudflare-tunnel** | **✅ Complete** | **6h** | **~67%** | **8** | Critical |
+| **oci-infrastructure** | **✅ Complete** | **8h** | **~67%** | **6** | Critical |
+| **coolify** | **✅ Complete** | **6h** | **~70%** | **6** | High |
+| **kasm-workspaces** | **✅ Complete** | **8h** | **~70%** | **7** | High |
 
-**Total Skills In Table**: 48 (all complete ✅)
-**Total Skills In Repo**: 50 (all complete ✅)
-**Not in Table**: 11 skills (all complete) - vercel-kv, vercel-blob, neon-vercel-postgres, fastmcp, typescript-mcp, project-planning, project-session-management, nextjs, sveltia-cms, zustand-state-management, open-source-contributions
+**Total Skills In Table**: 52 (all complete ✅)
+**Total Skills In Repo**: 65 (all complete ✅)
+**Not in Table**: 13 skills (all complete) - vercel-kv, vercel-blob, neon-vercel-postgres, fastmcp, typescript-mcp, project-planning, project-session-management, nextjs, sveltia-cms, zustand-state-management, open-source-contributions, tinacms, cloudflare-full-stack-scaffold, cloudflare-full-stack-integration, cloudflare-mcp-server, cloudflare-turnstile, cloudflare-email-routing, google-gemini-embeddings, openai-agents, openai-batch, openai-realtime, better-auth
 **Planned Next**: cloudflare-sandboxing
 
 ---
@@ -1970,7 +1975,154 @@ A skill is considered "complete" when:
 
 ## 🚀 Future Skills (Backlog)
 
-### Batch 7 - Development & Contribution Tools ⭐
+### Batch 7 - Infrastructure & Deployment ⭐⭐
+
+#### cloudflare-tunnel
+**Status**: ✅ Complete (2025-11-14)
+**Priority**: Critical
+**Dependencies**: None
+**Actual Dev Time**: 6 hours
+**Token Savings**: ~67%
+**Errors Prevented**: 8
+
+**What It Does**:
+- Cloudflare Tunnel (cloudflared) installation and configuration
+- Secure service exposure without inbound firewall ports
+- DNS CNAME configuration with proxied=true
+- Tunnel ingress rules (HTTP, HTTPS, SSH, RDP, custom ports)
+- noTLSVerify for self-signed certificates
+- Systemd service management
+- Complete 10-step automated setup script
+- DNS troubleshooting and fixes
+
+**Files Created**:
+- README.md (comprehensive auto-trigger keywords, 245 lines)
+- SKILL.md (complete guide, 925 lines)
+- scripts/tunnel-setup.sh (16KB - 10-step automation)
+- scripts/dns-fix.sh (4.5KB - DNS troubleshooting)
+- assets/env-template (2.6KB)
+- assets/config-http.yml (2.5KB)
+- assets/config-https.yml (2.8KB)
+- assets/multi-service.yml (4.1KB)
+
+**Production Validated**: vibestack project (6+ months, KASM Workspaces + Coolify deployments)
+
+**Auto-Trigger Keywords**:
+- `cloudflare tunnel`, `cloudflared`, `secure tunnel`, `no inbound ports`
+- `tunnel ingress`, `DNS CNAME cloudflare`, `cfargotunnel.com`
+- Error keywords: `DNS_PROBE_FINISHED_NXDOMAIN`, `tunnel credentials`, `systemd cloudflared`
+
+---
+
+#### oci-infrastructure
+**Status**: ✅ Complete (2025-11-14)
+**Priority**: Critical
+**Dependencies**: None
+**Actual Dev Time**: 8 hours
+**Token Savings**: ~67%
+**Errors Prevented**: 6
+
+**What It Does**:
+- Oracle Cloud Infrastructure (OCI) deployment automation
+- ARM64 instances (VM.Standard.A1.Flex - Always Free tier)
+- OUT_OF_HOST_CAPACITY error prevention with capacity checking
+- Automated monitoring and deployment when capacity available
+- Compartment, VCN, subnet, and instance creation
+- Complete OCI CLI setup and configuration
+- 6 production scripts (84KB total)
+
+**Files Created**:
+- README.md (comprehensive auto-trigger keywords, 91 lines)
+- SKILL.md (complete guide, 322 lines)
+- scripts/check-oci-capacity.sh (9.5KB - capacity checking across ADs)
+- scripts/monitor-and-deploy.sh (11KB - auto-deploy when capacity found)
+- scripts/preflight-check.sh (7.4KB - OCI CLI setup)
+- scripts/oci-infrastructure-setup.sh (18KB - full infrastructure)
+- scripts/validate-env.sh (11KB - environment validation)
+- scripts/cleanup-compartment.sh (17KB - resource cleanup)
+
+**Production Validated**: vibestack project (multiple A1.Flex deployments, Always Free tier)
+
+**Auto-Trigger Keywords**:
+- `oracle cloud infrastructure`, `OCI`, `ARM64 instances`, `VM.Standard.A1.Flex`
+- `OCI CLI`, `oci compartment`, `oci vcn`, `OUT_OF_HOST_CAPACITY`
+- Error keywords: `OUT_OF_HOST_CAPACITY`, `availability domain OCI`, `OCI Always Free tier`
+
+---
+
+#### coolify
+**Status**: ✅ Complete (2025-11-14)
+**Priority**: High
+**Dependencies**: oci-infrastructure (optional), cloudflare-tunnel (optional)
+**Actual Dev Time**: 6 hours
+**Token Savings**: ~70%
+**Errors Prevented**: 6
+
+**What It Does**:
+- Coolify PaaS installation and configuration
+- Self-hosted Heroku/Netlify alternative
+- Docker and Docker Compose installation
+- Coolify web interface on port 8000
+- Traefik proxy on ports 80/443
+- Complete firewall configuration
+- 6 production scripts (40KB total)
+
+**Files Created**:
+- README.md (comprehensive auto-trigger keywords, 99 lines)
+- SKILL.md (complete guide, 533 lines)
+- scripts/coolify-installation.sh (14KB - full Docker + Coolify install)
+- scripts/coolify-cloudflare-tunnel-setup.sh (12KB - tunnel integration)
+- scripts/coolify-fix-dns.sh (7.2KB - DNS troubleshooting)
+- scripts/oci-coolify-infrastructure-setup.sh (1.6KB - OCI wrapper)
+- scripts/preflight-check.sh (715 bytes - prerequisites)
+- scripts/validate-env.sh (778 bytes - environment validation)
+
+**Production Validated**: vibestack project (6+ months, multiple app deployments)
+
+**Auto-Trigger Keywords**:
+- `coolify`, `self-hosted paas`, `open source heroku`, `docker deployment platform`
+- `coolify installation`, `ARM64 paas`, `traefik proxy`, `coolify port 8000`
+- Error keywords: `coolify web interface`, `coolify proxy ports`, `docker not installed`
+
+---
+
+#### kasm-workspaces
+**Status**: ✅ Complete (2025-11-14)
+**Priority**: High
+**Dependencies**: oci-infrastructure (optional), cloudflare-tunnel (optional)
+**Actual Dev Time**: 8 hours
+**Token Savings**: ~70%
+**Errors Prevented**: 7
+
+**What It Does**:
+- KASM Workspaces VDI platform installation
+- Self-hosted virtual desktop infrastructure
+- Docker-based desktop streaming (Guacamole)
+- Complete installation on ARM64 Ubuntu
+- Firewall configuration (ports 8443, 3389, 3000-4000)
+- 7 production scripts (80KB total)
+
+**Files Created**:
+- README.md (comprehensive auto-trigger keywords, 108 lines)
+- SKILL.md (complete guide, 458 lines)
+- scripts/kasm-installation.sh (12KB - full KASM installation)
+- scripts/cloudflare-tunnel-setup.sh (16KB - tunnel integration)
+- scripts/fix-dns.sh (3.7KB - DNS troubleshooting)
+- scripts/oci-infrastructure-setup.sh (19KB - OCI deployment)
+- scripts/oci-cleanup.sh (12KB - resource cleanup)
+- scripts/preflight-check.sh (7.1KB - prerequisites)
+- scripts/validate-env.sh (7.9KB - environment validation)
+
+**Production Validated**: vibestack project (6+ months, production VDI deployment)
+
+**Auto-Trigger Keywords**:
+- `kasm workspaces`, `kasm`, `virtual desktop infrastructure`, `vdi`
+- `remote desktop`, `docker vdi`, `guacamole streaming`, `kasm installation`
+- Error keywords: `kasm port 8443`, `kasm containers`, `docker vdi setup`
+
+---
+
+### Batch 8 - Development & Contribution Tools ⭐
 
 #### open-source-contributions
 **Status**: ✅ Complete (2025-11-05)
@@ -2201,6 +2353,6 @@ A skill is considered "complete" when:
 
 ---
 
-**Last Updated**: 2025-11-05 (51 skills complete! Added open-source-contributions skill)
-**Next Review**: 2025-12-05
+**Last Updated**: 2025-11-14 (65 skills complete! Added 4 infrastructure deployment skills)
+**Next Review**: 2025-12-14
 **Maintainer**: Jeremy Dawes | jeremy@jezweb.net
