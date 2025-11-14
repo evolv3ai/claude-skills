@@ -1,0 +1,77 @@
+# Cloudflare Tunnel Configuration - HTTPS Service Example
+# Use this configuration for services with HTTPS/SSL (KASM, dev servers with self-signed certs)
+
+tunnel: REPLACE_WITH_YOUR_TUNNEL_ID
+credentials-file: /etc/cloudflared/tunnel-credentials.json
+
+ingress:
+  # Main service route
+  - hostname: kasm.yourdomain.com
+    service: https://localhost:8443
+    originRequest:
+      # Skip TLS verification (required for self-signed certificates)
+      noTLSVerify: true
+
+      # Connection timeouts
+      connectTimeout: 30s  # How long to wait for origin connection
+      tlsTimeout: 30s      # TLS handshake timeout
+      tcpKeepAlive: 30s    # Keep connections alive during idle
+
+      # Connection pooling for performance
+      keepAliveConnections: 10  # Number of persistent connections
+      keepAliveTimeout: 90s     # How long to keep idle connections
+
+  # Catchall rule (required - must be last)
+  - service: http_status:404
+
+# =============================================================================
+# Configuration Explanation
+# =============================================================================
+
+# noTLSVerify: true
+#   - Bypasses SSL certificate validation
+#   - Required for self-signed certificates (KASM, development servers)
+#   - Still maintains encryption in the tunnel
+
+# connectTimeout: 30s
+#   - Allows time for slow origin servers to respond
+#   - Default is 15s (too short for some applications)
+#   - Increase to 60s+ for very slow origins
+
+# tlsTimeout: 30s
+#   - Time allowed for TLS handshake with HTTPS origin
+#   - Default is 10s
+#   - Increase if seeing TLS handshake timeouts
+
+# tcpKeepAlive: 30s
+#   - Sends periodic keepalive packets
+#   - Prevents connection drops during idle periods
+#   - Important for desktop streaming (KASM) and long-running requests
+
+# keepAliveConnections: 10
+#   - Connection pool size
+#   - Maintains persistent connections for better performance
+#   - Reduce to 5 for low-traffic services
+#   - Increase to 20 for high-traffic services
+
+# keepAliveTimeout: 90s
+#   - How long to keep idle connections in pool
+#   - Balances performance vs resource usage
+#   - Increase to 120s for applications with bursty traffic
+
+# =============================================================================
+# Common Use Cases
+# =============================================================================
+
+# KASM Workspaces (VDI):
+#   - Requires noTLSVerify: true (self-signed cert)
+#   - Needs long timeouts for desktop streaming
+#   - High keepAliveConnections for multiple concurrent sessions
+
+# Development servers:
+#   - Usually have self-signed certificates
+#   - May need higher connectTimeout if slow to start
+
+# Admin panels with SSL:
+#   - Benefit from connection pooling
+#   - Standard timeouts usually sufficient

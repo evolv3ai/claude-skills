@@ -1,0 +1,71 @@
+# Cloudflare Tunnel Configuration - HTTP Service Example
+# Use this configuration for standard HTTP web apps (Coolify, Next.js, React, etc.)
+
+tunnel: REPLACE_WITH_YOUR_TUNNEL_ID
+credentials-file: /etc/cloudflared/tunnel-credentials.json
+
+ingress:
+  # Main service route
+  - hostname: coolify.yourdomain.com
+    service: http://localhost:8000
+    originRequest:
+      # Connection timeouts
+      connectTimeout: 30s  # How long to wait for origin connection
+      tcpKeepAlive: 30s    # Keep connections alive during idle
+
+      # Connection pooling for performance
+      keepAliveConnections: 10  # Number of persistent connections
+      keepAliveTimeout: 90s     # How long to keep idle connections
+
+  # Catchall rule (required - must be last)
+  - service: http_status:404
+
+# =============================================================================
+# Configuration Explanation
+# =============================================================================
+
+# HTTP vs HTTPS configuration:
+#   - HTTP services don't need noTLSVerify or tlsTimeout
+#   - Simpler configuration with fewer options
+#   - Still encrypted end-to-end (Cloudflare edge to user uses HTTPS)
+
+# connectTimeout: 30s
+#   - Allows time for origin server to respond
+#   - Important for applications with slow startup
+#   - Increase to 60s if seeing timeout errors
+
+# tcpKeepAlive: 30s
+#   - Maintains connection health
+#   - Prevents drops during periods of no traffic
+#   - Standard setting for most web applications
+
+# keepAliveConnections: 10
+#   - Persistent connection pool
+#   - Improves response times for repeat requests
+#   - Adjust based on traffic: 5 (low), 10 (medium), 20 (high)
+
+# keepAliveTimeout: 90s
+#   - How long to keep connections alive when idle
+#   - Balance between performance and resource usage
+#   - Increase for applications with sporadic traffic patterns
+
+# =============================================================================
+# Common Use Cases
+# =============================================================================
+
+# Coolify (PaaS):
+#   - HTTP on port 8000
+#   - Standard timeouts work well
+#   - Benefits from connection pooling
+
+# Next.js/React apps:
+#   - Usually HTTP on port 3000 (dev) or 3001-3005
+#   - May need higher connectTimeout during build/restart
+
+# Node.js APIs:
+#   - HTTP on port 3000, 4000, or 8080
+#   - Connection pooling improves API response times
+
+# Django/Flask apps:
+#   - HTTP on port 8000 or 5000
+#   - Standard configuration sufficient

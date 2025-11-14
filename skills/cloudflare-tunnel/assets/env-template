@@ -1,0 +1,102 @@
+# Cloudflare Tunnel Environment Configuration Template
+# Copy this file to .env and fill in your values
+# WARNING: Never commit .env to version control!
+
+# =============================================================================
+# Cloudflare Configuration
+# =============================================================================
+
+# API Token - Create at https://dash.cloudflare.com/profile/api-tokens
+# Permissions needed: Account.Cloudflare Tunnel:Edit + Zone.DNS:Edit
+CLOUDFLARE_API_TOKEN="your_api_token_here"
+
+# Account ID - Found in dashboard URL: dash.cloudflare.com/{account_id}/
+CLOUDFLARE_ACCOUNT_ID="your_account_id_here"
+
+# Zone ID - Auto-detected from domain, or find in DNS section of dashboard
+# Leave empty to auto-detect from TUNNEL_HOSTNAME
+CLOUDFLARE_ZONE_ID=""
+
+# =============================================================================
+# Tunnel Configuration
+# =============================================================================
+
+# Tunnel name (must be unique in your Cloudflare account)
+TUNNEL_NAME="my-service-tunnel"
+
+# Public hostname for your tunnel (must be a domain you manage in Cloudflare)
+TUNNEL_HOSTNAME="service.yourdomain.com"
+
+# Tunnel ID - Auto-generated, leave empty (will be populated by setup script)
+TUNNEL_ID=""
+
+# DNS Record ID - Auto-generated, leave empty (will be populated by setup script)
+DNS_RECORD_ID=""
+
+# Tunnel Token - Auto-generated, leave empty (will be populated by setup script)
+# WARNING: This contains sensitive credentials - keep secure!
+TUNNEL_TOKEN=""
+
+# =============================================================================
+# Service Configuration (What You're Exposing)
+# =============================================================================
+
+# Service IP address
+# - Use "localhost" for services running on same machine as cloudflared
+# - Use private IP (e.g., "10.0.1.5") for services on local network
+SERVICE_IP="localhost"
+
+# Service port
+# Common ports:
+# - 3000: Node.js/React dev servers
+# - 8000: Django/Coolify
+# - 8080: Many Java/Go apps
+# - 8443: KASM Workspaces, secure admin panels
+SERVICE_PORT="8000"
+
+# Service protocol: http or https
+# - http: Most web apps, APIs, Coolify
+# - https: Services with SSL (KASM, dev servers with self-signed certs)
+SERVICE_PROTOCOL="http"
+
+# =============================================================================
+# Server Access (Optional - for automated deployment)
+# =============================================================================
+
+# Server public IP (where cloudflared will run)
+# Leave empty to skip automated deployment
+SERVER_IP=""
+
+# SSH user (usually "ubuntu" on Ubuntu, "ec2-user" on Amazon Linux)
+SSH_USER="ubuntu"
+
+# Path to SSH private key
+SSH_KEY_PATH="~/.ssh/id_rsa"
+
+# =============================================================================
+# Examples
+# =============================================================================
+
+# Example 1: Expose Coolify (HTTP service on port 8000)
+# SERVICE_IP="localhost"
+# SERVICE_PORT="8000"
+# SERVICE_PROTOCOL="http"
+# TUNNEL_HOSTNAME="coolify.yourdomain.com"
+
+# Example 2: Expose KASM Workspaces (HTTPS service on port 8443)
+# SERVICE_IP="localhost"
+# SERVICE_PORT="8443"
+# SERVICE_PROTOCOL="https"
+# TUNNEL_HOSTNAME="kasm.yourdomain.com"
+
+# Example 3: Expose web app (HTTP service on port 3000)
+# SERVICE_IP="localhost"
+# SERVICE_PORT="3000"
+# SERVICE_PROTOCOL="http"
+# TUNNEL_HOSTNAME="app.yourdomain.com"
+
+# Example 4: Expose service on different server (private network)
+# SERVICE_IP="10.0.1.10"
+# SERVICE_PORT="8080"
+# SERVICE_PROTOCOL="http"
+# TUNNEL_HOSTNAME="api.yourdomain.com"

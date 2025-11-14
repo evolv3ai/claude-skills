@@ -1,0 +1,116 @@
+# Cloudflare Tunnel Configuration - Multiple Services Example
+# Use single tunnel to expose multiple services on different hostnames
+
+tunnel: REPLACE_WITH_YOUR_TUNNEL_ID
+credentials-file: /etc/cloudflared/tunnel-credentials.json
+
+ingress:
+  # Service 1: Main web application (HTTP)
+  - hostname: app.yourdomain.com
+    service: http://localhost:3000
+    originRequest:
+      connectTimeout: 30s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 10
+      keepAliveTimeout: 90s
+
+  # Service 2: API backend (HTTP)
+  - hostname: api.yourdomain.com
+    service: http://localhost:8080
+    originRequest:
+      connectTimeout: 30s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 15  # Higher for API traffic
+      keepAliveTimeout: 90s
+
+  # Service 3: Admin panel (HTTPS with self-signed cert)
+  - hostname: admin.yourdomain.com
+    service: https://localhost:8443
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+      tlsTimeout: 30s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 5  # Lower for admin-only access
+      keepAliveTimeout: 90s
+
+  # Service 4: Monitoring dashboard (HTTP)
+  - hostname: monitoring.yourdomain.com
+    service: http://localhost:9090
+    originRequest:
+      connectTimeout: 30s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 5
+      keepAliveTimeout: 90s
+
+  # Catchall rule (required - must be last)
+  - service: http_status:404
+
+# =============================================================================
+# Multi-Service Best Practices
+# =============================================================================
+
+# 1. One tunnel can route to multiple services
+#    - More efficient than running multiple tunnel daemons
+#    - Single point of configuration
+#    - Lower resource usage
+
+# 2. Each hostname needs its own DNS CNAME record
+#    - app.yourdomain.com -> {TUNNEL_ID}.cfargotunnel.com
+#    - api.yourdomain.com -> {TUNNEL_ID}.cfargotunnel.com
+#    - admin.yourdomain.com -> {TUNNEL_ID}.cfargotunnel.com
+#    - monitoring.yourdomain.com -> {TUNNEL_ID}.cfargotunnel.com
+
+# 3. Adjust keepAliveConnections based on traffic
+#    - High-traffic services (app, API): 10-20 connections
+#    - Medium-traffic (monitoring): 5-10 connections
+#    - Low-traffic (admin): 2-5 connections
+
+# 4. Mix HTTP and HTTPS services freely
+#    - HTTP services: simpler configuration
+#    - HTTPS services: add noTLSVerify if self-signed certs
+
+# 5. Service ordering doesn't matter (except catchall)
+#    - Routes match by hostname, not order
+#    - Catchall MUST be last
+
+# =============================================================================
+# Alternative Pattern: Path-Based Routing
+# =============================================================================
+
+# You can also route based on URL paths:
+# ingress:
+#   - hostname: app.yourdomain.com
+#     path: /api/*
+#     service: http://localhost:8080  # API backend
+#
+#   - hostname: app.yourdomain.com
+#     path: /admin/*
+#     service: http://localhost:9000  # Admin panel
+#
+#   - hostname: app.yourdomain.com
+#     service: http://localhost:3000  # Everything else -> frontend
+#
+#   - service: http_status:404
+
+# =============================================================================
+# Example Service Combinations
+# =============================================================================
+
+# Full-stack application:
+#   - Frontend (React/Next.js): http://localhost:3000
+#   - Backend API (Node.js/Go): http://localhost:8080
+#   - Database admin (pgAdmin): https://localhost:5050
+#   - Monitoring (Grafana): http://localhost:3001
+
+# Microservices architecture:
+#   - Auth service: http://localhost:4001
+#   - User service: http://localhost:4002
+#   - Payment service: http://localhost:4003
+#   - Gateway/proxy: http://localhost:8080
+
+# Development environment:
+#   - Main app (dev server): http://localhost:3000
+#   - API docs (Swagger): http://localhost:8081
+#   - Mock API: http://localhost:3002
+#   - Testing dashboard: http://localhost:9000
