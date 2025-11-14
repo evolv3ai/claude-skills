@@ -20,6 +20,34 @@ license: MIT
 
 ## Quick Start (10 Minutes)
 
+**IMPORTANT: Check Capacity First!**
+
+OCI Always Free A1 instances are highly sought-after and frequently show OUT_OF_HOST_CAPACITY errors. **Always check capacity before attempting deployment:**
+
+```bash
+# Check A1 capacity across all availability domains
+./scripts/check-oci-capacity.sh
+
+# Check capacity in specific region
+./scripts/check-oci-capacity.sh us-ashburn-1
+
+# Use different OCI profile
+./scripts/check-oci-capacity.sh --profile DANIEL
+```
+
+**If no capacity available:** Use automated monitoring to deploy when capacity opens:
+
+```bash
+# Monitor and auto-deploy when capacity found (checks every 3 minutes)
+./scripts/monitor-and-deploy.sh --stack-id <STACK_OCID>
+
+# With custom profile and interval
+./scripts/monitor-and-deploy.sh \
+  --stack-id <STACK_OCID> \
+  --profile DANIEL \
+  --interval 300
+```
+
 ### 1. Install and Configure OCI CLI
 
 Install the OCI CLI and configure credentials:
@@ -161,6 +189,116 @@ This skill prevents **6** documented issues:
 ❌ **Never forget egress rules** - Outbound traffic must be allowed
 ❌ **Never hardcode OCIDs** - Use environment variables or config files
 ❌ **Never skip --wait-for-state** - Resources must reach ACTIVE/AVAILABLE before use
+
+---
+
+## Bundled Scripts
+
+This skill includes 6 production-tested automation scripts:
+
+### 1. **check-oci-capacity.sh** - Capacity Checker
+Checks VM.Standard.A1.Flex availability across all availability domains.
+
+```bash
+# Check capacity in home region
+./scripts/check-oci-capacity.sh
+
+# Check specific region
+./scripts/check-oci-capacity.sh us-ashburn-1
+
+# Use different OCI profile
+./scripts/check-oci-capacity.sh --profile DANIEL ca-montreal-1
+```
+
+**Features:**
+- Tests 4 OCPU / 24GB RAM configuration (Always Free tier)
+- Falls back to 2 OCPU / 12GB if full tier unavailable
+- Color-coded status (green=available, red=out of capacity)
+- Provides exact availability_domain values for deployment
+
+### 2. **monitor-and-deploy.sh** - Auto-Deploy Monitor
+Continuously monitors capacity and automatically deploys when available.
+
+```bash
+# Monitor and auto-deploy (checks every 3 minutes)
+./scripts/monitor-and-deploy.sh --stack-id <STACK_OCID>
+
+# Custom interval and profile
+./scripts/monitor-and-deploy.sh \
+  --stack-id <STACK_OCID> \
+  --profile DANIEL \
+  --interval 300 \
+  --max-attempts 100
+```
+
+**Features:**
+- Monitors all availability domains
+- Automatically creates apply job when capacity found
+- Configurable check intervals (default: 180s)
+- Real-time progress tracking
+- Optional max attempts limit
+
+### 3. **preflight-check.sh** - OCI CLI Setup
+Universal OCI CLI installation and configuration verification.
+
+```bash
+# Interactive mode
+./scripts/preflight-check.sh
+
+# Non-interactive (CI/automation)
+./scripts/preflight-check.sh --auto
+```
+
+**Features:**
+- Cross-platform (Linux, macOS, Windows)
+- Auto-detects OS and installs appropriate OCI CLI
+- Verifies OCI configuration and authentication
+- Guides through setup if needed
+
+### 4. **oci-infrastructure-setup.sh** - Full Infrastructure
+Complete OCI infrastructure deployment (compartment, VCN, subnet, instance).
+
+```bash
+# Ensure .env configured first
+./scripts/oci-infrastructure-setup.sh
+```
+
+**Creates:**
+- Compartment
+- VCN with CIDR block
+- Public subnet
+- Internet gateway
+- Route tables
+- Security lists
+- ARM64 compute instance
+
+### 5. **validate-env.sh** - Environment Validation
+Validates environment variables before deployment.
+
+```bash
+./scripts/validate-env.sh
+```
+
+**Checks:**
+- Required OCI OCIDs present
+- Valid compartment/VCN/subnet configuration
+- Network configuration (CIDR blocks, ports)
+- SSH key paths
+
+### 6. **cleanup-compartment.sh** - Resource Cleanup
+Safely deletes compartment and all resources.
+
+```bash
+./scripts/cleanup-compartment.sh <COMPARTMENT_OCID>
+```
+
+**Deletes (in order):**
+- Compute instances
+- VCNs and subnets
+- Security lists
+- Route tables
+- Internet gateways
+- Compartment itself
 
 ---
 
