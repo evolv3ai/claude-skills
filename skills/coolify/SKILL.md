@@ -341,6 +341,107 @@ docker ps --format "table {{.Names}}\t{{.Status}}"
 
 ---
 
+## Bundled Scripts
+
+This skill includes 6 production-tested automation scripts:
+
+### 1. **coolify-installation.sh** - Complete Installation
+Full Docker and Coolify installation automation for OCI ARM64 instances.
+
+```bash
+# Automated Coolify installation
+./scripts/coolify-installation.sh
+```
+
+**Features:**
+- System verification and updates
+- Docker CE installation with Compose Plugin
+- Coolify installation via official script
+- Firewall configuration (ports 8000, 80, 443, 6001, 6002)
+- Service health verification
+- Admin credentials extraction and saving
+- Post-install testing and validation
+
+**Creates:**
+- Coolify web interface on port 8000
+- Traefik proxy on ports 80/443
+- Docker networks and volumes
+- Admin access file: `coolify-access.txt`
+
+### 2. **coolify-cloudflare-tunnel-setup.sh** - Tunnel Integration
+Integrates Coolify with Cloudflare Tunnel for secure external access.
+
+```bash
+# Setup tunnel for Coolify
+./scripts/coolify-cloudflare-tunnel-setup.sh
+```
+
+**Features:**
+- Downloads and installs cloudflared
+- Creates tunnel via API
+- Configures DNS CNAME records
+- Sets up HTTP service routing
+- Creates systemd service for tunnel
+- Verifies tunnel connectivity
+
+### 3. **coolify-fix-dns.sh** - DNS Troubleshooting
+Fixes DNS_PROBE_FINISHED_NXDOMAIN errors for Cloudflare tunnels.
+
+```bash
+# Fix DNS resolution issues
+./scripts/coolify-fix-dns.sh
+```
+
+**Fixes:**
+- CNAME not resolving to tunnel
+- Missing `proxied: true` flag
+- DNS propagation issues
+- Tunnel hostname mismatches
+
+### 4. **oci-coolify-infrastructure-setup.sh** - OCI Deployment
+Wrapper script for deploying Coolify infrastructure on Oracle Cloud.
+
+```bash
+# Deploy Coolify on OCI
+./scripts/oci-coolify-infrastructure-setup.sh
+```
+
+**Orchestrates:**
+- OCI infrastructure setup
+- Coolify installation
+- Cloudflare tunnel configuration
+- End-to-end deployment
+
+### 5. **preflight-check.sh** - Pre-Deployment Validation
+Validates environment before Coolify installation.
+
+```bash
+# Check prerequisites
+./scripts/preflight-check.sh
+```
+
+**Checks:**
+- System requirements (RAM, disk space)
+- Docker availability
+- Network connectivity
+- Port availability
+
+### 6. **validate-env.sh** - Environment Validation
+Validates environment variables for deployment.
+
+```bash
+# Validate configuration
+./scripts/validate-env.sh
+```
+
+**Validates:**
+- Required variables present
+- Server connection details
+- SSH key paths
+- Port configurations
+
+---
+
 ## Official Documentation
 
 - **Coolify Website**: https://coolify.io

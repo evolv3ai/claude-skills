@@ -360,6 +360,128 @@ docker restart <container-name>
 
 ---
 
+## Bundled Scripts
+
+This skill includes 7 production-tested automation scripts:
+
+### 1. **kasm-installation.sh** - Complete KASM Installation
+Full KASM Workspaces installation automation for OCI ARM64 instances.
+
+```bash
+# Automated KASM installation
+./scripts/kasm-installation.sh
+```
+
+**Features:**
+- System verification and updates
+- Docker CE installation with Compose Plugin
+- KASM Workspaces 1.17.0 download and installation
+- Silent installation mode
+- Firewall configuration (ports 8443, 3389, 3000-4000)
+- Container health verification (8+ containers)
+- Admin credentials extraction
+- Access information saved to file
+
+**Creates:**
+- KASM web interface on port 8443 (HTTPS)
+- 8+ Docker containers (API, manager, agent, database, etc.)
+- PostgreSQL and Redis databases
+- Guacamole for session management
+- Admin credentials file: `kasm-credentials.txt`
+
+### 2. **cloudflare-tunnel-setup.sh** - Tunnel Integration
+Integrates KASM with Cloudflare Tunnel for secure external access.
+
+```bash
+# Setup tunnel for KASM
+./scripts/cloudflare-tunnel-setup.sh
+```
+
+**Features:**
+- Downloads and installs cloudflared
+- Creates tunnel via API
+- Configures DNS CNAME records
+- Sets up HTTPS service routing (with noTLSVerify for self-signed cert)
+- Creates systemd service for tunnel
+- Verifies tunnel connectivity
+
+### 3. **fix-dns.sh** - DNS Troubleshooting
+Fixes DNS_PROBE_FINISHED_NXDOMAIN errors for Cloudflare tunnels.
+
+```bash
+# Fix DNS resolution issues
+./scripts/fix-dns.sh
+```
+
+**Fixes:**
+- CNAME not resolving to tunnel
+- Missing `proxied: true` flag
+- DNS propagation issues
+- Tunnel hostname mismatches
+
+### 4. **oci-infrastructure-setup.sh** - OCI Deployment
+Complete OCI infrastructure setup for KASM deployment.
+
+```bash
+# Deploy KASM infrastructure on OCI
+./scripts/oci-infrastructure-setup.sh
+```
+
+**Creates:**
+- OCI compartment
+- VCN with CIDR block
+- Public subnet
+- Internet gateway and route tables
+- Security lists (SSH, HTTPS, RDP, session ports)
+- ARM64 compute instance (VM.Standard.A1.Flex)
+
+### 5. **oci-cleanup.sh** - Resource Cleanup
+Safely removes all OCI resources created for KASM.
+
+```bash
+# Clean up OCI resources
+./scripts/oci-cleanup.sh <COMPARTMENT_OCID>
+```
+
+**Deletes (in order):**
+- KASM compute instance
+- VCN resources (subnets, route tables, security lists)
+- Internet gateway
+- VCN
+- Compartment
+
+### 6. **preflight-check.sh** - Pre-Deployment Validation
+Validates environment before KASM installation.
+
+```bash
+# Check prerequisites
+./scripts/preflight-check.sh
+```
+
+**Checks:**
+- System requirements (8GB+ RAM, disk space)
+- Docker availability
+- Network connectivity
+- Port availability (8443, 3389, 3000-4000)
+- SSL certificate handling
+
+### 7. **validate-env.sh** - Environment Validation
+Validates environment variables for deployment.
+
+```bash
+# Validate configuration
+./scripts/validate-env.sh
+```
+
+**Validates:**
+- Required variables present (KASM_SERVER_IP, SSH credentials)
+- Server connection details
+- SSH key paths
+- Port configurations (8443, 3389, RDP_PORT)
+- Network settings
+
+---
+
 ## Official Documentation
 
 - **KASM Website**: https://www.kasmweb.com
