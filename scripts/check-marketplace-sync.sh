@@ -153,18 +153,86 @@ if [ -n "$MARKDOWN_FILE" ]; then
     fi
 fi
 
-# Fix mode
+# Fix mode - regenerate marketplace.json from skills/ directory
 if [ "$FIX_MODE" = true ] && [ "$HAS_ISSUES" = true ]; then
-    echo -e "${BLUE}Running generate-plugin-manifests.sh to fix...${NC}"
+    echo -e "${BLUE}Regenerating marketplace.json from skills/ directory...${NC}"
+
+    # Load .env for fork-specific overrides
+    if [ -f "$REPO_ROOT/.env" ]; then
+        source "$REPO_ROOT/.env"
+    fi
+
+    # Determine marketplace owner info
+    UPSTREAM_AUTHOR_NAME="Jeremy Dawes / Jezweb"
+    UPSTREAM_AUTHOR_EMAIL="jeremy@jezweb.net"
+    MARKETPLACE_OWNER_NAME="${PLUGIN_AUTHOR_NAME:-$UPSTREAM_AUTHOR_NAME}"
+    MARKETPLACE_OWNER_EMAIL="${PLUGIN_AUTHOR_EMAIL:-$UPSTREAM_AUTHOR_EMAIL}"
+
+    # Count actual skills for the "all" description
+    SKILL_COUNT=$(ls -d "$SKILLS_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
+
+    # Build plugins array: start with "all" entry
+    PLUGINS="    {
+      \"name\": \"all\",
+      \"description\": \"All $SKILL_COUNT production-tested skills for Claude Code.\",
+      \"source\": \"./\"
+    }"
+
+    # Add each skill directory as an individual plugin entry
+    for skill_path in "$SKILLS_DIR"/*/; do
+        skill=$(basename "$skill_path")
+        plugin_json="$skill_path/.claude-plugin/plugin.json"
+
+        # Pull description from plugin.json if it exists, otherwise use a default
+        if [ -f "$plugin_json" ]; then
+            desc=$(grep -oP '"description"\s*:\s*"\K[^"]{0,200}' "$plugin_json" 2>/dev/null | head -1)
+        fi
+        if [ -z "$desc" ]; then
+            desc="Production-ready skill for $skill"
+        fi
+        # Escape any remaining quotes in description
+        desc=$(echo "$desc" | sed 's/"/\\"/g')
+
+        PLUGINS="$PLUGINS,
+    {
+      \"name\": \"$skill\",
+      \"description\": \"$desc\",
+      \"source\": \"./skills/$skill\"
+    }"
+        desc=""
+    done
+
+    # Write marketplace.json
+    cat > "$MARKETPLACE_FILE" << MKEOF
+{
+  "name": "evolv3ai-skills",
+  "owner": {
+    "name": "$MARKETPLACE_OWNER_NAME",
+    "email": "$MARKETPLACE_OWNER_EMAIL"
+  },
+  "metadata": {
+    "description": "Production-tested skills for Claude Code",
+    "version": "3.5.0",
+    "updated": "$(date +%Y-%m-%d)"
+  },
+  "plugins": [
+$PLUGINS
+  ]
+}
+MKEOF
+
+    echo -e "${GREEN}✅ marketplace.json regenerated with $SKILL_COUNT skills${NC}"
+
+    # Also regenerate per-skill plugin.json manifests
+    echo -e "${BLUE}Also regenerating per-skill plugin.json files...${NC}"
     "$SCRIPT_DIR/generate-plugin-manifests.sh"
-    echo -e "${GREEN}✅ marketplace.json regenerated${NC}"
+
     exit 0
 fi
 
 # Exit code
 if [ "$HAS_ISSUES" = true ]; then
     echo -e "${YELLOW}Run with --fix to regenerate marketplace.json${NC}"
-    echo "Or manually run: ./scripts/generate-plugin-manifests.sh"
     exit 1
 fi
 
