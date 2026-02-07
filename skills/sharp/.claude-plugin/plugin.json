@@ -3,10 +3,10 @@
   "description": "Processes images with Sharp, the high-performance Node.js library for resizing, converting, and optimizing images. Use when building image pipelines, generating thumbnails, batch processing client photos, or optimizing uploads server-side. Use when: resizing photos, converting to WebP/AVIF, batch optimization, thumbnail generation, watermarks. Errors: Input file is missing, unsupported image format, memory allocation failed, sharp: Installation failed.",
   "version": "1.0.0",
   "author": {
-    "name": "Jeremy Dawes",
-    "email": "jeremy@jezweb.net"
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
   },
   "license": "MIT",
-  "repository": "https://github.com/jezweb/claude-skills",
+  "repository": "https://evolv3.ai",
   "keywords": []
 }

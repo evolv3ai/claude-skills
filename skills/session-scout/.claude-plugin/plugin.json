@@ -3,10 +3,10 @@
   "description": "Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows and WSL. PowerShell script extracts project paths, session IDs, and timestamps from session artifacts. Use when: finding recent coding sessions, reviewing AI session history, exporting session logs to CSV, troubleshooting missing sessions, or auditing Claude Code/OpenCode usage across environments.",
   "version": "1.0.0",
   "author": {
-    "name": "Jeremy Dawes",
-    "email": "jeremy@jezweb.net"
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
   },
   "license": "MIT",
-  "repository": "https://github.com/jezweb/claude-skills",
+  "repository": "https://evolv3.ai",
   "keywords": []
 }

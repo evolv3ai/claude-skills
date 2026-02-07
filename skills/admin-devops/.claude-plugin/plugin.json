@@ -1,33 +1,14 @@
 {
   "name": "admin-devops",
+  "description": "REMOTE infrastructure administration (alpha v0.0.2). Server inventory, cloud provisioning (OCI, Hetzner, Linode, DigitalOcean, Contabo), and application deployment (Coolify, KASM). Profile-aware - reads servers from device profile. Use when: provisioning VPS, deploying to cloud, installing Coolify/KASM, managing remote servers. NOT for: local installs, Windows/WSL/macOS admin, MCP servers → use admin.",
   "version": "0.1.0",
-  "description": "Remote infrastructure administration. Server inventory, cloud provisioning (OCI, Hetzner, Contabo, DigitalOcean, Vultr, Linode), and application deployment (Coolify, KASM). Profile-aware - reads servers from device profile.",
   "author": {
     "name": "evolv3ai",
     "email": "hello@evolv3.ai"
   },
   "license": "MIT",
-  "repository": "https://github.com/evolv3ai/claude-skills",
-  "keywords": [
-    "server",
-    "servers",
-    "provision",
-    "deploy",
-    "cloud",
-    "infrastructure",
-    "VPS",
-    "VM",
-    "instance",
-    "inventory",
-    "OCI",
-    "oracle cloud",
-    "hetzner",
-    "digitalocean",
-    "vultr",
-    "linode",
-    "contabo",
-    "coolify",
-    "kasm",
-    "self-hosted"
-  ]
+  "repository": "https://evolv3.ai",
+  "keywords": [],
+  "commands": "./commands/",
+  "agents": "./agents/"
 }

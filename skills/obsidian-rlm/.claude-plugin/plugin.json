@@ -3,10 +3,10 @@
   "description": "Process large files for Obsidian workflows using RLM (Recursive Language Models). Handles LLM conversation exports (64MB+), bulk note analysis, and large JSON processing that would overwhelm standard tools. Use when: ContentImporter hits files over 10MB, processing large Claude/ChatGPT exports, bulk triage of conversation archives, extracting insights from massive JSON files.",
   "version": "1.0.0",
   "author": {
-    "name": "Jeremy Dawes",
-    "email": "jeremy@jezweb.net"
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
   },
   "license": "MIT",
-  "repository": "https://github.com/jezweb/claude-skills",
+  "repository": "https://evolv3.ai",
   "keywords": []
 }

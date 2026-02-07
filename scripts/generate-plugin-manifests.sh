@@ -6,7 +6,28 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_DIR="$(cd "$SCRIPT_DIR/../skills" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+# Load .env for fork-specific author overrides
+ENV_FILE="$ROOT_DIR/.env"
+if [ -f "$ENV_FILE" ]; then
+  source "$ENV_FILE"
+  echo "Loaded author config from .env"
+  echo "  Fork author: ${PLUGIN_AUTHOR_NAME:-<not set>}"
+  echo "  Fork skills: ${SKILL_PATHS:-<none>}"
+  # Convert comma-separated SKILL_PATHS to a lookup-friendly string
+  OWNED_SKILLS=",${SKILL_PATHS},"
+else
+  echo "No .env found, using upstream defaults for all skills"
+  OWNED_SKILLS=""
+fi
+
+# Upstream defaults
+UPSTREAM_AUTHOR_NAME="Jeremy Dawes"
+UPSTREAM_AUTHOR_EMAIL="jeremy@jezweb.net"
+UPSTREAM_REPOSITORY="https://github.com/jezweb/claude-skills"
+
+echo ""
 echo "Generating plugin.json files for all skills..."
 echo "Skills directory: $SKILLS_DIR"
 echo ""
@@ -116,6 +137,27 @@ for skill_dir in "$SKILLS_DIR"/*; do
     fi
   fi
 
+  # Preserve existing version from plugin.json, default to 1.0.0 for new plugins
+  version="1.0.0"
+  if [ -f "$plugin_json" ]; then
+    existing_version=$(grep -oP '"version"\s*:\s*"\K[^"]+' "$plugin_json" 2>/dev/null || true)
+    if [ -n "$existing_version" ]; then
+      version="$existing_version"
+    fi
+  fi
+
+  # Determine author info: use fork author for owned skills, upstream for everything else
+  if [ -n "$OWNED_SKILLS" ] && echo "$OWNED_SKILLS" | grep -q ",$skill_name,"; then
+    author_name="${PLUGIN_AUTHOR_NAME}"
+    author_email="${PLUGIN_AUTHOR_EMAIL}"
+    repository="${PLUGIN_REPOSITORY}"
+    echo "  🔧 Using fork author: $author_name"
+  else
+    author_name="$UPSTREAM_AUTHOR_NAME"
+    author_email="$UPSTREAM_AUTHOR_EMAIL"
+    repository="$UPSTREAM_REPOSITORY"
+  fi
+
   # Generate plugin.json
   # Build optional fields
   agents_line=""
@@ -134,13 +176,13 @@ for skill_dir in "$SKILLS_DIR"/*; do
 {
   "name": "$skill_name",
   "description": "$description",
-  "version": "1.0.0",
+  "version": "$version",
   "author": {
-    "name": "Jeremy Dawes",
-    "email": "jeremy@jezweb.net"
+    "name": "$author_name",
+    "email": "$author_email"
   },
   "license": "MIT",
-  "repository": "https://github.com/jezweb/claude-skills",
+  "repository": "$repository",
   "keywords": $keywords_json$commands_line$agents_line
 }
 EOF
