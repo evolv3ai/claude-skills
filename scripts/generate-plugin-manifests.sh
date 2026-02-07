@@ -8,27 +8,38 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILLS_DIR="$(cd "$SCRIPT_DIR/../skills" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Load .env for fork-specific author overrides
-ENV_FILE="$ROOT_DIR/.env"
-if [ -f "$ENV_FILE" ]; then
-  source "$ENV_FILE"
-  echo "Loaded author config from .env"
-  echo "  Fork author: ${PLUGIN_AUTHOR_NAME:-<not set>}"
-  echo "  Fork skills: ${SKILL_PATHS:-<none>}"
-  # Convert comma-separated SKILL_PATHS to a lookup-friendly string
-  OWNED_SKILLS=",${SKILL_PATHS},"
-else
-  echo "No .env found, using upstream defaults for all skills"
-  OWNED_SKILLS=""
+# Load author config from .env if it exists
+if [ -f "$ROOT_DIR/.env" ]; then
+  source "$ROOT_DIR/.env"
 fi
 
-# Upstream defaults
+# Original upstream author (preserved for skills not owned by fork)
 UPSTREAM_AUTHOR_NAME="Jeremy Dawes"
 UPSTREAM_AUTHOR_EMAIL="jeremy@jezweb.net"
 UPSTREAM_REPOSITORY="https://github.com/jezweb/claude-skills"
 
-echo ""
+# Fork author (used only for skills listed in SKILL_PATHS)
+FORK_AUTHOR_NAME="${PLUGIN_AUTHOR_NAME:-$UPSTREAM_AUTHOR_NAME}"
+FORK_AUTHOR_EMAIL="${PLUGIN_AUTHOR_EMAIL:-$UPSTREAM_AUTHOR_EMAIL}"
+FORK_REPOSITORY="${PLUGIN_REPOSITORY:-$UPSTREAM_REPOSITORY}"
+
+# Skills owned by this fork (comma-separated in .env)
+# Only these skills will use FORK_AUTHOR_* values
+FORK_SKILL_PATHS="${SKILL_PATHS:-}"
+
+# Helper function to check if skill is owned by fork
+is_fork_skill() {
+  local skill="$1"
+  if [ -z "$FORK_SKILL_PATHS" ]; then
+    return 1  # No fork skills defined, all use upstream
+  fi
+  echo ",$FORK_SKILL_PATHS," | grep -q ",$skill,"
+}
+
 echo "Generating plugin.json files for all skills..."
+if [ -n "$FORK_SKILL_PATHS" ]; then
+  echo "Fork skills (custom author): $FORK_SKILL_PATHS"
+fi
 echo "Skills directory: $SKILLS_DIR"
 echo ""
 
@@ -137,21 +148,24 @@ for skill_dir in "$SKILLS_DIR"/*; do
     fi
   fi
 
-  # Preserve existing version from plugin.json, default to 1.0.0 for new plugins
+  # Read version: VERSION file > existing plugin.json > default 1.0.0
   version="1.0.0"
-  if [ -f "$plugin_json" ]; then
+  version_file="$skill_dir/VERSION"
+  if [ -f "$version_file" ]; then
+    version=$(cat "$version_file" | tr -d '[:space:]')
+  elif [ -f "$plugin_json" ]; then
     existing_version=$(grep -oP '"version"\s*:\s*"\K[^"]+' "$plugin_json" 2>/dev/null || true)
     if [ -n "$existing_version" ]; then
       version="$existing_version"
     fi
   fi
 
-  # Determine author info: use fork author for owned skills, upstream for everything else
-  if [ -n "$OWNED_SKILLS" ] && echo "$OWNED_SKILLS" | grep -q ",$skill_name,"; then
-    author_name="${PLUGIN_AUTHOR_NAME}"
-    author_email="${PLUGIN_AUTHOR_EMAIL}"
-    repository="${PLUGIN_REPOSITORY}"
-    echo "  🔧 Using fork author: $author_name"
+  # Determine author info based on whether this is a fork skill
+  if is_fork_skill "$skill_name"; then
+    author_name="$FORK_AUTHOR_NAME"
+    author_email="$FORK_AUTHOR_EMAIL"
+    repository="$FORK_REPOSITORY"
+    echo "  👤 Using fork author: $author_name"
   else
     author_name="$UPSTREAM_AUTHOR_NAME"
     author_email="$UPSTREAM_AUTHOR_EMAIL"
@@ -193,7 +207,17 @@ done
 echo ""
 echo "✅ Done! Generated plugin.json for $count skills"
 echo ""
-echo "Next steps:"
-echo "1. Review generated files: find skills/ -name plugin.json"
-echo "2. Test marketplace: /plugin marketplace add https://github.com/jezweb/claude-skills"
-echo "3. Install a skill: /plugin install cloudflare-worker-base@jezweb-skills"
+# Extract marketplace identifiers from resolved repository URL
+if echo "$FORK_REPOSITORY" | grep -q 'github.com/'; then
+  # GitHub URL: extract org/repo for marketplace naming
+  MARKETPLACE_NAME=$(echo "$FORK_REPOSITORY" | sed 's|.*/||' | sed 's|\.git$||')
+  MARKETPLACE_ORG=$(echo "$FORK_REPOSITORY" | sed 's|https://github.com/||' | sed 's|/.*||')
+  echo "Next steps:"
+  echo "1. Review generated files: find skills/ -name plugin.json"
+  echo "2. Test marketplace: /plugin marketplace add $FORK_REPOSITORY"
+  echo "3. Install a skill: /plugin install cloudflare-worker-base@${MARKETPLACE_ORG}-${MARKETPLACE_NAME}"
+else
+  echo "Next steps:"
+  echo "1. Review generated files: find skills/ -name plugin.json"
+  echo "2. Repository: $FORK_REPOSITORY"
+fi
