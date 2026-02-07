@@ -1,0 +1,12 @@
+{
+  "name": "ralphban",
+  "description": "Create structured task files for the Ralphban VS Code extension - a visual Kanban board for LLM agent workflows. Generate valid task JSON with proper schema, status tracking, dependencies, and priority levels. Use when: breaking down features into agent-executable tasks, creating PRD files for Ralph-style workflows, visualizing LLM task graphs, or troubleshooting Invalid task schema, Task not found, missing description field. { category: backend, description: Design task execution loop, status: ",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}

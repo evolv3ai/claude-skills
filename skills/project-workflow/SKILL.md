@@ -15,11 +15,11 @@ user-invocable: true
 
 ## Installation
 
-**Marketplace**: `/plugin install project-workflow@jezweb-skills`
+**Marketplace**: `/plugin install project-workflow@claude-skills`
 
 **Manual**: Copy `commands/*.md` to `~/.claude/commands/`
 
-## The 9 Commands
+## The 7 Commands
 
 ### 1. `/explore-idea` - Pre-Planning Exploration
 
@@ -77,7 +77,7 @@ user-invocable: true
 
 **Use when**: First time user, unsure which command to use, or need quick reference.
 
-**Does**: Shows all 9 commands → context-aware guidance with decision trees → offers to execute appropriate command.
+**Does**: Shows all 7 commands → context-aware guidance with decision trees → offers to execute appropriate command.
 
 ---
 

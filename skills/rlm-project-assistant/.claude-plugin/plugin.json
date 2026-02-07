@@ -1,0 +1,12 @@
+{
+  "name": "rlm-project-assistant",
+  "description": "Set up and operate the RLM (Recursive Language Models) Orchestrator for processing arbitrarily large contexts. Handles Rust builds, Ollama/LiteLLM provider configuration, WASM compilation targets, and query workflows. Use when: setting up RLM project, configuring LLM providers for RLM, running queries against large files (10MB+), troubleshooting WASM compilation errors, or analyzing conversation exports.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}

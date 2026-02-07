@@ -1,0 +1,12 @@
+{
+  "name": "imagemagick",
+  "description": "Guide for using ImageMagick command-line tools to perform advanced image processing tasks including format conversion, resizing, cropping, effects, transformations, and batch operations. Use when manipulating images programmatically via shell commands.",
+  "version": "1.0.0",
+  "author": {
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/evolv3-ai/vibe-skills",
+  "keywords": []
+}

@@ -1,0 +1,458 @@
+#!/usr/bin/env bash
+# =============================================================================
+# New Admin Profile - Create profile (non-interactive, parameter-driven)
+# =============================================================================
+# Creates the Admin profile and directory structure based on provided parameters.
+# Designed to be called by an AI agent after gathering preferences via TUI.
+# No interactive prompts - all options passed as parameters.
+#
+# Usage:
+#   ./new-admin-profile.sh [OPTIONS]
+#
+# Options:
+#   -a, --admin-root PATH    Path to .admin directory (default: ~/.admin)
+#   -m, --multi-device       Multi-device setup (cloud-synced storage)
+#   -p, --pkg-mgr MGR        Package manager: brew/apt/dnf/pacman (default: auto-detect)
+#   --py-mgr MGR             Python manager: uv/pip/conda/poetry (default: uv)
+#   -n, --node-mgr MGR       Node manager: npm/pnpm/yarn/bun (default: npm)
+#   -s, --shell-default SH   Default shell: bash/zsh/fish (default: $SHELL)
+#   -i, --run-inventory      Run tool inventory scan
+#   -f, --force              Overwrite existing profile
+#   -h, --help               Show this help
+#
+# Examples:
+#   ./new-admin-profile.sh --run-inventory
+#   ./new-admin-profile.sh --admin-root ~/Dropbox/.admin --multi-device --pkg-mgr brew
+# =============================================================================
+
+set -eo pipefail
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+GRAY='\033[0;37m'
+NC='\033[0m' # No Color
+
+info() { echo -e "${GRAY}[i]${NC} $1"; }
+ok() { echo -e "${GREEN}[OK]${NC} $1"; }
+warn() { echo -e "${YELLOW}[!]${NC} $1"; }
+err() { echo -e "${RED}[-]${NC} $1"; }
+section() { echo -e "\n${CYAN}=== $1 ===${NC}"; }
+
+# Defaults
+ADMIN_ROOT=""
+MULTI_DEVICE=false
+PKG_MGR=""
+PY_MGR="uv"
+NODE_MGR="npm"
+SHELL_DEFAULT=""
+RUN_INVENTORY=false
+FORCE=false
+
+# Script paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SKILL_ROOT="$(dirname "$SCRIPT_DIR")"
+VERSION_FILE="${SKILL_ROOT}/VERSION"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -a|--admin-root)
+            ADMIN_ROOT="$2"
+            shift 2
+            ;;
+        -m|--multi-device)
+            MULTI_DEVICE=true
+            shift
+            ;;
+        -p|--pkg-mgr)
+            PKG_MGR="$2"
+            shift 2
+            ;;
+        --py-mgr)
+            PY_MGR="$2"
+            shift 2
+            ;;
+        -n|--node-mgr)
+            NODE_MGR="$2"
+            shift 2
+            ;;
+        -s|--shell-default)
+            SHELL_DEFAULT="$2"
+            shift 2
+            ;;
+        -i|--run-inventory)
+            RUN_INVENTORY=true
+            shift
+            ;;
+        -f|--force)
+            FORCE=true
+            shift
+            ;;
+        -h|--help)
+            head -35 "$0" | tail -30
+            exit 0
+            ;;
+        *)
+            err "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Detect platform
+detect_platform() {
+    if grep -qi microsoft /proc/version 2>/dev/null; then
+        echo "wsl"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo "macos"
+    elif [[ "$OSTYPE" == "linux"* ]]; then
+        echo "linux"
+    else
+        echo "unix"
+    fi
+}
+
+PLATFORM=$(detect_platform)
+
+# Set defaults based on platform
+if [[ -z "$ADMIN_ROOT" ]]; then
+    if [[ "$PLATFORM" == "wsl" ]]; then
+        # WSL: Use Windows user's home
+        WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+        ADMIN_ROOT="/mnt/c/Users/$WIN_USER/.admin"
+    else
+        ADMIN_ROOT="${HOME}/.admin"
+    fi
+fi
+
+if [[ -z "$PKG_MGR" ]]; then
+    case "$PLATFORM" in
+        macos) PKG_MGR="brew" ;;
+        wsl|linux)
+            if command -v apt &>/dev/null; then PKG_MGR="apt"
+            elif command -v dnf &>/dev/null; then PKG_MGR="dnf"
+            elif command -v pacman &>/dev/null; then PKG_MGR="pacman"
+            else PKG_MGR="apt"
+            fi
+            ;;
+        *) PKG_MGR="apt" ;;
+    esac
+fi
+
+if [[ -z "$SHELL_DEFAULT" ]]; then
+    SHELL_DEFAULT=$(basename "$SHELL")
+fi
+
+# Read version
+ADMIN_SKILL_VERSION="0.0.3"
+if [[ -f "$VERSION_FILE" ]]; then
+    ADMIN_SKILL_VERSION=$(head -1 "$VERSION_FILE" | tr -d '[:space:]')
+fi
+
+DEVICE_NAME=$(hostname)
+PROFILE_PATH="${ADMIN_ROOT}/profiles/${DEVICE_NAME}.json"
+
+section "New Admin Profile"
+echo "Device:      $DEVICE_NAME"
+echo "AdminRoot:   $ADMIN_ROOT"
+echo "Platform:    $PLATFORM"
+echo "MultiDevice: $MULTI_DEVICE"
+
+# Check existing profile
+if [[ -f "$PROFILE_PATH" && "$FORCE" != "true" ]]; then
+    warn "Profile already exists: $PROFILE_PATH"
+    echo "Use --force to overwrite"
+    echo '{"success":false,"error":"profile_exists","path":"'"$PROFILE_PATH"'","message":"Profile already exists. Use --force to overwrite."}'
+    exit 1
+fi
+
+# Create directories
+section "Creating Directories"
+DIRS=(
+    "$ADMIN_ROOT"
+    "$ADMIN_ROOT/profiles"
+    "$ADMIN_ROOT/logs"
+    "$ADMIN_ROOT/logs/devices"
+    "$ADMIN_ROOT/issues"
+    "$ADMIN_ROOT/registries"
+    "$ADMIN_ROOT/config"
+    "$ADMIN_ROOT/backups"
+    "$ADMIN_ROOT/scripts"
+    "$ADMIN_ROOT/inbox"
+)
+
+for dir in "${DIRS[@]}"; do
+    if [[ ! -d "$dir" ]]; then
+        mkdir -p "$dir"
+        ok "Created: $dir"
+    fi
+done
+
+# Gather system info
+section "Detecting System"
+OS_NAME="Unknown"
+OS_VERSION=""
+ARCH=$(uname -m)
+CPU_INFO=""
+RAM_GB=""
+
+case "$PLATFORM" in
+    macos)
+        OS_NAME=$(sw_vers -productName 2>/dev/null || echo "macOS")
+        OS_VERSION=$(sw_vers -productVersion 2>/dev/null || echo "")
+        CPU_INFO=$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo "Apple Silicon")
+        RAM_GB=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1073741824 ))
+        ;;
+    linux|wsl)
+        if [[ -f /etc/os-release ]]; then
+            OS_NAME=$(grep "^NAME=" /etc/os-release | cut -d'"' -f2)
+            OS_VERSION=$(grep "^VERSION_ID=" /etc/os-release | cut -d'"' -f2)
+        fi
+        CPU_INFO=$(grep "model name" /proc/cpuinfo 2>/dev/null | head -1 | cut -d':' -f2 | xargs)
+        RAM_GB=$(( $(grep MemTotal /proc/meminfo 2>/dev/null | awk '{print $2}') / 1048576 ))
+        ;;
+esac
+
+ok "OS: $OS_NAME $OS_VERSION"
+ok "CPU: $CPU_INFO"
+ok "RAM: ${RAM_GB} GB"
+
+# Initialize tool/package arrays
+PKG_MANAGERS_JSON="{}"
+TOOLS_JSON="{}"
+CAPABILITIES_JSON="{}"
+
+# Run inventory if requested
+if [[ "$RUN_INVENTORY" == "true" ]]; then
+    section "Running Inventory Scan"
+
+    # Package managers
+    declare -A PKG_MANAGERS
+
+    # brew
+    if command -v brew &>/dev/null; then
+        BREW_VER=$(brew --version 2>/dev/null | head -1 | awk '{print $2}')
+        PKG_MANAGERS["brew"]='{"present":true,"version":"'"$BREW_VER"'","path":"'"$(which brew)"'"}'
+        ok "brew: $BREW_VER"
+    fi
+
+    # apt
+    if command -v apt &>/dev/null; then
+        APT_VER=$(apt --version 2>/dev/null | head -1 | awk '{print $2}')
+        PKG_MANAGERS["apt"]='{"present":true,"version":"'"$APT_VER"'","path":"'"$(which apt)"'"}'
+        ok "apt: $APT_VER"
+    fi
+
+    # npm
+    if command -v npm &>/dev/null; then
+        NPM_VER=$(npm --version 2>/dev/null)
+        PKG_MANAGERS["npm"]='{"present":true,"version":"'"$NPM_VER"'","path":"'"$(which npm)"'"}'
+        ok "npm: $NPM_VER"
+    fi
+
+    # pnpm
+    if command -v pnpm &>/dev/null; then
+        PNPM_VER=$(pnpm --version 2>/dev/null)
+        PKG_MANAGERS["pnpm"]='{"present":true,"version":"'"$PNPM_VER"'","path":"'"$(which pnpm)"'"}'
+        ok "pnpm: $PNPM_VER"
+    fi
+
+    # uv
+    if command -v uv &>/dev/null; then
+        UV_VER=$(uv --version 2>/dev/null | awk '{print $2}')
+        PKG_MANAGERS["uv"]='{"present":true,"version":"'"$UV_VER"'","path":"'"$(which uv)"'"}'
+        ok "uv: $UV_VER"
+    fi
+
+    # pip
+    if command -v pip &>/dev/null; then
+        PIP_VER=$(pip --version 2>/dev/null | awk '{print $2}')
+        PKG_MANAGERS["pip"]='{"present":true,"version":"'"$PIP_VER"'","path":"'"$(which pip)"'"}'
+        ok "pip: $PIP_VER"
+    fi
+
+    # Build package managers JSON
+    PKG_MANAGERS_JSON="{"
+    first=true
+    for key in "${!PKG_MANAGERS[@]}"; do
+        if [[ "$first" == "true" ]]; then first=false; else PKG_MANAGERS_JSON+=","; fi
+        PKG_MANAGERS_JSON+='"'"$key"'":'"${PKG_MANAGERS[$key]}"
+    done
+    PKG_MANAGERS_JSON+="}"
+
+    # Tools
+    declare -A TOOLS
+
+    # git
+    if command -v git &>/dev/null; then
+        GIT_VER=$(git --version 2>/dev/null | awk '{print $3}')
+        TOOLS["git"]='{"present":true,"version":"'"$GIT_VER"'","path":"'"$(which git)"'"}'
+        ok "git: $GIT_VER"
+    fi
+
+    # node
+    if command -v node &>/dev/null; then
+        NODE_VER=$(node --version 2>/dev/null | tr -d 'v')
+        TOOLS["node"]='{"present":true,"version":"'"$NODE_VER"'","path":"'"$(which node)"'"}'
+        ok "node: $NODE_VER"
+    fi
+
+    # python
+    if command -v python3 &>/dev/null; then
+        PYTHON_VER=$(python3 --version 2>/dev/null | awk '{print $2}')
+        TOOLS["python"]='{"present":true,"version":"'"$PYTHON_VER"'","path":"'"$(which python3)"'"}'
+        ok "python: $PYTHON_VER"
+    elif command -v python &>/dev/null; then
+        PYTHON_VER=$(python --version 2>/dev/null | awk '{print $2}')
+        TOOLS["python"]='{"present":true,"version":"'"$PYTHON_VER"'","path":"'"$(which python)"'"}'
+        ok "python: $PYTHON_VER"
+    fi
+
+    # docker
+    if command -v docker &>/dev/null; then
+        DOCKER_VER=$(docker --version 2>/dev/null | awk '{print $3}' | tr -d ',')
+        TOOLS["docker"]='{"present":true,"version":"'"$DOCKER_VER"'","path":"'"$(which docker)"'"}'
+        CAPABILITIES_JSON='{"hasDocker":true'
+        ok "docker: $DOCKER_VER"
+    else
+        CAPABILITIES_JSON='{"hasDocker":false'
+    fi
+
+    # ssh
+    if command -v ssh &>/dev/null; then
+        TOOLS["ssh"]='{"present":true,"path":"'"$(which ssh)"'"}'
+        CAPABILITIES_JSON+='"hasSsh":true,'
+        ok "ssh: available"
+    fi
+
+    # claude
+    if command -v claude &>/dev/null; then
+        CLAUDE_VER=$(claude --version 2>/dev/null | awk '{print $NF}' | tr -d 'v')
+        TOOLS["claude"]='{"present":true,"version":"'"$CLAUDE_VER"'","path":"'"$(which claude)"'"}'
+        ok "claude: $CLAUDE_VER"
+    fi
+
+    CAPABILITIES_JSON+='"canRunBash":true}'
+
+    # Build tools JSON
+    TOOLS_JSON="{"
+    first=true
+    for key in "${!TOOLS[@]}"; do
+        if [[ "$first" == "true" ]]; then first=false; else TOOLS_JSON+=","; fi
+        TOOLS_JSON+='"'"$key"'":'"${TOOLS[$key]}"
+    done
+    TOOLS_JSON+="}"
+else
+    CAPABILITIES_JSON='{"canRunBash":true}'
+fi
+
+# Build profile JSON
+section "Saving Profile"
+
+TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+cat > "$PROFILE_PATH" <<EOF
+{
+  "schemaVersion": "3.0",
+  "adminSkillVersion": "$ADMIN_SKILL_VERSION",
+  "multiDevice": $MULTI_DEVICE,
+  "device": {
+    "name": "$DEVICE_NAME",
+    "platform": "$PLATFORM",
+    "shell": "$SHELL_DEFAULT",
+    "user": "$USER",
+    "os": "$OS_NAME",
+    "osVersion": "$OS_VERSION",
+    "architecture": "$ARCH",
+    "cpu": "$CPU_INFO",
+    "ram": "${RAM_GB} GB",
+    "timezone": "$(date +%Z)",
+    "envType": "$PLATFORM",
+    "created": "$TIMESTAMP",
+    "lastUpdated": "$TIMESTAMP"
+  },
+  "paths": {
+    "adminRoot": "$ADMIN_ROOT",
+    "deviceProfile": "$PROFILE_PATH",
+    "logs": "$ADMIN_ROOT/logs",
+    "issuesDir": "$ADMIN_ROOT/issues",
+    "registries": "$ADMIN_ROOT/registries",
+    "config": "$ADMIN_ROOT/config",
+    "backups": "$ADMIN_ROOT/backups",
+    "scripts": "$ADMIN_ROOT/scripts",
+    "inbox": "$ADMIN_ROOT/inbox",
+    "mcpRegistry": "$ADMIN_ROOT/registries/mcp-registry.json",
+    "skillsRegistry": "$ADMIN_ROOT/registries/skills-registry.json",
+    "devopsRegistry": "$ADMIN_ROOT/registries/devops-registry.json"
+  },
+  "packageManagers": $PKG_MANAGERS_JSON,
+  "tools": $TOOLS_JSON,
+  "preferences": {
+    "packages": {"manager": "$PKG_MGR"},
+    "python": {"manager": "$PY_MGR"},
+    "node": {"manager": "$NODE_MGR"},
+    "shell": {"default": "$SHELL_DEFAULT"}
+  },
+  "wsl": {},
+  "docker": {},
+  "mcp": {"servers": {}},
+  "servers": [],
+  "deployments": {},
+  "issues": {"current": [], "resolved": []},
+  "history": [
+    {
+      "date": "$TIMESTAMP",
+      "action": "profile_create",
+      "tool": "new-admin-profile.sh",
+      "method": "tui-driven",
+      "status": "success",
+      "details": "Profile created via TUI interview"
+    }
+  ],
+  "capabilities": $CAPABILITIES_JSON
+}
+EOF
+
+ok "Profile: $PROFILE_PATH"
+
+# Create/update .env
+ENV_FILE="$ADMIN_ROOT/.env"
+if [[ ! -f "$ENV_FILE" ]]; then
+    echo "ADMIN_ROOT=$ADMIN_ROOT" > "$ENV_FILE"
+else
+    if grep -q "^ADMIN_ROOT=" "$ENV_FILE"; then
+        sed -i.bak "s|^ADMIN_ROOT=.*|ADMIN_ROOT=$ADMIN_ROOT|" "$ENV_FILE" && rm -f "${ENV_FILE}.bak"
+    else
+        echo "ADMIN_ROOT=$ADMIN_ROOT" >> "$ENV_FILE"
+    fi
+fi
+ok ".env updated"
+
+# Export for current session
+export ADMIN_ROOT="$ADMIN_ROOT"
+
+# Copy AGENTS.md if exists
+AGENTS_TEMPLATE="${SKILL_ROOT}/templates/AGENTS.md"
+if [[ -f "$AGENTS_TEMPLATE" ]]; then
+    cp "$AGENTS_TEMPLATE" "$ADMIN_ROOT/AGENTS.md"
+    ok "AGENTS.md generated"
+fi
+
+# Summary
+section "Profile Created Successfully"
+echo -e "${GREEN}Profile:${NC}      $PROFILE_PATH"
+echo -e "${GREEN}ADMIN_ROOT:${NC}   $ADMIN_ROOT"
+echo -e "Multi-device: $MULTI_DEVICE"
+echo ""
+echo -e "${YELLOW}Preferences:${NC}"
+echo "  Packages: $PKG_MGR"
+echo "  Python:   $PY_MGR"
+echo "  Node:     $NODE_MGR"
+echo "  Shell:    $SHELL_DEFAULT"
+echo ""
+
+# Output JSON for agent consumption
+echo '{"success":true,"path":"'"$PROFILE_PATH"'","adminRoot":"'"$ADMIN_ROOT"'","device":"'"$DEVICE_NAME"'","preferences":{"packages":"'"$PKG_MGR"'","python":"'"$PY_MGR"'","node":"'"$NODE_MGR"'","shell":"'"$SHELL_DEFAULT"'"}}'

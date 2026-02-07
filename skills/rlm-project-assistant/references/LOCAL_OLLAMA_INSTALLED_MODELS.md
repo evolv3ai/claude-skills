@@ -1,0 +1,30 @@
+NAME                                         ID              SIZE      MODIFIED
+qwen3-embedding:4b-q4_K_M                    df5bd2e3c74c    2.5 GB    24 seconds ago
+qwen3-embedding:0.6b                         ac6da0dfba84    639 MB    About a minute ago
+devstral-small-2:24b-instruct-2512-q4_K_M    24277f07f62d    15 GB     4 minutes ago
+qwen3-vl:2b-instruct-q4_K_M                  ea422f1e7365    1.9 GB    9 minutes ago
+qwen3-vl:8b-thinking-q4_K_M                  901cae732162    6.1 GB    10 minutes ago
+qwen3:14b-q4_K_M                             bdbd181c33f2    9.3 GB    17 hours ago
+qwen2.5:14b-instruct-q4_K_M                  7cdf5a0187d5    9.0 GB    17 hours ago
+nomic-embed-text:latest                      0a109f422b47    274 MB    4 weeks ago
+qwen3:4b-thinking-2507-q4_K_M                e55aed6fe643    2.5 GB    4 months ago
+qwen3:0.6b-q4_K_M                            7df6b6e09427    522 MB    4 months ago
+qwen3:1.7b-q4_K_M                            8f68893c685c    1.4 GB    4 months ago
+openbmb/minicpm-v4.5:latest                  d60b490c2110    5.9 GB    4 months ago
+gpt-oss:20b                                  f2b8351c629c    13 GB     5 months ago
+magistral:24b-small-2506-q4_K_M              27bcbbf6d324    14 GB     7 months ago
+devstral:24b                                 c4b2fa0c33d7    14 GB     7 months ago
+mistral-small:24b                            8039dd90c113    14 GB     7 months ago
+roocode_qwen3_16k:latest                     2a64fda92641    5.2 GB    7 months ago
+qwen3:8b                                     500a1f067a9f    5.2 GB    7 months ago
+mychen76/qwen3_cline_roocode:14b             27fb8a95756a    9.3 GB    7 months ago
+llama3.2:latest                              a80c4f17acd5    2.0 GB    8 months ago
+qwen3:latest                                 e4b5fd7f8af0    5.2 GB    8 months ago
+gemma3:latest                                a2af6cc3eb7f    3.3 GB    8 months ago
+qwq:latest                                   cc1091b0e276    19 GB     10 months ago
+deepseek-r1:14b                              ea35dfe18182    9.0 GB    11 months ago
+deepseek-r1:latest                           0a8c26691023    4.7 GB    11 months ago
+mistral:7b-instruct                          f974a74358d6    4.1 GB    16 months ago
+mxbai-embed-large:latest                     468836162de7    669 MB    16 months ago
+llama3:latest                                365c0bd3c000    4.7 GB    17 months ago
+mistral:latest                               f974a74358d6    4.1 GB    17 months ago

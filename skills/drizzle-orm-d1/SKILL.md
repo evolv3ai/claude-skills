@@ -10,15 +10,7 @@ user-invocable: true
 # Drizzle ORM for Cloudflare D1
 
 **Status**: Production Ready ✅
-**Last Updated**: 2026-02-03
-
-## Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/db-init` | Set up Drizzle ORM with D1 (schema, config, migrations) |
-| `/migrate` | Generate and apply database migrations |
-| `/seed` | Seed database with initial or test data |
+**Last Updated**: 2026-01-20
 **Latest Version**: drizzle-orm@0.45.1, drizzle-kit@0.31.8, better-sqlite3@12.5.0
 **Dependencies**: cloudflare-d1, cloudflare-worker-base
 

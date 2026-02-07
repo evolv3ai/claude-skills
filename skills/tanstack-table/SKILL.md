@@ -1,5 +1,5 @@
 ---
-name: tanstack-table
+name: TanStack Table
 description: |
   Build headless data tables with TanStack Table v8. Server-side pagination, filtering, sorting, and virtualization for Cloudflare Workers + D1. Prevents 12 documented errors.
 

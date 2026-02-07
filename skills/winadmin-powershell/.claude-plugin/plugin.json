@@ -1,0 +1,12 @@
+{
+  "name": "winadmin-powershell",
+  "description": "Administer Windows 11 systems with PowerShell 7.x. Includes command translations from bash/Linux, package manager usage (winget, scoop, npm, chocolatey), PATH configuration, and environment management for multi-device setups. Use when: setting up Windows admin environments, writing PowerShell automation scripts, translating bash commands to PowerShell, configuring PATH and environment variables, or troubleshooting command not found, Get-Content not recognized, winget not working errors.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}
