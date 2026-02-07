@@ -9,6 +9,5 @@
   "license": "MIT",
   "repository": "https://evolv3.ai",
   "keywords": [],
-  "commands": "./commands/",
-  "agents": "./agents/"
+  "commands": "./commands/"
 }

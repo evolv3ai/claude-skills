@@ -9,6 +9,5 @@
   "license": "MIT",
   "repository": "https://github.com/jezweb/claude-skills",
   "keywords": ["audit","vulnerabilities","outdated","security","npm audit","pnpm audit","CVE","GHSA","license."],
-  "commands": "./commands/",
-  "agents": "./agents/"
+  "commands": "./commands/"
 }
