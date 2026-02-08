@@ -9,5 +9,6 @@
   "license": "MIT",
   "repository": "https://evolv3.ai",
   "keywords": ["install","installed","is installed","check if installed","7zip","7-zip","git","node","python","docker","npm","winget","scoop","brew","clone repo"],
-  "commands": "./commands/"
+  "commands": "./commands/",
+  "agents": "./agents/"
 }
