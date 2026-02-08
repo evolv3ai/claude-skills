@@ -7,12 +7,12 @@
   "metadata": {
     "description": "Production-tested skills for Claude Code",
     "version": "1.0.0",
-    "updated": "2026-02-07"
+    "updated": "2026-02-08"
   },
   "plugins": [
     {
       "name": "all",
-      "description": "All 20 production-tested skills for Claude Code.",
+      "description": "All 19 production-tested skills for Claude Code.",
       "source": "./"
     },
     {
@@ -64,11 +64,6 @@
       "name": "admin-infra-vultr",
       "description": "Deploys infrastructure on Vultr with Cloud Compute instances, High-Frequency servers, and VPCs. Excellent value with Kubernetes autoscaling support and global data centers. Use when: setting up Vultr ",
       "source": "./skills/admin-infra-vultr"
-    },
-    {
-      "name": "agent-development",
-      "description": "Design and build custom Claude Code agents with effective descriptions, tool access patterns, and self-documenting prompts. Covers Task tool delegation, model selection, memory limits, and declarative",
-      "source": "./skills/agent-development"
     },
     {
       "name": "deckmate",
