@@ -9,6 +9,5 @@
   "license": "MIT",
   "repository": "https://github.com/evolv3ai/claude-skills",
   "keywords": [],
-  "commands": "./commands/",
-  "agents": "./agents/"
+  "commands": "./commands/"
 }

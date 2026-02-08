@@ -124,16 +124,15 @@ for skill_dir in "$SKILLS_DIR"/*; do
   # Now clean up description (remove Keywords line, trim, limit to 500 chars)
   description=$(echo "$description" | sed 's/Keywords:.*$//' | tr -d '"' | tr -d "'" | sed 's/  */ /g' | sed 's/^ *//;s/ *$//' | head -c 500)
 
-  # Detect agents in skill's agents/ directory
-  # Per Claude Code plugin spec: agents field should be directory path, not array of names
-  agents_json=""
+  # Detect agents in skill's agents/ directory (logging only)
+  # NOTE: agents field is NOT emitted in plugin.json - it causes validation errors.
+  # Agents are auto-discovered from the agents/ directory at plugin root.
   agents_dir="$skill_dir/agents"
   if [ -d "$agents_dir" ]; then
     agent_count=$(find "$agents_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     if [ "$agent_count" -gt 0 ]; then
-      agents_json="\"./agents/\""
       agent_names=$(find "$agents_dir" -maxdepth 1 -name "*.md" -type f -exec basename {} .md \; | sort | tr '\n' ' ')
-      echo "  📦 Found $agent_count agent(s): $agent_names"
+      echo "  📦 Found $agent_count agent(s) (auto-discovered): $agent_names"
     fi
   fi
 
@@ -174,13 +173,7 @@ for skill_dir in "$SKILLS_DIR"/*; do
   fi
 
   # Generate plugin.json
-  # Build optional fields
-  agents_line=""
-  if [ -n "$agents_json" ]; then
-    agents_line=",
-  \"agents\": $agents_json"
-  fi
-
+  # Build optional fields (agents excluded - causes validation errors, auto-discovered instead)
   commands_line=""
   if [ -n "$commands_json" ]; then
     commands_line=",
@@ -198,7 +191,7 @@ for skill_dir in "$SKILLS_DIR"/*; do
   },
   "license": "MIT",
   "repository": "$repo_url",
-  "keywords": $keywords_json$commands_line$agents_line
+  "keywords": $keywords_json$commands_line
 }
 EOF
 
