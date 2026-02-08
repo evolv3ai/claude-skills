@@ -7,7 +7,7 @@
     "email": "hello@evolv3.ai"
   },
   "license": "MIT",
-  "repository": "https://evolv3.ai",
+  "repository": "https://github.com/evolv3ai/claude-skills",
   "keywords": ["install","installed","is installed","check if installed","7zip","7-zip","git","node","python","docker","npm","winget","scoop","brew","clone repo"],
   "commands": "./commands/",
   "agents": "./agents/"

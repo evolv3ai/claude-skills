@@ -6,19 +6,19 @@
   },
   "metadata": {
     "description": "Production-tested skills for Claude Code",
-    "version": "3.5.0",
-    "updated": "2026-02-06"
+    "version": "1.0.0",
+    "updated": "2026-02-07"
   },
   "plugins": [
     {
       "name": "all",
-      "description": "All 123 production-tested skills for Claude Code.",
+      "description": "All 20 production-tested skills for Claude Code.",
       "source": "./"
     },
     {
-      "name": "accessibility",
-      "description": "Build WCAG 2.1 AA compliant websites with semantic HTML, proper ARIA, focus management, and screen reader support. Includes color contrast (4.5:1 text), keyboard navigation, form labels, and live regi",
-      "source": "./skills/accessibility"
+      "name": "admin",
+      "description": "Local machine administration for Windows, WSL, macOS, Linux. Install tools, check if software is installed, manage packages, configure dev environments. Works with winget, scoop, brew, apt, npm, pip, ",
+      "source": "./skills/admin"
     },
     {
       "name": "admin-app-coolify",
@@ -37,7 +37,7 @@
     },
     {
       "name": "admin-infra-contabo",
-      "description": "Deploys infrastructure on Contabo using Cloud VPS and Object Storage. Focuses on cost‑effective provisioning and Contabo-specific CLI/API quirks. Use when: provisioning Contabo Cloud VPS, configuring ",
+      "description": "Deploys infrastructure on Contabo using Cloud VPS and Object Storage. Focuses on cost‑effective provisioning and Contabo-specific CLI/API quirks. Use when: provisioning Contabo Cloud VPS, configurin",
       "source": "./skills/admin-infra-contabo"
     },
     {
@@ -66,144 +66,9 @@
       "source": "./skills/admin-infra-vultr"
     },
     {
-      "name": "admin",
-      "description": "Local machine administration for Windows, WSL, macOS, Linux. Install tools, check if software is installed, manage packages, configure dev environments. Works with winget, scoop, brew, apt, npm, pip, ",
-      "source": "./skills/admin"
-    },
-    {
       "name": "agent-development",
       "description": "Design and build custom Claude Code agents with effective descriptions, tool access patterns, and self-documenting prompts. Covers Task tool delegation, model selection, memory limits, and declarative",
       "source": "./skills/agent-development"
-    },
-    {
-      "name": "ai-sdk-core",
-      "description": "Build backend AI with Vercel AI SDK v6 stable. Covers Output API (replaces generateObject/streamObject), speech synthesis, transcription, embeddings, MCP tools with security guidance. Includes v4→v5 m",
-      "source": "./skills/ai-sdk-core"
-    },
-    {
-      "name": "ai-sdk-ui",
-      "description": "Build React chat interfaces with Vercel AI SDK v6. Covers useChat/useCompletion/useObject hooks, message parts structure, tool approval workflows, and 18 UI error solutions. Prevents documented issues",
-      "source": "./skills/ai-sdk-ui"
-    },
-    {
-      "name": "auto-animate",
-      "description": "Zero-config animations for React, Vue, Solid, Svelte, Preact with @formkit/auto-animate (3.28kb). Prevents 15 documented errors including React 19 StrictMode bugs, SSR imports, conditional parents, vi",
-      "source": "./skills/auto-animate"
-    },
-    {
-      "name": "azure-auth",
-      "description": "Microsoft Entra ID (Azure AD) authentication for React SPAs with MSAL.js and Cloudflare Workers JWT validation using jose library. Full-stack pattern with Authorization Code Flow + PKCE. Prevents 8 do",
-      "source": "./skills/azure-auth"
-    },
-    {
-      "name": "better-auth",
-      "description": "Self-hosted auth for TypeScript/Cloudflare Workers with social auth, 2FA, passkeys, organizations, RBAC, and 15+ plugins. Requires Drizzle ORM or Kysely for D1 (no direct adapter). Self-hosted alterna",
-      "source": "./skills/better-auth"
-    },
-    {
-      "name": "claude-agent-sdk",
-      "description": "Build autonomous AI agents with Claude Agent SDK. Structured outputs guarantee JSON schema validation, with plugins system and hooks for event-driven workflows. Prevents 14 documented errors. Use when",
-      "source": "./skills/claude-agent-sdk"
-    },
-    {
-      "name": "claude-api",
-      "description": "Build with Claude Messages API using structured outputs for guaranteed JSON schema validation. Covers prompt caching (90% savings), streaming SSE, tool use, and model deprecations. Prevents 16 documen",
-      "source": "./skills/claude-api"
-    },
-    {
-      "name": "clerk-auth",
-      "description": "Clerk auth with API Keys beta (Dec 2025), Next.js 16 proxy.ts (March 2025 CVE context), API version 2025-11-10 breaking changes, clerkMiddleware() options, webhooks, production considerations (GCP out",
-      "source": "./skills/clerk-auth"
-    },
-    {
-      "name": "cloudflare-agents",
-      "description": "Build AI agents with Cloudflare Agents SDK on Workers + Durable Objects. Provides WebSockets, state persistence, scheduling, and multi-agent coordination. Prevents 23 documented errors. Use when: buil",
-      "source": "./skills/cloudflare-agents"
-    },
-    {
-      "name": "cloudflare-browser-rendering",
-      "description": "Add headless Chrome automation with Puppeteer/Playwright on Cloudflare Workers. Use when: taking screenshots, generating PDFs, web scraping, crawling sites, browser automation, or troubleshooting XPat",
-      "source": "./skills/cloudflare-browser-rendering"
-    },
-    {
-      "name": "cloudflare-d1",
-      "description": "Build with D1 serverless SQLite database on Cloudflares edge. Use when: creating databases, writing SQL migrations, querying D1 from Workers, handling relational data, or troubleshooting D1_ERROR, sta",
-      "source": "./skills/cloudflare-d1"
-    },
-    {
-      "name": "cloudflare-durable-objects",
-      "description": "Build stateful Durable Objects for real-time apps, WebSocket servers, coordination, and persistent state. Prevents 20 documented errors. Use when: implementing chat rooms, multiplayer games, rate limi",
-      "source": "./skills/cloudflare-durable-objects"
-    },
-    {
-      "name": "cloudflare-hyperdrive",
-      "description": "Connect Workers to PostgreSQL/MySQL with Hyperdrives global pooling and caching. Use when: connecting to existing databases, setting up connection pools, using node-postgres/mysql2, integrating Drizzl",
-      "source": "./skills/cloudflare-hyperdrive"
-    },
-    {
-      "name": "cloudflare-images",
-      "description": "Store and transform images with Cloudflare Images API and transformations. Use when: uploading images, implementing direct creator uploads, creating variants, generating signed URLs, optimizing format",
-      "source": "./skills/cloudflare-images"
-    },
-    {
-      "name": "cloudflare-kv",
-      "description": "Store key-value data globally with Cloudflare KVs edge network. Use when: caching API responses, storing configuration, managing user preferences, handling TTL expiration, or troubleshooting KV_ERROR,",
-      "source": "./skills/cloudflare-kv"
-    },
-    {
-      "name": "cloudflare-mcp-server",
-      "description": "Build MCP servers on Cloudflare Workers - the only platform with official remote MCP support. TypeScript-based with OAuth, Durable Objects, and WebSocket hibernation. Prevents 24 documented errors. Us",
-      "source": "./skills/cloudflare-mcp-server"
-    },
-    {
-      "name": "cloudflare-python-workers",
-      "description": "Build Python APIs on Cloudflare Workers using pywrangler CLI and WorkerEntrypoint class pattern. Includes Python Workflows for multi-step DAG automation. Prevents 11 documented errors. Use when: build",
-      "source": "./skills/cloudflare-python-workers"
-    },
-    {
-      "name": "cloudflare-queues",
-      "description": "Build async message queues with Cloudflare Queues for background processing. Use when: handling async tasks, batch processing, implementing retries, configuring dead letter queues, managing consumer c",
-      "source": "./skills/cloudflare-queues"
-    },
-    {
-      "name": "cloudflare-r2",
-      "description": "Store objects with R2s S3-compatible storage on Cloudflares edge. Use when: uploading/downloading files, configuring CORS, generating presigned URLs, multipart uploads, managing metadata, or troublesh",
-      "source": "./skills/cloudflare-r2"
-    },
-    {
-      "name": "cloudflare-turnstile",
-      "description": "Add bot protection with Turnstile (CAPTCHA alternative). Use when: protecting forms, securing login/signup, preventing spam, migrating from reCAPTCHA, integrating with React/Next.js/Hono, implementing",
-      "source": "./skills/cloudflare-turnstile"
-    },
-    {
-      "name": "cloudflare-vectorize",
-      "description": "Build semantic search with Cloudflare Vectorize V2. Covers async mutations, 5M vectors/index, 31ms latency, returnMetadata enum changes, and V1 deprecation. Prevents 14 errors including dimension mism",
-      "source": "./skills/cloudflare-vectorize"
-    },
-    {
-      "name": "cloudflare-worker-base",
-      "description": "Set up Cloudflare Workers with Hono routing, Vite plugin, and Static Assets. Prevents 10 errors including export syntax, routing conflicts, Vite 8 nodejs_compat, base option regression, and cache corr",
-      "source": "./skills/cloudflare-worker-base"
-    },
-    {
-      "name": "cloudflare-workers-ai",
-      "description": "Run LLMs and AI models on Cloudflares GPU network with Workers AI. Includes Llama 4, Gemma 3, Mistral 3.1, Flux images, BGE embeddings, streaming, and AI Gateway. Handles 2025 breaking changes. Preven",
-      "source": "./skills/cloudflare-workers-ai"
-    },
-    {
-      "name": "cloudflare-workflows",
-      "description": "Build durable workflows with Cloudflare Workflows (GA April 2025). Features step.do, step.sleep, waitForEvent, Vitest testing, automatic retries, and state persistence for long-running tasks. Prevents",
-      "source": "./skills/cloudflare-workflows"
-    },
-    {
-      "name": "color-palette",
-      "description": "Generate complete, accessible color palettes from a single brand hex. Creates 11-shade scale (50-950), semantic tokens (background, foreground, card, muted), and dark mode variants. Includes WCAG cont",
-      "source": "./skills/color-palette"
-    },
-    {
-      "name": "context-mate",
-      "description": "Entry point to the Context Mate toolkit - skills, agents, and slash commands that work with Claude Codes natural flow. Project lifecycle (/explore-idea → /plan-project → /wrap-session), session handof",
-      "source": "./skills/context-mate"
     },
     {
       "name": "deckmate",
@@ -211,174 +76,9 @@
       "source": "./skills/deckmate"
     },
     {
-      "name": "deep-debug",
-      "description": "Multi-agent investigation for stubborn bugs. Use when: going in circles debugging, need to investigate browser/API interactions, complex bugs resisting normal debugging, or when symptoms dont match ex",
-      "source": "./skills/deep-debug"
-    },
-    {
-      "name": "dependency-audit",
-      "description": "Comprehensive dependency health auditing for JavaScript/TypeScript projects. Run npm audit, detect outdated packages, check for security advisories, and verify license compliance. Prioritises vulnerab",
-      "source": "./skills/dependency-audit"
-    },
-    {
-      "name": "developer-toolbox",
-      "description": "Essential development workflow agents for code review, debugging, testing, documentation, and git operations. Includes 7 specialized agents with strong auto-discovery triggers. Use when: setting up de",
-      "source": "./skills/developer-toolbox"
-    },
-    {
-      "name": "device-profile-management",
-      "description": "Manage multi-device profiles and centralized logging for Windows administration. Includes profile.json schema for tracking installed tools, installation history, centralized cross-device logs, and Dro",
-      "source": "./skills/device-profile-management"
-    },
-    {
-      "name": "django-cloud-sql-postgres",
-      "description": "Deploy Django on Google App Engine Standard with Cloud SQL PostgreSQL. Covers Unix socket connections, Cloud SQL Auth Proxy for local dev, Gunicorn configuration, and production-ready settings. Use wh",
-      "source": "./skills/django-cloud-sql-postgres"
-    },
-    {
-      "name": "docs-workflow",
-      "description": "Four slash commands for documentation lifecycle: /docs, /docs-init, /docs-update, /docs-claude. Create, maintain, and audit CLAUDE.md, README.md, and docs/ structure with smart templates. Use when: st",
-      "source": "./skills/docs-workflow"
-    },
-    {
-      "name": "drizzle-orm-d1",
-      "description": "Build type-safe D1 databases with Drizzle ORM. Includes schema definition, migrations with Drizzle Kit, relations, and D1 batch API patterns. Prevents 18 errors including SQL BEGIN failures, cascade d",
-      "source": "./skills/drizzle-orm-d1"
-    },
-    {
-      "name": "electron-base",
-      "description": "Build secure desktop applications with Electron 33, Vite, React, and TypeScript. Covers type-safe IPC via contextBridge, OAuth with custom protocol handlers, native module compatibility (better-sqlite",
-      "source": "./skills/electron-base"
-    },
-    {
-      "name": "elevenlabs-agents",
-      "description": "Build conversational AI voice agents with ElevenLabs Platform. Configure agents, tools, RAG knowledge bases, agent versioning with A/B testing, and MCP security. React, React Native, or Swift SDKs. Pr",
-      "source": "./skills/elevenlabs-agents"
-    },
-    {
-      "name": "email-gateway",
-      "description": "Multi-provider email sending for Cloudflare Workers and Node.js applications. Build transactional email systems with Resend (React Email support), SendGrid (enterprise scale), Mailgun (developer webho",
-      "source": "./skills/email-gateway"
-    },
-    {
-      "name": "fastapi",
-      "description": "Optional[str] # Still required!",
-      "source": "./skills/fastapi"
-    },
-    {
-      "name": "fastmcp",
-      "description": "Build MCP servers in Python with FastMCP to expose tools, resources, and prompts to LLMs. Supports storage backends, middleware, OAuth Proxy, OpenAPI integration, and FastMCP Cloud deployment. Prevent",
-      "source": "./skills/fastmcp"
-    },
-    {
-      "name": "favicon-gen",
-      "description": "Generate custom favicons from logos, text, or brand colors - prevents launching with CMS defaults. Extract icons from logos, create monogram favicons from initials, or use branded shapes. Outputs all ",
-      "source": "./skills/favicon-gen"
-    },
-    {
-      "name": "firebase-auth",
-      "description": "Build with Firebase Authentication - email/password, OAuth providers, phone auth, and custom tokens. Use when: setting up auth flows, implementing sign-in/sign-up, managing user sessions, protecting r",
-      "source": "./skills/firebase-auth"
-    },
-    {
-      "name": "firebase-firestore",
-      "description": "Build with Firestore NoSQL database - real-time sync, offline support, and scalable document storage. Use when: creating collections, querying documents, setting up security rules, handling real-time ",
-      "source": "./skills/firebase-firestore"
-    },
-    {
-      "name": "firebase-storage",
-      "description": "Build with Firebase Cloud Storage - file uploads, downloads, and secure access. Use when: uploading images/files, generating download URLs, implementing file pickers, setting up storage security rules",
-      "source": "./skills/firebase-storage"
-    },
-    {
-      "name": "firecrawl-scraper",
-      "description": "Convert websites into LLM-ready data with Firecrawl API. Features: scrape, crawl, map, search, extract, agent (autonomous), batch operations, and change tracking. Handles JavaScript, anti-bot bypass, ",
-      "source": "./skills/firecrawl-scraper"
-    },
-    {
-      "name": "flask",
-      "description": "Build Python web apps with Flask using application factory pattern, Blueprints, and Flask-SQLAlchemy. Prevents 9 documented errors including stream_with_context teardown issues, async/gevent conflicts",
-      "source": "./skills/flask"
-    },
-    {
-      "name": "google-app-engine",
-      "description": "Deploy Python applications to Google App Engine Standard/Flexible. Covers app.yaml configuration, Cloud SQL socket connections, Cloud Storage for static files, scaling settings, and environment variab",
-      "source": "./skills/google-app-engine"
-    },
-    {
-      "name": "google-chat-api",
-      "description": "Build Google Chat bots and webhooks with Cards v2, interactive forms, and Cloudflare Workers. Covers Spaces/Members/Reactions APIs, bearer token verification, and dialog patterns. Use when: creating C",
-      "source": "./skills/google-chat-api"
-    },
-    {
-      "name": "google-gemini-api",
-      "description": "Integrate Gemini API with @google/genai SDK (NOT deprecated @google/generative-ai). Text generation, multimodal (images/video/audio/PDFs), function calling, thinking mode, streaming. 1M input tokens. ",
-      "source": "./skills/google-gemini-api"
-    },
-    {
-      "name": "google-gemini-embeddings",
-      "description": "Build RAG systems and semantic search with Gemini embeddings (gemini-embedding-001). 768-3072 dimension vectors, 8 task types, Cloudflare Vectorize integration. Prevents 13 documented errors. Use when",
-      "source": "./skills/google-gemini-embeddings"
-    },
-    {
-      "name": "google-gemini-file-search",
-      "description": "Build document Q&A with Gemini File Search - fully managed RAG with automatic chunking, embeddings, and citations. Upload 100+ file formats, query with natural language. Use when: document Q&A, search",
-      "source": "./skills/google-gemini-file-search"
-    },
-    {
-      "name": "google-spaces-updates",
-      "description": "Post team updates to Google Chat Spaces via webhook. Deployment notifications, bug fixes, feature announcements, questions. Reads config from .claude/settings.json, includes git context. Use when: pos",
-      "source": "./skills/google-spaces-updates"
-    },
-    {
-      "name": "google-workspace",
-      "description": "Build integrations with Google Workspace APIs (Gmail, Calendar, Drive, Sheets, Docs, Chat, Meet, Forms, Tasks, Admin SDK). Covers OAuth 2.0, service accounts, rate limits, batch operations, and Cloudf",
-      "source": "./skills/google-workspace"
-    },
-    {
-      "name": "hono-routing",
-      "description": "Build type-safe APIs with Hono for Cloudflare Workers, Deno, Bun, Node.js. Routing, middleware, validation (Zod/Valibot), RPC, streaming (SSE), WebSocket, security (CSRF, secureHeaders). Use when: bui",
-      "source": "./skills/hono-routing"
-    },
-    {
-      "name": "hyperbrowser",
-      "description": "Production-ready skill for hyperbrowser",
-      "source": "./skills/hyperbrowser"
-    },
-    {
-      "name": "icon-design",
-      "description": "Select semantically appropriate icons for websites using Lucide, Heroicons, or Phosphor. Covers concept-to-icon mapping, React/HTML templates, and tree-shaking patterns. Use when: building feature sec",
-      "source": "./skills/icon-design"
-    },
-    {
-      "name": "image-gen",
-      "description": "Generate website images with Gemini 3 Native Image Generation. Covers hero banners, service cards, infographics with legible text, and multi-turn editing. Includes Australian-specific imagery patterns",
-      "source": "./skills/image-gen"
-    },
-    {
       "name": "imagemagick",
       "description": "Guide for using ImageMagick command-line tools to perform advanced image processing tasks including format conversion, resizing, cropping, effects, transformations, and batch operations. Use when mani",
       "source": "./skills/imagemagick"
-    },
-    {
-      "name": "jquery-4",
-      "description": "Migrate jQuery 3.x to 4.0.0 safely in WordPress and legacy web projects. Covers all breaking changes: removed APIs ($.isArray, $.trim, $.parseJSON, $.type), focus event order changes, slim build diffe",
-      "source": "./skills/jquery-4"
-    },
-    {
-      "name": "mcp-cli-scripts",
-      "description": "Build CLI scripts alongside MCP servers for terminal environments. File I/O, batch processing, caching, richer output formats. Templates for TypeScript scripts and SCRIPTS.md. Use when: MCP companion ",
-      "source": "./skills/mcp-cli-scripts"
-    },
-    {
-      "name": "mcp-oauth-cloudflare",
-      "description": "Add OAuth authentication to MCP servers on Cloudflare Workers. Uses @cloudflare/workers-oauth-provider with Google OAuth for Claude.ai-compatible authentication. Prevents 9 documented errors including",
-      "source": "./skills/mcp-oauth-cloudflare"
-    },
-    {
-      "name": "mcp-server-management",
-      "description": "Install and configure MCP (Model Context Protocol) servers for Claude Desktop on Windows. Covers installation workflows, claude_desktop_config.json management, MCP registry patterns, and the three CLI",
-      "source": "./skills/mcp-server-management"
     },
     {
       "name": "mockoon-cli",
@@ -386,119 +86,14 @@
       "source": "./skills/mockoon-cli"
     },
     {
-      "name": "motion",
-      "description": "Build React animations with Motion (Framer Motion) - gestures (drag, hover, tap), scroll effects, spring physics, layout animations, SVG. Bundle: 2.3 KB (mini) to 34 KB (full). Use when: drag-and-drop",
-      "source": "./skills/motion"
-    },
-    {
-      "name": "neon-vercel-postgres",
-      "description": "Set up serverless Postgres with Neon or Vercel Postgres for Cloudflare Workers/Edge. Includes connection pooling, git-like branching, and Drizzle ORM integration. Use when: setting up edge Postgres, t",
-      "source": "./skills/neon-vercel-postgres"
-    },
-    {
-      "name": "nextjs",
-      "description": "Build Next.js 16 apps with App Router, Server Components/Actions, Cache Components (use cache), and async route params. Includes proxy.ts and React 19.2. Prevents 25 documented errors. Use when: build",
-      "source": "./skills/nextjs"
-    },
-    {
-      "name": "oauth-integrations",
-      "description": "Implement OAuth 2.0 authentication with GitHub and Microsoft Entra (Azure AD) in Cloudflare Workers and other edge environments. Covers provider-specific quirks, required headers, scope requirements, ",
-      "source": "./skills/oauth-integrations"
-    },
-    {
       "name": "obsidian-rlm",
       "description": "Process large files for Obsidian workflows using RLM (Recursive Language Models). Handles LLM conversation exports (64MB+), bulk note analysis, and large JSON processing that would overwhelm standard ",
       "source": "./skills/obsidian-rlm"
     },
     {
-      "name": "office",
-      "description": "Generate Office documents (DOCX, XLSX, PDF, PPTX) with TypeScript. Pure JS libraries that work everywhere: Claude Code CLI, Cloudflare Workers, browsers. Uses docx (Word), xlsx/SheetJS (Excel), pdf-li",
-      "source": "./skills/office"
-    },
-    {
-      "name": "open-source-contributions",
-      "description": "Create maintainer-friendly pull requests with clean code and professional communication. Prevents 16 common mistakes that cause PR rejection. Use when: contributing to open source, submitting PRs, or ",
-      "source": "./skills/open-source-contributions"
-    },
-    {
-      "name": "openai-agents",
-      "description": "Build AI applications with OpenAI Agents SDK - text agents, voice agents, multi-agent handoffs, tools with Zod schemas, guardrails, and streaming. Prevents 11 documented errors. Use when: building age",
-      "source": "./skills/openai-agents"
-    },
-    {
-      "name": "openai-api",
-      "description": "Build with OpenAI stateless APIs - Chat Completions (GPT-5.2, o3), Realtime voice, Batch API (50% savings), Embeddings, DALL-E 3, Whisper, and TTS. Prevents 16 documented errors. Use when: implementin",
-      "source": "./skills/openai-api"
-    },
-    {
-      "name": "openai-apps-mcp",
-      "description": "Build ChatGPT apps with MCP servers on Cloudflare Workers. Extend ChatGPT with custom tools and interactive widgets (HTML/JS UI). Use when: developing ChatGPT extensions, implementing MCP servers, or ",
-      "source": "./skills/openai-apps-mcp"
-    },
-    {
-      "name": "openai-assistants",
-      "description": "Build stateful chatbots with OpenAI Assistants API v2 - Code Interpreter, File Search (10k files), Function Calling. Prevents 10 documented errors including vector store upload bugs, temperature param",
-      "source": "./skills/openai-assistants"
-    },
-    {
-      "name": "openai-responses",
-      "description": "Build agentic AI with OpenAI Responses API - stateful conversations with preserved reasoning, built-in tools (Code Interpreter, File Search, Web Search), and MCP integration. Prevents 11 documented er",
-      "source": "./skills/openai-responses"
-    },
-    {
-      "name": "playwright-local",
-      "description": "Build browser automation and web scraping with Playwright on your local machine. Prevents 10 documented errors including CI timeout hangs, extension testing failures, and Ubuntu compatibility issues. ",
-      "source": "./skills/playwright-local"
-    },
-    {
-      "name": "project-health",
-      "description": "AI-agent readiness auditing for project documentation and workflows. Evaluates whether future Claude Code sessions can understand docs, execute workflows literally, and resume work effectively. Use wh",
-      "source": "./skills/project-health"
-    },
-    {
-      "name": "project-planning",
-      "description": "Generate structured planning docs for web projects with context-safe phases, verification criteria, and exit conditions. Creates IMPLEMENTATION_PHASES.md plus conditional docs. Use when: starting new ",
-      "source": "./skills/project-planning"
-    },
-    {
-      "name": "project-session-management",
-      "description": "Track progress across sessions using SESSION.md with git checkpoints and concrete next actions. Converts IMPLEMENTATION_PHASES.md into trackable session state. Use when: resuming work after context cl",
-      "source": "./skills/project-session-management"
-    },
-    {
-      "name": "project-workflow",
-      "description": "Nine integrated slash commands for complete project lifecycle: /explore-idea, /plan-project, /plan-feature, /wrap-session, /continue-session, /workflow, /release, /brief, /reflect. Use when starting p",
-      "source": "./skills/project-workflow"
-    },
-    {
       "name": "ralphban",
       "description": "Create structured task files for the Ralphban VS Code extension - a visual Kanban board for LLM agent workflows. Generate valid task JSON with proper schema, status tracking, dependencies, and priorit",
       "source": "./skills/ralphban"
-    },
-    {
-      "name": "react-hook-form-zod",
-      "description": "Build type-safe validated forms using React Hook Form v7 and Zod v4. Single schema works on client and server with full TypeScript inference via z.infer. Use when building forms, multi-step wizards, o",
-      "source": "./skills/react-hook-form-zod"
-    },
-    {
-      "name": "react-native-expo",
-      "description": "Build React Native 0.76+ apps with Expo SDK 52-54. Covers mandatory New Architecture (0.82+/SDK 55+), React 19 changes, SDK 54 breaking changes (expo-av, expo-file-system, Reanimated v4), and Swift iO",
-      "source": "./skills/react-native-expo"
-    },
-    {
-      "name": "responsive-images",
-      "description": "Implement performant responsive images with srcset, sizes, lazy loading, and modern formats (WebP, AVIF). Covers aspect-ratio for CLS prevention, picture element for art direction, and fetchpriority f",
-      "source": "./skills/responsive-images"
-    },
-    {
-      "name": "rlm-project-assistant",
-      "description": "Set up and operate the RLM (Recursive Language Models) Orchestrator for processing arbitrarily large contexts. Handles Rust builds, Ollama/LiteLLM provider configuration, WASM compilation targets, and",
-      "source": "./skills/rlm-project-assistant"
-    },
-    {
-      "name": "seo-meta",
-      "description": "Generate complete SEO meta tags for every page. Covers title patterns, meta descriptions, Open Graph, Twitter Cards, and JSON-LD structured data (LocalBusiness, Service, FAQ, BreadcrumbList). Use when",
-      "source": "./skills/seo-meta"
     },
     {
       "name": "session-scout",
@@ -511,124 +106,9 @@
       "source": "./skills/sharp"
     },
     {
-      "name": "skill-creator",
-      "description": "A skill for Tailwind # ❌ 25 chars",
-      "source": "./skills/skill-creator"
-    },
-    {
-      "name": "skill-development",
-      "description": "Tools for creating, auditing, and maintaining Claude Code skills. Includes /create-skill for scaffolding, /review-skill for quality checks, and /audit commands for bulk verification. Use when: buildin",
-      "source": "./skills/skill-development"
-    },
-    {
-      "name": "skill-review",
-      "description": "Audit claude-skills with systematic 9-phase review: standards compliance, official docs verification, code accuracy, cross-file consistency, and version drift detection. Use when investigating skill i",
-      "source": "./skills/skill-review"
-    },
-    {
-      "name": "snowflake-platform",
-      "description": "Build on Snowflakes AI Data Cloud with snow CLI, Cortex AI (COMPLETE, SUMMARIZE, AI_FILTER), Native Apps, and Snowpark. Covers JWT auth, account identifiers, Marketplace publishing. Prevents 11 docume",
-      "source": "./skills/snowflake-platform"
-    },
-    {
-      "name": "streamlit-snowflake",
-      "description": "Build and deploy Streamlit apps natively in Snowflake. Covers snowflake.yml scaffolding, Snowpark sessions, multi-page structure, Marketplace publishing as Native Apps, and callers rights connections ",
-      "source": "./skills/streamlit-snowflake"
-    },
-    {
-      "name": "sub-agent-patterns",
-      "description": "Expert code reviewer. Use proactively after code changes.",
-      "source": "./skills/sub-agent-patterns"
-    },
-    {
-      "name": "sveltia-cms",
-      "description": "Set up Sveltia CMS - lightweight Git-backed CMS successor to Decap/Netlify CMS (300KB bundle, 270+ fixes). Framework-agnostic for Hugo, Jekyll, 11ty, Astro. Prevents 10 documented errors. Use when add",
-      "source": "./skills/sveltia-cms"
-    },
-    {
-      "name": "tailwind-patterns",
-      "description": "Production-ready Tailwind CSS patterns for common website components: responsive layouts, cards, navigation, forms, buttons, and typography. Includes spacing scale, breakpoints, mobile-first patterns,",
-      "source": "./skills/tailwind-patterns"
-    },
-    {
-      "name": "tailwind-v4-shadcn",
-      "description": "Set up Tailwind v4 with shadcn/ui using @theme inline pattern and CSS variable architecture. Four-step pattern: CSS variables, Tailwind mapping, base styles, automatic dark mode. Prevents 8 documented",
-      "source": "./skills/tailwind-v4-shadcn"
-    },
-    {
-      "name": "tanstack-query",
-      "description": "Manage server state in React with TanStack Query v5. Covers useMutationState, simplified optimistic updates, throwOnError, network mode (offline/PWA), and infiniteQueryOptions. Use when setting up dat",
-      "source": "./skills/tanstack-query"
-    },
-    {
-      "name": "tanstack-router",
-      "description": "Build type-safe, file-based React routing with TanStack Router. Supports client-side navigation, route loaders, and TanStack Query integration. Prevents 20 documented errors including validation struc",
-      "source": "./skills/tanstack-router"
-    },
-    {
-      "name": "tanstack-start",
-      "description": "Build full-stack React apps with TanStack Start on Cloudflare Workers. Type-safe routing, server functions, SSR/streaming, D1/KV/R2 integration. Use when building full-stack React apps with SSR, migra",
-      "source": "./skills/tanstack-start"
-    },
-    {
-      "name": "tanstack-table",
-      "description": "Build headless data tables with TanStack Table v8. Server-side pagination, filtering, sorting, and virtualization for Cloudflare Workers + D1. Prevents 12 documented errors. Use when building tables w",
-      "source": "./skills/tanstack-table"
-    },
-    {
-      "name": "testing-patterns",
-      "description": "What these tests validate",
-      "source": "./skills/testing-patterns"
-    },
-    {
-      "name": "tinacms",
-      "description": "Build content-heavy sites with Git-backed TinaCMS. Provides visual editing for blogs, documentation, and marketing sites. Supports Next.js, Vite+React, and Astro with TinaCloud or Node.js self-hosting",
-      "source": "./skills/tinacms"
-    },
-    {
-      "name": "tiptap",
-      "description": "Build rich text editors with Tiptap - headless editor framework with React and Tailwind v4. Covers SSR-safe setup, image uploads, prose styling, and collaborative editing. Use when creating blog edito",
-      "source": "./skills/tiptap"
-    },
-    {
-      "name": "ts-agent-sdk",
-      "description": "Generate typed TypeScript SDKs for AI agents to interact with MCP servers. Converts JSON-RPC curl commands to clean function calls. Auto-generates types, client methods, and example scripts from MCP t",
-      "source": "./skills/ts-agent-sdk"
-    },
-    {
-      "name": "typescript-mcp",
-      "description": "Build MCP servers with TypeScript on Cloudflare Workers. Covers tools, resources, prompts, tasks, authentication (API keys, OAuth, Zero Trust), and Cloudflare service integrations. Prevents 20 documen",
-      "source": "./skills/typescript-mcp"
-    },
-    {
-      "name": "vercel-blob",
-      "description": "Integrate Vercel Blob for file uploads and CDN-delivered assets in Next.js. Supports client-side uploads with presigned URLs and multipart transfers for large files. Use when implementing file uploads",
-      "source": "./skills/vercel-blob"
-    },
-    {
-      "name": "vercel-kv",
-      "description": "Integrate Redis-compatible Vercel KV for caching, session management, and rate limiting in Next.js. Powered by Upstash with strong consistency and TTL support. Use when implementing cache strategies, ",
-      "source": "./skills/vercel-kv"
-    },
-    {
       "name": "winadmin-powershell",
       "description": "Administer Windows 11 systems with PowerShell 7.x. Includes command translations from bash/Linux, package manager usage (winget, scoop, npm, chocolatey), PATH configuration, and environment management",
       "source": "./skills/winadmin-powershell"
-    },
-    {
-      "name": "windows-wsl-coordination",
-      "description": "Coordinate between Windows and WSL environments. Manage .wslconfig for resource allocation, WSL distribution management, cross-platform file access paths, and handoff protocols between WinAdmin and WS",
-      "source": "./skills/windows-wsl-coordination"
-    },
-    {
-      "name": "wordpress-plugin-core",
-      "description": "Build secure WordPress plugins with hooks, database interactions, Settings API, custom post types, and REST API. Covers Simple, OOP, and PSR-4 architecture patterns plus the Security Trinity. Includes",
-      "source": "./skills/wordpress-plugin-core"
-    },
-    {
-      "name": "zustand-state-management",
-      "description": "Build type-safe global state in React with Zustand. Supports TypeScript, persist middleware, devtools, slices pattern, and Next.js SSR with hydration handling. Prevents 6 documented errors. Use when s",
-      "source": "./skills/zustand-state-management"
     }
   ]
 }

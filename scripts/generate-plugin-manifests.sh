@@ -1,45 +1,47 @@
 #!/bin/bash
 # Generate plugin.json for all skills
 # Extracts metadata from SKILL.md frontmatter
+#
+# Fork-aware: loads .env for author/repo overrides per-skill.
+# See .env.sample for configuration.
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SKILLS_DIR="$(cd "$SCRIPT_DIR/../skills" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+SKILLS_DIR="$(cd "$ROOT_DIR/skills" && pwd)"
 
-# Load author config from .env if it exists
-if [ -f "$ROOT_DIR/.env" ]; then
-  source "$ROOT_DIR/.env"
-fi
-
-# Original upstream author (preserved for skills not owned by fork)
+# --- Fork Configuration ---
+# Default author (upstream)
 UPSTREAM_AUTHOR_NAME="Jeremy Dawes"
 UPSTREAM_AUTHOR_EMAIL="jeremy@jezweb.net"
 UPSTREAM_REPOSITORY="https://github.com/jezweb/claude-skills"
 
-# Fork author (used only for skills listed in SKILL_PATHS)
-FORK_AUTHOR_NAME="${PLUGIN_AUTHOR_NAME:-$UPSTREAM_AUTHOR_NAME}"
-FORK_AUTHOR_EMAIL="${PLUGIN_AUTHOR_EMAIL:-$UPSTREAM_AUTHOR_EMAIL}"
-FORK_REPOSITORY="${PLUGIN_REPOSITORY:-$UPSTREAM_REPOSITORY}"
+# Fork overrides (from .env)
+FORK_AUTHOR_NAME=""
+FORK_AUTHOR_EMAIL=""
+FORK_REPOSITORY=""
+FORK_SKILL_PATHS=""
 
-# Skills owned by this fork (comma-separated in .env)
-# Only these skills will use FORK_AUTHOR_* values
-FORK_SKILL_PATHS="${SKILL_PATHS:-}"
+if [ -f "$ROOT_DIR/.env" ]; then
+  # Source .env safely (only known vars)
+  FORK_AUTHOR_NAME=$(grep '^PLUGIN_AUTHOR_NAME=' "$ROOT_DIR/.env" | cut -d= -f2- | tr -d '"' | tr -d "'")
+  FORK_AUTHOR_EMAIL=$(grep '^PLUGIN_AUTHOR_EMAIL=' "$ROOT_DIR/.env" | cut -d= -f2- | tr -d '"' | tr -d "'")
+  FORK_REPOSITORY=$(grep '^PLUGIN_REPOSITORY=' "$ROOT_DIR/.env" | cut -d= -f2- | tr -d '"' | tr -d "'")
+  FORK_SKILL_PATHS=$(grep '^SKILL_PATHS=' "$ROOT_DIR/.env" | cut -d= -f2- | tr -d '"' | tr -d "'" | tr -d ' ')
+  echo "Loaded .env: author=$FORK_AUTHOR_NAME, skills=$(echo "$FORK_SKILL_PATHS" | tr ',' ' ' | wc -w) fork-owned"
+fi
 
-# Helper function to check if skill is owned by fork
+# Helper: check if skill is owned by fork author
 is_fork_skill() {
   local skill="$1"
   if [ -z "$FORK_SKILL_PATHS" ]; then
-    return 1  # No fork skills defined, all use upstream
+    return 1
   fi
   echo ",$FORK_SKILL_PATHS," | grep -q ",$skill,"
 }
 
 echo "Generating plugin.json files for all skills..."
-if [ -n "$FORK_SKILL_PATHS" ]; then
-  echo "Fork skills (custom author): $FORK_SKILL_PATHS"
-fi
 echo "Skills directory: $SKILLS_DIR"
 echo ""
 
@@ -122,14 +124,16 @@ for skill_dir in "$SKILLS_DIR"/*; do
   # Now clean up description (remove Keywords line, trim, limit to 500 chars)
   description=$(echo "$description" | sed 's/Keywords:.*$//' | tr -d '"' | tr -d "'" | sed 's/  */ /g' | sed 's/^ *//;s/ *$//' | head -c 500)
 
-  # Detect agents in skill's agents/ directory (for logging only)
-  # Note: agents/ is auto-discovered by Claude Code; explicit "agents" field causes validation errors
+  # Detect agents in skill's agents/ directory
+  # Per Claude Code plugin spec: agents field should be directory path, not array of names
+  agents_json=""
   agents_dir="$skill_dir/agents"
   if [ -d "$agents_dir" ]; then
     agent_count=$(find "$agents_dir" -maxdepth 1 -name "*.md" -type f 2>/dev/null | wc -l)
     if [ "$agent_count" -gt 0 ]; then
+      agents_json="\"./agents/\""
       agent_names=$(find "$agents_dir" -maxdepth 1 -name "*.md" -type f -exec basename {} .md \; | sort | tr '\n' ' ')
-      echo "  📦 Found $agent_count agent(s) (auto-discovered): $agent_names"
+      echo "  📦 Found $agent_count agent(s): $agent_names"
     fi
   fi
 
@@ -158,20 +162,25 @@ for skill_dir in "$SKILLS_DIR"/*; do
     fi
   fi
 
-  # Determine author info based on whether this is a fork skill
-  if is_fork_skill "$skill_name"; then
+  # Determine author: fork-owned skills get fork author, others get upstream
+  if is_fork_skill "$skill_name" && [ -n "$FORK_AUTHOR_NAME" ]; then
     author_name="$FORK_AUTHOR_NAME"
     author_email="$FORK_AUTHOR_EMAIL"
-    repository="$FORK_REPOSITORY"
-    echo "  👤 Using fork author: $author_name"
+    repo_url="${FORK_REPOSITORY:-$UPSTREAM_REPOSITORY}"
   else
     author_name="$UPSTREAM_AUTHOR_NAME"
     author_email="$UPSTREAM_AUTHOR_EMAIL"
-    repository="$UPSTREAM_REPOSITORY"
+    repo_url="$UPSTREAM_REPOSITORY"
   fi
 
   # Generate plugin.json
-  # Build optional fields (agents excluded - auto-discovered by Claude Code)
+  # Build optional fields
+  agents_line=""
+  if [ -n "$agents_json" ]; then
+    agents_line=",
+  \"agents\": $agents_json"
+  fi
+
   commands_line=""
   if [ -n "$commands_json" ]; then
     commands_line=",
@@ -188,8 +197,8 @@ for skill_dir in "$SKILLS_DIR"/*; do
     "email": "$author_email"
   },
   "license": "MIT",
-  "repository": "$repository",
-  "keywords": $keywords_json$commands_line
+  "repository": "$repo_url",
+  "keywords": $keywords_json$commands_line$agents_line
 }
 EOF
 
@@ -199,17 +208,18 @@ done
 echo ""
 echo "✅ Done! Generated plugin.json for $count skills"
 echo ""
-# Extract marketplace identifiers from resolved repository URL
-if echo "$FORK_REPOSITORY" | grep -q 'github.com/'; then
-  # GitHub URL: extract org/repo for marketplace naming
-  MARKETPLACE_NAME=$(echo "$FORK_REPOSITORY" | sed 's|.*/||' | sed 's|\.git$||')
-  MARKETPLACE_ORG=$(echo "$FORK_REPOSITORY" | sed 's|https://github.com/||' | sed 's|/.*||')
+
+# Dynamic footer based on config
+repo_display="${FORK_REPOSITORY:-$UPSTREAM_REPOSITORY}"
+if echo "$repo_display" | grep -q "github.com/"; then
+  marketplace_name=$(echo "$repo_display" | sed 's|.*github.com/||' | sed 's|\.git$||' | tr '/' '-')
   echo "Next steps:"
   echo "1. Review generated files: find skills/ -name plugin.json"
-  echo "2. Test marketplace: /plugin marketplace add $FORK_REPOSITORY"
-  echo "3. Install a skill: /plugin install cloudflare-worker-base@${MARKETPLACE_ORG}-${MARKETPLACE_NAME}"
+  echo "2. Test marketplace: /plugin marketplace add $repo_display"
+  echo "3. Install a skill: /plugin install <skill-name>@$marketplace_name"
 else
   echo "Next steps:"
   echo "1. Review generated files: find skills/ -name plugin.json"
-  echo "2. Repository: $FORK_REPOSITORY"
+  echo "2. Commit and push changes"
+  echo "3. Update marketplace on test machines"
 fi

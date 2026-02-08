@@ -153,77 +153,78 @@ if [ -n "$MARKDOWN_FILE" ]; then
     fi
 fi
 
-# Fix mode - regenerate marketplace.json from skills/ directory
+# Fix mode
 if [ "$FIX_MODE" = true ] && [ "$HAS_ISSUES" = true ]; then
     echo -e "${BLUE}Regenerating marketplace.json from skills/ directory...${NC}"
 
-    # Load .env for fork-specific overrides
+    # Load fork config for owner info
+    OWNER_NAME="Jeremy Dawes"
+    OWNER_EMAIL="jeremy@jezweb.net"
     if [ -f "$REPO_ROOT/.env" ]; then
-        source "$REPO_ROOT/.env"
+        _name=$(grep '^PLUGIN_AUTHOR_NAME=' "$REPO_ROOT/.env" | cut -d= -f2- | tr -d '"' | tr -d "'")
+        _email=$(grep '^PLUGIN_AUTHOR_EMAIL=' "$REPO_ROOT/.env" | cut -d= -f2- | tr -d '"' | tr -d "'")
+        [ -n "$_name" ] && OWNER_NAME="$_name"
+        [ -n "$_email" ] && OWNER_EMAIL="$_email"
     fi
 
-    # Determine marketplace owner info
-    UPSTREAM_AUTHOR_NAME="Jeremy Dawes / Jezweb"
-    UPSTREAM_AUTHOR_EMAIL="jeremy@jezweb.net"
-    MARKETPLACE_OWNER_NAME="${PLUGIN_AUTHOR_NAME:-$UPSTREAM_AUTHOR_NAME}"
-    MARKETPLACE_OWNER_EMAIL="${PLUGIN_AUTHOR_EMAIL:-$UPSTREAM_AUTHOR_EMAIL}"
+    SKILL_COUNT=$(wc -l < "$ACTUAL_SKILLS" | tr -d ' ')
+    TODAY=$(date +%Y-%m-%d)
+    MARKETPLACE_NAME=$(basename "$REPO_ROOT")
 
-    # Count actual skills for the "all" description
-    SKILL_COUNT=$(ls -d "$SKILLS_DIR"/*/ 2>/dev/null | wc -l | tr -d ' ')
-
-    # Build plugins array: start with "all" entry
-    PLUGINS="    {
-      \"name\": \"all\",
-      \"description\": \"All $SKILL_COUNT production-tested skills for Claude Code.\",
-      \"source\": \"./\"
-    }"
-
-    # Add each skill directory as an individual plugin entry
-    for skill_path in "$SKILLS_DIR"/*/; do
-        skill=$(basename "$skill_path")
-        plugin_json="$skill_path/.claude-plugin/plugin.json"
-
-        # Pull description from plugin.json if it exists, otherwise use a default
-        if [ -f "$plugin_json" ]; then
-            desc=$(grep -oP '"description"\s*:\s*"\K[^"]{0,200}' "$plugin_json" 2>/dev/null | head -1)
-        fi
-        if [ -z "$desc" ]; then
-            desc="Production-ready skill for $skill"
-        fi
-        # Escape any remaining quotes in description
-        desc=$(echo "$desc" | sed 's/"/\\"/g')
-
-        PLUGINS="$PLUGINS,
+    # Build marketplace.json
     {
-      \"name\": \"$skill\",
-      \"description\": \"$desc\",
-      \"source\": \"./skills/$skill\"
-    }"
-        desc=""
-    done
-
-    # Write marketplace.json
-    cat > "$MARKETPLACE_FILE" << MKEOF
+        cat << HEADER
 {
-  "name": "evolv3ai-skills",
+  "name": "$MARKETPLACE_NAME",
   "owner": {
-    "name": "$MARKETPLACE_OWNER_NAME",
-    "email": "$MARKETPLACE_OWNER_EMAIL"
+    "name": "$OWNER_NAME",
+    "email": "$OWNER_EMAIL"
   },
   "metadata": {
     "description": "Production-tested skills for Claude Code",
-    "version": "3.5.0",
-    "updated": "$(date +%Y-%m-%d)"
+    "version": "1.0.0",
+    "updated": "$TODAY"
   },
   "plugins": [
-$PLUGINS
-  ]
-}
-MKEOF
+    {
+      "name": "all",
+      "description": "All $SKILL_COUNT production-tested skills for Claude Code.",
+      "source": "./"
+    },
+HEADER
 
-    echo -e "${GREEN}✅ marketplace.json regenerated with $SKILL_COUNT skills${NC}"
+        first=true
+        while IFS= read -r skill; do
+            [ -z "$skill" ] && continue
+            skill_md="$SKILLS_DIR/$skill/SKILL.md"
+            if [ ! -f "$skill_md" ]; then
+                continue
+            fi
 
-    # Also regenerate per-skill plugin.json manifests
+            # Extract description
+            desc=$(awk '/^description:/{if($0 !~ /[\|>]$/){gsub(/^description: */, ""); print; exit}}' "$skill_md")
+            if [ -z "$desc" ]; then
+                desc=$(awk '/^description: [\|>]/{flag=1; next} /^[a-z-]+:/{flag=0} flag && /^  /{gsub(/^  /, ""); line=line $0 " "} END{gsub(/ $/, "", line); print line}' "$skill_md")
+            fi
+            [ -z "$desc" ] && desc="Production-ready skill for $skill"
+            desc=$(echo "$desc" | sed 's/Keywords:.*$//' | tr -d '"' | tr -d "'" | sed 's/  */ /g' | sed 's/^ *//;s/ *$//' | head -c 200)
+
+            if [ "$first" = true ]; then
+                first=false
+            else
+                echo ","
+            fi
+            printf '    {\n      "name": "%s",\n      "description": "%s",\n      "source": "./skills/%s"\n    }' "$skill" "$desc" "$skill"
+        done < "$ACTUAL_SKILLS"
+
+        echo ""
+        echo "  ]"
+        echo "}"
+    } > "$MARKETPLACE_FILE"
+
+    echo -e "${GREEN}✅ marketplace.json regenerated ($SKILL_COUNT skills)${NC}"
+
+    # Also regenerate per-skill plugin.json files
     echo -e "${BLUE}Also regenerating per-skill plugin.json files...${NC}"
     "$SCRIPT_DIR/generate-plugin-manifests.sh"
 
@@ -233,6 +234,7 @@ fi
 # Exit code
 if [ "$HAS_ISSUES" = true ]; then
     echo -e "${YELLOW}Run with --fix to regenerate marketplace.json${NC}"
+    echo "Or manually run: ./scripts/generate-plugin-manifests.sh"
     exit 1
 fi
 
