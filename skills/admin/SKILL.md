@@ -44,19 +44,22 @@ keywords:
 
 **HALT. You MUST check for a profile before ANY operation. This is non-negotiable.**
 
-### Step 1: Test Profile Exists
+### Step 1: Check Satellite .env
 
-**PowerShell (Windows):**
-```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
-```
+The fastest check is whether `~/.admin/.env` exists. This satellite file is created
+during setup and contains 3 vars: `ADMIN_ROOT`, `ADMIN_DEVICE`, `ADMIN_PLATFORM`.
 
 **Bash (WSL/Linux/macOS):**
 ```bash
 ~/.claude/skills/admin/scripts/test-admin-profile.sh
 ```
 
-Returns JSON: `{"exists":true|false,"path":"...","device":"..."}`
+**PowerShell (Windows):**
+```powershell
+pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
+```
+
+Returns JSON: `{"exists":true|false,"path":"...","device":"...","platform":"..."}`
 
 ### Step 2: If `exists: false` → HALT AND RUN SETUP
 

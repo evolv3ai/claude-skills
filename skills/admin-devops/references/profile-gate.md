@@ -73,9 +73,14 @@ load_admin_profile
 
 ## WSL Note (Critical)
 
-When running in WSL, the profile typically lives on the Windows filesystem:
+When running in WSL, the profile data lives on the Windows filesystem. A **satellite `.env`** at
+`~/.admin/.env` points scripts to the correct location automatically:
 
-- Windows: `C:/Users/<WIN_USER>/.admin/profiles/<DEVICE>.json`
-- WSL: `/mnt/c/Users/<WIN_USER>/.admin/profiles/<DEVICE>.json`
+```env
+# ~/.admin/.env (created during setup)
+ADMIN_ROOT=/mnt/c/Users/Owner/.admin
+ADMIN_DEVICE=WOPR3
+ADMIN_PLATFORM=wsl
+```
 
-The helper scripts auto-detect WSL and resolve paths correctly.
+All helper scripts read the satellite `.env` first - no `cmd.exe` calls needed.

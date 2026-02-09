@@ -2,8 +2,16 @@
 # =============================================================================
 # Test Admin Profile - Checks if admin profile exists
 # =============================================================================
-# Reliably checks for the admin profile, handling path resolution correctly.
-# Returns JSON with profile path, existence status, and basic info if exists.
+# Checks for the satellite .env at ~/.admin/.env, reads ADMIN_ROOT, ADMIN_DEVICE,
+# and ADMIN_PLATFORM, then checks if the profile JSON exists at ADMIN_ROOT.
+#
+# Resolution order:
+#   1. ADMIN_ROOT env var (if already set)
+#   2. ~/.admin/.env satellite file (primary mechanism)
+#   3. Platform-based fallback (legacy, for pre-satellite setups)
+#
+# Returns JSON: {"exists":true|false,"path":"...","device":"...","adminRoot":"...",
+#                "schemaVersion":"...","adminSkillVersion":"...","platform":"..."}
 #
 # Usage:
 #   ./test-admin-profile.sh
@@ -12,37 +20,95 @@
 
 set -eo pipefail
 
+SATELLITE_ENV="${HOME}/.admin/.env"
+
+# Detect Windows username from WSL (multiple fallback methods)
+# Only used as legacy fallback when no satellite .env exists
+detect_win_user() {
+    local win_user=""
+
+    # Method 1: cmd.exe (fastest, often fails in WSL)
+    win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" && "$win_user" != "%USERNAME%" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 2: PowerShell
+    win_user=$(powershell.exe -NoProfile -Command '$env:USERNAME' 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 3: wslvar (if wslu is installed)
+    win_user=$(wslvar USERNAME 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 4: Parse /mnt/c/Users (heuristic)
+    win_user=$(ls /mnt/c/Users/ 2>/dev/null | grep -v -E "^(Public|Default|All Users|Default User|desktop.ini)$" | head -1)
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    echo ""  # All methods failed
+}
+
+# Read a variable from the satellite .env file
+read_satellite_var() {
+    local var_name="$1"
+    local env_file="$2"
+    grep "^${var_name}=" "$env_file" 2>/dev/null | head -1 | cut -d'=' -f2-
+}
+
 test_admin_profile() {
-    # Resolve ADMIN_ROOT
-    local admin_root
+    local admin_root=""
+    local device_name=""
+    local platform=""
+
+    # Priority 1: ADMIN_ROOT env var already set
     if [[ -n "${ADMIN_ROOT:-}" ]]; then
         admin_root="$ADMIN_ROOT"
+        device_name="${ADMIN_DEVICE:-$(hostname)}"
+        platform="${ADMIN_PLATFORM:-}"
+
+    # Priority 2: Satellite .env file (primary mechanism)
+    elif [[ -f "$SATELLITE_ENV" ]]; then
+        admin_root=$(read_satellite_var "ADMIN_ROOT" "$SATELLITE_ENV")
+        device_name=$(read_satellite_var "ADMIN_DEVICE" "$SATELLITE_ENV")
+        platform=$(read_satellite_var "ADMIN_PLATFORM" "$SATELLITE_ENV")
+        device_name="${device_name:-$(hostname)}"
+
+    # Priority 3: Legacy fallback (no satellite .env yet)
     elif grep -qi microsoft /proc/version 2>/dev/null; then
-        # WSL: Use Windows user's home
         local win_user
-        win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        admin_root="/mnt/c/Users/$win_user/.admin"
+        win_user=$(detect_win_user)
+        if [[ -n "$win_user" ]]; then
+            admin_root="/mnt/c/Users/$win_user/.admin"
+        else
+            admin_root="${HOME}/.admin"
+        fi
+        device_name=$(hostname)
     else
         admin_root="${HOME}/.admin"
+        device_name=$(hostname)
     fi
 
     # Build profile path
-    local device_name
-    device_name=$(hostname)
     local profile_path="${admin_root}/profiles/${device_name}.json"
 
-    # Check existence
+    # Check existence and read metadata
     local exists="false"
     local schema_version=""
     local skill_version=""
-    local platform=""
 
     if [[ -f "$profile_path" ]]; then
         exists="true"
         if command -v jq &>/dev/null; then
             schema_version=$(jq -r '.schemaVersion // empty' "$profile_path" 2>/dev/null || true)
             skill_version=$(jq -r '.adminSkillVersion // empty' "$profile_path" 2>/dev/null || true)
-            platform=$(jq -r '.device.platform // empty' "$profile_path" 2>/dev/null || true)
+            # Read platform from profile if not set by satellite
+            [[ -z "$platform" ]] && platform=$(jq -r '.device.platform // empty' "$profile_path" 2>/dev/null || true)
         fi
     fi
 

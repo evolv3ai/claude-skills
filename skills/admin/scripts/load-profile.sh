@@ -17,22 +17,45 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Detect environment and set correct ADMIN_ROOT
-detect_admin_root() {
-    if grep -qi microsoft /proc/version 2>/dev/null; then
-        # WSL - profile lives on Windows side
-        local win_user
-        win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        echo "/mnt/c/Users/$win_user/.admin"
-    else
-        # Native Linux/macOS - use home directory
-        echo "${HOME}/.admin"
+# Resolve ADMIN_ROOT from satellite .env or environment
+SATELLITE_ENV="${HOME}/.admin/.env"
+
+resolve_admin_root() {
+    # Priority 1: Already set in environment
+    if [[ -n "${ADMIN_ROOT:-}" ]]; then
+        echo "$ADMIN_ROOT"; return
     fi
+
+    # Priority 2: Satellite .env (primary mechanism)
+    if [[ -f "$SATELLITE_ENV" ]]; then
+        local root
+        root=$(grep "^ADMIN_ROOT=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        if [[ -n "$root" ]]; then
+            echo "$root"; return
+        fi
+    fi
+
+    # Priority 3: Legacy fallback
+    echo "${HOME}/.admin"
 }
 
-# Default paths - auto-detect based on environment
-ADMIN_ROOT="${ADMIN_ROOT:-$(detect_admin_root)}"
-HOSTNAME=$(hostname)
+resolve_device_name() {
+    if [[ -n "${ADMIN_DEVICE:-}" ]]; then
+        echo "$ADMIN_DEVICE"; return
+    fi
+    if [[ -f "$SATELLITE_ENV" ]]; then
+        local dev
+        dev=$(grep "^ADMIN_DEVICE=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        if [[ -n "$dev" ]]; then
+            echo "$dev"; return
+        fi
+    fi
+    hostname
+}
+
+# Default paths - resolved from satellite .env
+ADMIN_ROOT="$(resolve_admin_root)"
+HOSTNAME="$(resolve_device_name)"
 DEFAULT_PROFILE="${ADMIN_ROOT}/profiles/${HOSTNAME}.json"
 
 # Global variables
@@ -50,17 +73,22 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 show_environment() {
     echo ""
     echo -e "${CYAN}=== Environment Detection ===${NC}"
-    if grep -qi microsoft /proc/version 2>/dev/null; then
-        echo "Type:        WSL (Windows Subsystem for Linux)"
-        local win_user
-        win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        echo "Win User:    $win_user"
+    if [[ -f "$SATELLITE_ENV" ]]; then
+        local sat_platform
+        sat_platform=$(grep "^ADMIN_PLATFORM=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        echo "Source:      Satellite .env ($SATELLITE_ENV)"
+        echo "Platform:    ${sat_platform:-unknown}"
+    elif grep -qi microsoft /proc/version 2>/dev/null; then
+        echo "Source:      Auto-detected (no satellite .env)"
+        echo "Platform:    WSL"
     elif [[ "$(uname -s)" == "Darwin" ]]; then
-        echo "Type:        macOS"
+        echo "Source:      Auto-detected (no satellite .env)"
+        echo "Platform:    macOS"
     else
-        echo "Type:        Native Linux"
+        echo "Source:      Auto-detected (no satellite .env)"
+        echo "Platform:    Native Linux"
     fi
-    echo "Hostname:    $(hostname)"
+    echo "Device:      $HOSTNAME"
     echo "ADMIN_ROOT:  $ADMIN_ROOT"
     echo "Profile:     $DEFAULT_PROFILE"
     echo "Exists:      $(test -f "$DEFAULT_PROFILE" && echo 'YES' || echo 'NO')"

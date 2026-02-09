@@ -117,12 +117,48 @@ detect_platform() {
 
 PLATFORM=$(detect_platform)
 
-# Set defaults based on platform
+# Detect Windows username from WSL (multiple fallback methods)
+detect_win_user() {
+    local win_user=""
+
+    # Method 1: cmd.exe (fastest, often fails in WSL)
+    win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" && "$win_user" != "%USERNAME%" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 2: PowerShell
+    win_user=$(powershell.exe -NoProfile -Command '$env:USERNAME' 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 3: wslvar (if wslu is installed)
+    win_user=$(wslvar USERNAME 2>/dev/null | tr -d '\r')
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    # Method 4: Parse /mnt/c/Users (heuristic)
+    win_user=$(ls /mnt/c/Users/ 2>/dev/null | grep -v -E "^(Public|Default|All Users|Default User|desktop.ini)$" | head -1)
+    if [[ -n "$win_user" ]]; then
+        echo "$win_user"; return
+    fi
+
+    echo ""  # All methods failed
+}
+
+# --admin-root takes precedence over all auto-detection
 if [[ -z "$ADMIN_ROOT" ]]; then
     if [[ "$PLATFORM" == "wsl" ]]; then
         # WSL: Use Windows user's home
-        WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        ADMIN_ROOT="/mnt/c/Users/$WIN_USER/.admin"
+        WIN_USER=$(detect_win_user)
+        if [[ -n "$WIN_USER" ]]; then
+            ADMIN_ROOT="/mnt/c/Users/$WIN_USER/.admin"
+        else
+            warn "Could not detect Windows username. Falling back to \$HOME/.admin"
+            ADMIN_ROOT="${HOME}/.admin"
+        fi
     else
         ADMIN_ROOT="${HOME}/.admin"
     fi
@@ -311,14 +347,20 @@ if [[ "$RUN_INVENTORY" == "true" ]]; then
         ok "python: $PYTHON_VER"
     fi
 
-    # docker
+    # docker (validate output - WSL Docker Desktop shim can return error text)
     if command -v docker &>/dev/null; then
         DOCKER_VER=$(docker --version 2>/dev/null | awk '{print $3}' | tr -d ',')
-        TOOLS["docker"]='{"present":true,"version":"'"$DOCKER_VER"'","path":"'"$(which docker)"'"}'
-        CAPABILITIES_JSON='{"hasDocker":true'
-        ok "docker: $DOCKER_VER"
+        if [[ -n "$DOCKER_VER" && ! "$DOCKER_VER" =~ [[:space:]] && "$DOCKER_VER" =~ ^[0-9] ]]; then
+            TOOLS["docker"]='{"present":true,"version":"'"$DOCKER_VER"'","path":"'"$(which docker)"'"}'
+            CAPABILITIES_JSON='{"hasDocker":true,'
+            ok "docker: $DOCKER_VER"
+        else
+            TOOLS["docker"]='{"present":false,"note":"docker found in PATH but not functional"}'
+            CAPABILITIES_JSON='{"hasDocker":false,'
+            warn "docker: found but not functional (WSL integration may be disabled)"
+        fi
     else
-        CAPABILITIES_JSON='{"hasDocker":false'
+        CAPABILITIES_JSON='{"hasDocker":false,'
     fi
 
     # ssh
@@ -326,6 +368,8 @@ if [[ "$RUN_INVENTORY" == "true" ]]; then
         TOOLS["ssh"]='{"present":true,"path":"'"$(which ssh)"'"}'
         CAPABILITIES_JSON+='"hasSsh":true,'
         ok "ssh: available"
+    else
+        CAPABILITIES_JSON+='"hasSsh":false,'
     fi
 
     # claude
@@ -346,7 +390,7 @@ if [[ "$RUN_INVENTORY" == "true" ]]; then
     done
     TOOLS_JSON+="}"
 else
-    CAPABILITIES_JSON='{"canRunBash":true}'
+    CAPABILITIES_JSON='{"hasDocker":false,"hasSsh":false,"canRunBash":true}'
 fi
 
 # Build profile JSON
@@ -418,7 +462,7 @@ EOF
 
 ok "Profile: $PROFILE_PATH"
 
-# Create/update .env
+# Create/update ADMIN_ROOT .env (stores secrets, deployment refs)
 ENV_FILE="$ADMIN_ROOT/.env"
 if [[ ! -f "$ENV_FILE" ]]; then
     echo "ADMIN_ROOT=$ADMIN_ROOT" > "$ENV_FILE"
@@ -429,10 +473,31 @@ else
         echo "ADMIN_ROOT=$ADMIN_ROOT" >> "$ENV_FILE"
     fi
 fi
-ok ".env updated"
+ok "ADMIN_ROOT .env updated: $ENV_FILE"
+
+# Write satellite .env to ~/.admin/.env
+# This is the primary discovery mechanism for all scripts.
+# On WSL: ~/.admin/ contains ONLY this .env (data lives at ADMIN_ROOT)
+# On native: ~/.admin/.env may point to itself or to a network path
+SATELLITE_DIR="${HOME}/.admin"
+SATELLITE_ENV="${SATELLITE_DIR}/.env"
+mkdir -p "$SATELLITE_DIR"
+cat > "$SATELLITE_ENV" <<SATELLITE
+# Admin satellite config - points to centralized profile
+# Do not store secrets here. See \$ADMIN_ROOT/.env for credentials.
+ADMIN_ROOT=$ADMIN_ROOT
+ADMIN_DEVICE=$DEVICE_NAME
+ADMIN_PLATFORM=$PLATFORM
+SATELLITE
+ok "Satellite .env written: $SATELLITE_ENV"
+
+# Clean up legacy breadcrumb if it exists
+[[ -f "${HOME}/.admin-root" ]] && rm -f "${HOME}/.admin-root"
 
 # Export for current session
 export ADMIN_ROOT="$ADMIN_ROOT"
+export ADMIN_DEVICE="$DEVICE_NAME"
+export ADMIN_PLATFORM="$PLATFORM"
 
 # Copy AGENTS.md if exists
 AGENTS_TEMPLATE="${SKILL_ROOT}/templates/AGENTS.md"

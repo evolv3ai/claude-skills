@@ -2,15 +2,28 @@
 
 Device profiles provide **context-aware assistance** by tracking your installed tools, preferences, servers, and capabilities.
 
-## Profile Location
+## Profile Discovery
+
+All platforms use a **satellite .env** at `~/.admin/.env` to find the profile:
 
 ```
-$HOME/.admin/profiles/{HOSTNAME}.json
+~/.admin/.env            ← Satellite (always at $HOME, 3 vars)
+  ADMIN_ROOT=<path>      ← Points to centralized data
+  ADMIN_DEVICE=<name>    ← Device name (used for profile filename)
+  ADMIN_PLATFORM=<os>    ← wsl/linux/macos/windows
+    └─ resolves to → $ADMIN_ROOT/profiles/$ADMIN_DEVICE.json
 ```
 
-- **Windows**: `C:\Users\{username}\.admin\profiles\{COMPUTERNAME}.json`
-- **WSL**: `/mnt/c/Users/{win_user}/.admin/profiles/{hostname}.json`
-- **Linux/macOS**: `~/.admin/profiles/{hostname}.json`
+### Examples by Platform
+
+| Platform | Satellite location | ADMIN_ROOT | Profile path |
+|----------|-------------------|------------|-------------|
+| Windows | `C:\Users\Owner\.admin\.env` | `C:\Users\Owner\.admin` | `...\profiles\WOPR3.json` |
+| WSL | `/home/user/.admin/.env` | `/mnt/c/Users/Owner/.admin` | `.../profiles/WOPR3.json` |
+| Linux/macOS | `~/.admin/.env` | `~/.admin` | `.../profiles/myhost.json` |
+| Multi-device | `~/.admin/.env` | `/mnt/nas/.admin` | `.../profiles/myhost.json` |
+
+On WSL, `~/.admin/` contains **only** the satellite `.env`. All data lives at `ADMIN_ROOT`.
 
 ## Schema Version
 

@@ -61,16 +61,22 @@ new_admin_issue "Docker installation failed" "install" "docker,apt"
 
 **The profile lives on the WINDOWS side, not in WSL home.**
 
-```bash
-# WRONG - this doesn't exist in WSL
-ls ~/.admin/profiles/  # Empty!
+A satellite `.env` at `~/.admin/.env` points to the real location:
 
-# RIGHT - profile is on Windows, accessed via /mnt/c
-WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-ADMIN_ROOT="/mnt/c/Users/$WIN_USER/.admin"
+```bash
+# ~/.admin/.env contains:
+#   ADMIN_ROOT=/mnt/c/Users/Owner/.admin
+#   ADMIN_DEVICE=WOPR3
+#   ADMIN_PLATFORM=wsl
+
+# Read ADMIN_ROOT from satellite
+source <(grep "^ADMIN_ROOT=" ~/.admin/.env)
 PROFILE_PATH="$ADMIN_ROOT/profiles/$(hostname).json"
 ls "$PROFILE_PATH"  # Found!
 ```
+
+The satellite `.env` is created by `new-admin-profile.sh` during setup.
+On WSL, `~/.admin/` contains **only** this `.env` file - all data lives at `ADMIN_ROOT`.
 
 ---
 

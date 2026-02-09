@@ -19,20 +19,18 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)
 # shellcheck source=log-admin-event.sh
 source "${SCRIPT_DIR}/log-admin-event.sh"
 
-# Detect environment and set correct ADMIN_ROOT
-_detect_admin_root() {
+# Resolve ADMIN_ROOT from satellite .env or environment
+_resolve_admin_root() {
     if [[ -n "${ADMIN_ROOT:-}" ]]; then
-        echo "$ADMIN_ROOT"
-        return
+        echo "$ADMIN_ROOT"; return
     fi
-
-    if grep -qi microsoft /proc/version 2>/dev/null; then
-        local win_user
-        win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        echo "/mnt/c/Users/$win_user/.admin"
-    else
-        echo "${HOME}/.admin"
+    local satellite="${HOME}/.admin/.env"
+    if [[ -f "$satellite" ]]; then
+        local root
+        root=$(grep "^ADMIN_ROOT=" "$satellite" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        if [[ -n "$root" ]]; then echo "$root"; return; fi
     fi
+    echo "${HOME}/.admin"
 }
 
 update_admin_issue() {
@@ -54,7 +52,7 @@ update_admin_issue() {
 
     # Resolve ADMIN_ROOT
     local admin_root
-    admin_root=$(_detect_admin_root)
+    admin_root=$(_resolve_admin_root)
 
     # Find issue file
     local issues_dir="${admin_root}/issues"

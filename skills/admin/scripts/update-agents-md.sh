@@ -26,12 +26,12 @@ NC='\033[0m'
 log_ok() { echo -e "${GREEN}[OK]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 
-# Detect ADMIN_ROOT
+# Resolve ADMIN_ROOT from satellite .env or environment
 if [[ -n "${ADMIN_ROOT:-}" ]]; then
     admin_root="$ADMIN_ROOT"
-elif grep -qi microsoft /proc/version 2>/dev/null; then
-    win_user=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-    admin_root="/mnt/c/Users/$win_user/.admin"
+elif [[ -f "${HOME}/.admin/.env" ]]; then
+    admin_root=$(grep "^ADMIN_ROOT=" "${HOME}/.admin/.env" 2>/dev/null | head -1 | cut -d'=' -f2-)
+    admin_root="${admin_root:-${HOME}/.admin}"
 else
     admin_root="${HOME}/.admin"
 fi

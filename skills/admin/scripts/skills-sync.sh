@@ -11,24 +11,34 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-# Detect environment (from admin skill)
+# Detect environment - reads satellite .env first, falls back to detection
 detect_environment() {
-    if grep -qi microsoft /proc/version 2>/dev/null; then
-        WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
-        ADMIN_ROOT="/mnt/c/Users/$WIN_USER/.admin"
-        ENV_TYPE="wsl"
-    elif [[ "$OS" == "Windows_NT" || -n "$MSYSTEM" ]]; then
-        ADMIN_ROOT="$HOME/.admin"
-        ENV_TYPE="windows-gitbash"
-    elif [[ "$(uname -s)" == "Darwin" ]]; then
-        ADMIN_ROOT="$HOME/.admin"
-        ENV_TYPE="macos"
-    else
-        ADMIN_ROOT="$HOME/.admin"
-        ENV_TYPE="linux"
+    local satellite="${HOME}/.admin/.env"
+    if [[ -f "$satellite" ]]; then
+        ADMIN_ROOT=$(grep "^ADMIN_ROOT=" "$satellite" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        HOSTNAME=$(grep "^ADMIN_DEVICE=" "$satellite" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        ENV_TYPE=$(grep "^ADMIN_PLATFORM=" "$satellite" 2>/dev/null | head -1 | cut -d'=' -f2-)
     fi
 
-    HOSTNAME=$(hostname)
+    # Fallback if satellite values missing
+    if [[ -z "${ADMIN_ROOT:-}" ]]; then
+        ADMIN_ROOT="$HOME/.admin"
+    fi
+    if [[ -z "${HOSTNAME:-}" ]]; then
+        HOSTNAME=$(hostname)
+    fi
+    if [[ -z "${ENV_TYPE:-}" ]]; then
+        if grep -qi microsoft /proc/version 2>/dev/null; then
+            ENV_TYPE="wsl"
+        elif [[ "$OS" == "Windows_NT" || -n "$MSYSTEM" ]]; then
+            ENV_TYPE="windows-gitbash"
+        elif [[ "$(uname -s)" == "Darwin" ]]; then
+            ENV_TYPE="macos"
+        else
+            ENV_TYPE="linux"
+        fi
+    fi
+
     PROFILE_PATH="$ADMIN_ROOT/profiles/$HOSTNAME.json"
     REGISTRY_PATH="$ADMIN_ROOT/skills-registry.json"
 }
