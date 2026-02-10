@@ -1,5 +1,5 @@
 ---
-name: skill
+name: skills-bot
 description: Manage Claude Code skills - install, update, list, and configure via registry
 allowed-tools:
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
 argument-hint: "[install | list | update | sync | info <name>]"
 ---
 
-# /skill Command
+# /skills-bot Command
 
 Manage Claude Code skills using a local registry stored in `~/.admin/skills-registry.json`.
 
@@ -27,7 +27,7 @@ Skills are installed to:
 
 ## Workflow by Subcommand
 
-### `/skill list` - List Installed Skills
+### `/skills-bot list` - List Installed Skills
 
 Read the skills registry and display:
 
@@ -46,7 +46,7 @@ Status values:
 - `outdated` - Newer version available
 - `missing` - In registry but skill files missing
 
-### `/skill install` - Install New Skill
+### `/skills-bot install` - Install New Skill
 
 Use TUI to guide installation:
 
@@ -81,7 +81,7 @@ Then perform installation:
 3. Update skills registry
 4. Log the operation
 
-### `/skill update` - Update Skills
+### `/skills-bot update` - Update Skills
 
 Check for updates and apply:
 
@@ -101,7 +101,7 @@ Then:
 4. Apply update
 5. Update registry
 
-### `/skill sync` - Sync Registry
+### `/skills-bot sync` - Sync Registry
 
 Scan `~/.claude/skills/` and update registry to match:
 
@@ -116,7 +116,7 @@ This:
 3. Updates registry with current state
 4. Reports discrepancies
 
-### `/skill info <name>` - Show Skill Details
+### `/skills-bot info <name>` - Show Skill Details
 
 Display detailed information about a skill:
 
@@ -210,8 +210,8 @@ Update registry entry:
 
 ## Tips
 
-- Run `/skill sync` after manually adding skills
+- Run `/skills-bot sync` after manually adding skills
 - Use symlinks for skills in active development
-- Check `/skill info` to understand skill capabilities
+- Check `/skills-bot info` to understand skill capabilities
 - Registry tracks usage for analytics (local only)
 - Backup registry before major updates: `cp ~/.admin/skills-registry.json ~/.admin/skills-registry.backup.json`
