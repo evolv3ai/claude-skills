@@ -11,29 +11,6 @@ description: |
   NOT for: VPS, cloud servers, remote infrastructure → use admin-devops skill.
 license: MIT
 source: plugin
-keywords:
-  - install
-  - installed
-  - is installed
-  - check if installed
-  - 7zip
-  - 7-zip
-  - git
-  - node
-  - python
-  - docker
-  - npm
-  - winget
-  - scoop
-  - brew
-  - clone repo
-  - add to PATH
-  - mcp server
-  - dev environment
-  - windows
-  - wsl
-  - macos
-  - linux
 ---
 
 # Admin - Local Machine Companion (Alpha)
