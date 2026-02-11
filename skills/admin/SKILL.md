@@ -8,7 +8,7 @@ description: |
   Use when: install 7zip, is git installed, clone repo, check if node installed,
   add to PATH, configure MCP servers, manage dev tools, set up environment.
 
-  NOT for: VPS, cloud servers, remote infrastructure → use admin-devops skill.
+  NOT for: VPS, cloud servers, remote infrastructure → use devops skill.
 license: MIT
 source: plugin
 ---
@@ -123,7 +123,7 @@ Add `-MultiDevice` (PowerShell) or `--multi-device` (Bash) if user selected mult
 - Store live secrets in `~/.admin/.env` and reference from there.
 
 ## Task Qualification (MANDATORY)
-- If the task involves **remote servers/VPS/cloud**, stop and hand off to **admin-devops**.
+- If the task involves **remote servers/VPS/cloud**, stop and hand off to **devops**.
 - If the task is **local machine administration**, continue.
 - If ambiguous, ask a clarifying question before proceeding.
 
@@ -137,7 +137,7 @@ Add `-MultiDevice` (PowerShell) or `--multi-device` (Bash) if user selected mult
 | macOS/Linux admin | references/unix.md |
 | MCP server management | references/mcp.md |
 | Skill registry | references/skills-registry.md |
-| **Remote servers/cloud** | **→ Use admin-devops skill** |
+| **Remote servers/cloud** | **→ Use devops skill** |
 
 ## Profile-Aware Adaptation (Always Check Preferences)
 

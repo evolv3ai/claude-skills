@@ -367,7 +367,7 @@ if (Test-AdminCapability "hasDocker") {
 |------|----------|
 | WSL operations | `admin (wsl)` |
 | MCP servers | `admin (mcp)` |
-| Server provisioning | `admin-devops` |
+| Server provisioning | `devops` |
 | Profile management | `admin` |
 
 ---

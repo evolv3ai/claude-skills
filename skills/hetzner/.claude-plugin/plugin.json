@@ -1,0 +1,12 @@
+{
+  "name": "hetzner",
+  "description": "Deploys infrastructure on Hetzner Cloud with ARM64 or x86 servers. Cost-effective European cloud with excellent price/performance ratio. Use when: setting up Hetzner Cloud infrastructure, deploying ARM64 servers (CAX), x86 servers (CX/CPX), looking for affordable alternative to OCI.",
+  "version": "1.0.0",
+  "author": {
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/evolv3ai/claude-skills",
+  "keywords": ["hetzner","hcloud","ARM64","CAX","CX","CPX","infrastructure","server setup","european cloud"]
+}

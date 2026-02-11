@@ -1,0 +1,12 @@
+{
+  "name": "linode",
+  "description": "Deploys infrastructure on Linode (Akamai Cloud) with Linodes, Firewalls, and VLANs. Strong Kubernetes support with Cluster Autoscaler and Akamai edge network integration. Use when: setting up Linode/Akamai infrastructure, deploying Linodes, configuring firewalls, needing Kubernetes autoscaling, wanting Akamai CDN integration.",
+  "version": "1.0.0",
+  "author": {
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/evolv3ai/claude-skills",
+  "keywords": ["linode","akamai","linode-cli","VPS","dedicated CPU","firewall","VLAN","kubernetes autoscale","infrastructure"]
+}

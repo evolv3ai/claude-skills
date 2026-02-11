@@ -70,10 +70,16 @@ Profile-aware local machine administration for Windows, WSL, macOS, and Linux.
 
 | Skill | Purpose |
 |-------|---------|
-| admin-devops | Remote server/cloud infrastructure |
-| admin-infra-* | Cloud provider provisioning |
-| admin-app-* | Application deployment (Coolify, KASM) |
+| devops | Remote server/cloud infrastructure |
+| contabo | Contabo cloud provider provisioning |
+| digital-ocean | DigitalOcean cloud provider provisioning |
+| hetzner | Hetzner cloud provider provisioning |
+| linode | Linode cloud provider provisioning |
+| oci | Oracle Cloud Infrastructure provisioning |
+| vultr | Vultr cloud provider provisioning |
+| coolify | Coolify application deployment |
+| kasm | KASM Workspaces deployment |
 
 ## NOT for
 
-Remote servers, VPS, cloud infrastructure → use `admin-devops`
+Remote servers, VPS, cloud infrastructure → use `devops`

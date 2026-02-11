@@ -159,7 +159,7 @@
       "lastVerified": "2026-01-15",
       "notes": "Tailwind v4 + shadcn/ui patterns"
     },
-    "admin-devops": {
+    "devops": {
       "source": "evolv3-ai/vibe-skills",
       "version": "0.0.2",
       "installDate": "2026-02-02",
@@ -170,7 +170,7 @@
       ],
       "status": "active",
       "lastVerified": "2026-02-02",
-      "notes": "Alpha consolidated admin-devops (remote)"
+      "notes": "Alpha consolidated devops (remote)"
     }
   },
   "clientInstallations": {
@@ -261,12 +261,14 @@
     "admin-unix": "admin",
     "admin-mcp": "admin",
     "admin-skills": "admin",
-    "admin-infra-oci": "admin-devops",
-    "admin-infra-hetzner": "admin-devops",
-    "admin-infra-linode": "admin-devops",
-    "admin-infra-digitalocean": "admin-devops",
-    "admin-infra-contabo": "admin-devops",
-    "admin-app-coolify": "admin-devops",
-    "admin-app-kasm": "admin-devops"
+    "admin-infra-oci": "oci",
+    "admin-infra-hetzner": "hetzner",
+    "admin-infra-linode": "linode",
+    "admin-infra-digitalocean": "digital-ocean",
+    "admin-infra-contabo": "contabo",
+    "admin-infra-vultr": "vultr",
+    "admin-app-coolify": "coolify",
+    "admin-app-kasm": "kasm",
+    "admin-devops": "devops"
   }
 }

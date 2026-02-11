@@ -35,7 +35,7 @@ Read the skills registry and display:
 Name                    | Version | Source      | Status   | Last Updated
 ------------------------|---------|-------------|----------|-------------
 admin                   | 0.1.0   | local       | active   | 2026-02-04
-admin-devops            | 0.1.0   | local       | active   | 2026-02-04
+devops                  | 0.1.0   | local       | active   | 2026-02-04
 tailwind-v4-shadcn      | 1.2.0   | marketplace | active   | 2026-02-01
 cloudflare-worker-base  | 1.0.0   | marketplace | disabled | 2026-01-15
 ```

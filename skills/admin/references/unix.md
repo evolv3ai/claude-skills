@@ -224,7 +224,7 @@ has_capability "hasGit" && git --version
 | Python/Node | ✅ | - |
 | WSL operations | ❌ | admin (wsl) |
 | Windows operations | ❌ | admin (windows) |
-| Server provisioning | ❌ | admin-devops |
+| Server provisioning | ❌ | devops |
 
 ---
 

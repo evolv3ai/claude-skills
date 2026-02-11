@@ -1,8 +1,8 @@
 # Admin Routing Guide
 
 > **Legacy Notice (Alpha Consolidation)**: This guide references pre-consolidation
-> skills (admin (windows), admin (wsl), admin-*-infra, admin-devops (app reference)). The current
-> routing model is two skills: **admin** (local) and **admin-devops** (remote).
+> skills (admin (windows), admin (wsl), admin-*-infra, devops (app reference)). The current
+> routing model is two skills: **admin** (local) and **devops** (remote).
 > Use `skills/admin/SKILL.md` for the authoritative routing rules.
 
 Detailed routing rules for the admin orchestrator skill.
@@ -132,7 +132,7 @@ echo "Detected: ENV=$ENV, ADMIN_ROOT=$ADMIN_ROOT"
         │ YES                              │
         ▼                                  │
 ┌────────────────┐                         │
-│ admin-devops (provider reference)  │◄────────────────────────┘
+│ devops (provider reference)  │◄────────────────────────┘
 │ (oci, hetzner, │    (MCP may need server)
 │  vultr, etc.)  │
 └───────┬────────┘
@@ -144,7 +144,7 @@ echo "Detected: ENV=$ENV, ADMIN_ROOT=$ADMIN_ROOT"
         │ YES
         ▼
 ┌────────────────┐
-│  admin-devops (app reference)   │
+│  devops (app reference)   │
 │(coolify, kasm) │
 └────────────────┘
 ```
@@ -188,32 +188,32 @@ keywords:
   - server, servers, provision, deploy, infrastructure
   - cloud, VPS, VM, instance, droplet, linode
   - inventory, "my servers", "server list"
-route_to: admin-devops
+route_to: devops
 
 sub_routing:
   - keywords: [oracle, oci, "oracle cloud", ARM64, "always free"]
-    route_to: admin-devops (oci)
+    route_to: oci
 
   - keywords: [hetzner, hcloud, CAX, european]
-    route_to: admin-devops (hetzner)
+    route_to: hetzner
 
   - keywords: [digitalocean, doctl, droplet]
-    route_to: admin-devops (digitalocean)
+    route_to: digital-ocean
 
   - keywords: [vultr, "vultr-cli", "high frequency"]
-    route_to: admin-devops (vultr)
+    route_to: vultr
 
   - keywords: [linode, akamai, "linode-cli"]
-    route_to: admin-devops (linode)
+    route_to: linode
 
   - keywords: [contabo, cntb, budget]
-    route_to: admin-devops (contabo)
+    route_to: contabo
 
   - keywords: [coolify, paas, "self-hosted heroku"]
-    route_to: admin-devops (coolify)
+    route_to: coolify
 
   - keywords: [kasm, workspaces, vdi, "virtual desktop"]
-    route_to: admin-devops (kasm)
+    route_to: kasm
 ```
 
 ### Windows Administration
@@ -321,7 +321,7 @@ validate_context() {
                 return 1
             fi
             ;;
-        admin-devops|admin-devops (provider reference)|admin-devops (app reference))
+        devops|oci|hetzner|digital-ocean|vultr|linode|contabo|coolify|kasm)
             # These work from any context
             return 0
             ;;
@@ -372,9 +372,15 @@ function Test-AdminContext {
                 return $false
             }
         }
-        'admin-devops' { return $true }
-        'admin-devops (provider reference)' { return $true }
-        'admin-devops (app reference)' { return $true }
+        'devops' { return $true }
+        'oci' { return $true }
+        'hetzner' { return $true }
+        'digital-ocean' { return $true }
+        'vultr' { return $true }
+        'linode' { return $true }
+        'contabo' { return $true }
+        'coolify' { return $true }
+        'kasm' { return $true }
         default { return $true }
     }
 
@@ -440,9 +446,9 @@ check_skill_available() {
 
 1. Detect platform: WSL
 2. Keywords: "provision", "OCI", "server"
-3. Match: admin-devops → admin-devops (oci)
+3. Match: devops → oci
 4. Context check: Pass (servers work from any context)
-5. Route to: admin-devops (which routes to admin-devops (oci))
+5. Route to: devops (which routes to oci)
 
 ### Example 4: "What tools do I have installed?"
 

@@ -1,0 +1,12 @@
+{
+  "name": "vultr",
+  "description": "Deploys infrastructure on Vultr with Cloud Compute instances, High-Frequency servers, and VPCs. Excellent value with Kubernetes autoscaling support and global data centers. Use when: setting up Vultr infrastructure, deploying cloud compute or high-frequency instances, configuring firewalls, needing good price/performance with global reach.",
+  "version": "1.0.0",
+  "author": {
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/evolv3ai/claude-skills",
+  "keywords": ["vultr","vultr-cli","VPS","cloud compute","high-frequency","firewall","VPC","kubernetes autoscale","infrastructure"]
+}

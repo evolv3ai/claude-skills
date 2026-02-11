@@ -21,49 +21,49 @@
       "source": "./skills/admin"
     },
     {
-      "name": "admin-app-coolify",
+      "name": "coolify",
       "description": "Installs and manages Coolify, an open-source self-hosted PaaS for deploying applications with Docker. Provides a Heroku-like experience on your own infrastructure. Use when: installing Coolify, deploy",
-      "source": "./skills/admin-app-coolify"
+      "source": "./skills/coolify"
     },
     {
-      "name": "admin-app-kasm",
+      "name": "kasm",
       "description": "Installs and manages KASM Workspaces, a container-based VDI platform for streaming desktops to browsers. Supports Ubuntu ARM64, desktop streaming, isolated browser sessions, and remote workspace acces",
-      "source": "./skills/admin-app-kasm"
+      "source": "./skills/kasm"
     },
     {
-      "name": "admin-devops",
+      "name": "devops",
       "description": "REMOTE infrastructure administration (alpha v0.0.2). Server inventory, cloud provisioning (OCI, Hetzner, Linode, DigitalOcean, Contabo), and application deployment (Coolify, KASM). Profile-aware - rea",
-      "source": "./skills/admin-devops"
+      "source": "./skills/devops"
     },
     {
-      "name": "admin-infra-contabo",
+      "name": "contabo",
       "description": "Deploys infrastructure on Contabo using Cloud VPS and Object Storage. Focuses on cost‑effective provisioning and Contabo-specific CLI/API quirks. Use when: provisioning Contabo Cloud VPS, configurin",
-      "source": "./skills/admin-infra-contabo"
+      "source": "./skills/contabo"
     },
     {
-      "name": "admin-infra-digitalocean",
+      "name": "digital-ocean",
       "description": "Deploys infrastructure on DigitalOcean with Droplets (VMs), Firewalls, and VPCs. Includes Kasm Workspaces auto-scaling integration for dynamic agent provisioning. Use when: setting up DigitalOcean inf",
-      "source": "./skills/admin-infra-digitalocean"
+      "source": "./skills/digital-ocean"
     },
     {
-      "name": "admin-infra-hetzner",
+      "name": "hetzner",
       "description": "Deploys infrastructure on Hetzner Cloud with ARM64 or x86 servers. Cost-effective European cloud with excellent price/performance ratio. Use when: setting up Hetzner Cloud infrastructure, deploying AR",
-      "source": "./skills/admin-infra-hetzner"
+      "source": "./skills/hetzner"
     },
     {
-      "name": "admin-infra-linode",
+      "name": "linode",
       "description": "Deploys infrastructure on Linode (Akamai Cloud) with Linodes, Firewalls, and VLANs. Strong Kubernetes support with Cluster Autoscaler and Akamai edge network integration. Use when: setting up Linode/A",
-      "source": "./skills/admin-infra-linode"
+      "source": "./skills/linode"
     },
     {
-      "name": "admin-infra-oci",
+      "name": "oci",
       "description": "Deploys infrastructure on Oracle Cloud Infrastructure (OCI) with ARM64 instances (Always Free tier eligible). Handles compartments, VCNs, subnets, security lists, and compute instances. Use when: sett",
-      "source": "./skills/admin-infra-oci"
+      "source": "./skills/oci"
     },
     {
-      "name": "admin-infra-vultr",
+      "name": "vultr",
       "description": "Deploys infrastructure on Vultr with Cloud Compute instances, High-Frequency servers, and VPCs. Excellent value with Kubernetes autoscaling support and global data centers. Use when: setting up Vultr ",
-      "source": "./skills/admin-infra-vultr"
+      "source": "./skills/vultr"
     },
     {
       "name": "deckmate",
