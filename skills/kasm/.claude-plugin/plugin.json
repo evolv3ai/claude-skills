@@ -1,6 +1,6 @@
 {
   "name": "kasm",
-  "description": "Manage KASM Workspaces - a container-based VDI platform streaming desktops to browsers. Covers installation, workspace configuration, persistent profiles, S3 storage, backup/recovery, troubleshooting, and API operations for single-server and multi-server deployments.",
+  "description": "Manage KASM Workspaces - a container-based VDI platform streaming desktops to browsers. Covers installation, workspace configuration, persistent profiles, S3 storage, backup/recovery, troubleshooting, and API operations for single-server and multi-server deployments. Use when: installing KASM, configuring workspaces, setting up persistent profiles, troubleshooting No Resources Available, container destruction errors, backup to Backblaze B2, Cloudflare Tunnel setup, database operations, or managi",
   "version": "2.0.0",
   "author": {
     "name": "evolv3ai",

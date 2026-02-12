@@ -1,6 +1,6 @@
 {
   "name": "devops",
-  "description": "REMOTE infrastructure administration (alpha v0.0.2). Server inventory, cloud provisioning (OCI, Hetzner, Linode, DigitalOcean, Contabo), and application deployment (Coolify, KASM). Profile-aware - reads servers from device profile. Use when: provisioning VPS, deploying to cloud, installing Coolify/KASM, managing remote servers. NOT for: local installs, Windows/WSL/macOS → use admin skill.",
+  "description": "REMOTE infrastructure administration (alpha v0.0.2). Server inventory, cloud provisioning (OCI, Hetzner, Linode, DigitalOcean, Contabo), and application deployment (Coolify, KASM). Profile-aware - reads servers from device profile. Use when: provisioning VPS, deploying to cloud, installing Coolify/KASM, managing remote servers. NOT for: local installs, Windows/WSL/macOS admin, MCP servers → use admin.",
   "version": "0.0.3",
   "author": {
     "name": "evolv3ai",

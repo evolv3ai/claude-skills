@@ -79,12 +79,14 @@ for skill_dir in "$SKILLS_DIR"/*; do
 
   # Extract description (handle single-line, multi-line with |, and multi-line with >)
   # First try single-line format
-  description=$(awk '/^description:/{if($0 !~ /[\|>]$/){gsub(/^description: */, ""); print; exit}}' "$skill_md")
+  description=$(awk '{gsub(/\r$/,"")} /^description:/{if($0 !~ /[\|>]$/){gsub(/^description: */, ""); print; exit}}' "$skill_md")
 
   # If not found or empty, try multi-line format with | or >
   if [ -z "$description" ]; then
     description=$(awk '
+      {gsub(/\r$/,"")}
       /^description: [\|>]/{flag=1; next}
+      /^---$/{flag=0}
       /^[a-z-]+:/{flag=0}
       flag && /^  /{gsub(/^  /, ""); line=line $0 " "}
       END{gsub(/ $/, "", line); print line}

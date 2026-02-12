@@ -1,0 +1,12 @@
+{
+  "name": "openclaw",
+  "description": "Deploy and configure OpenClaw AI gateway on KASM workspaces or standalone Docker. Multi-provider LLM routing (Anthropic, OpenAI, Gemini, Groq, Bedrock) with multi-channel messaging (WhatsApp, Telegram, Discord, Slack). Covers Docker deployment, security hardening, persistent storage, browser sidecar, and webhook automation. Use when: deploying OpenClaw, configuring AI gateway channels, setting up openclaw container on KASM, troubleshooting token mismatch or EACCES errors, or securing gateway bin",
+  "version": "1.0.0",
+  "author": {
+    "name": "evolv3ai",
+    "email": "hello@evolv3.ai"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/evolv3ai/claude-skills",
+  "keywords": []
+}
