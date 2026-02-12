@@ -43,8 +43,6 @@ param(
 )
 
 # --- Resolve paths ---
-$AgeKey = Join-Path $HOME ".age\key.txt"
-
 function Get-AdminRoot {
     if ($env:ADMIN_ROOT) { return $env:ADMIN_ROOT }
     $satelliteEnv = Join-Path $HOME ".admin\.env"
@@ -55,7 +53,25 @@ function Get-AdminRoot {
     return Join-Path $HOME ".admin"
 }
 
+function Resolve-AgeKey {
+    if ($env:AGE_KEY_PATH) { return $env:AGE_KEY_PATH }
+    $satelliteEnv = Join-Path $HOME ".admin\.env"
+    if (Test-Path $satelliteEnv) {
+        $match = Select-String -Path $satelliteEnv -Pattern "^AGE_KEY_PATH=(.+)$" | Select-Object -First 1
+        if ($match) {
+            $keyPath = $match.Matches.Groups[1].Value
+            # Convert WSL paths to Windows paths (e.g., /mnt/c/Users/... -> C:\Users\...)
+            if ($keyPath -match '^/mnt/([a-z])/(.+)$') {
+                $keyPath = "$($matches[1].ToUpper()):\$($matches[2] -replace '/', '\')"
+            }
+            return $keyPath
+        }
+    }
+    return Join-Path $HOME ".age\key.txt"
+}
+
 $AdminRoot = Get-AdminRoot
+$AgeKey = Resolve-AgeKey
 $VaultFile = Join-Path $AdminRoot "vault.age"
 
 # --- Validation ---

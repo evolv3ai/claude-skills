@@ -146,8 +146,40 @@ function Load-EnvFile {
 }
 
 # --- Vault support ---
-$AgeKey = Join-Path $HOME ".age\key.txt"
-$VaultFile = Join-Path $HOME ".admin\vault.age"
+function Resolve-AgeKey {
+    if ($env:AGE_KEY_PATH) { return $env:AGE_KEY_PATH }
+    $satelliteEnv = Join-Path $HOME ".admin\.env"
+    if (Test-Path $satelliteEnv) {
+        $match = Select-String -Path $satelliteEnv -Pattern "^AGE_KEY_PATH=(.+)$" | Select-Object -First 1
+        if ($match) {
+            $keyPath = $match.Matches.Groups[1].Value
+            # Convert WSL paths to Windows paths (e.g., /mnt/c/Users/... -> C:\Users\...)
+            if ($keyPath -match '^/mnt/([a-z])/(.+)$') {
+                $keyPath = "$($matches[1].ToUpper()):\$($matches[2] -replace '/', '\')"
+            }
+            return $keyPath
+        }
+    }
+    return Join-Path $HOME ".age\key.txt"
+}
+
+$AgeKey = Resolve-AgeKey
+
+# Resolve vault path from ADMIN_ROOT (same as Get-AdminRoot but inline for bootstrap)
+$_adminRoot = $null
+$_satelliteEnv = Join-Path $HOME ".admin\.env"
+if (Test-Path $_satelliteEnv) {
+    $_match = Select-String -Path $_satelliteEnv -Pattern "^ADMIN_ROOT=(.+)$" | Select-Object -First 1
+    if ($_match) {
+        $_adminRoot = $_match.Matches.Groups[1].Value
+        # Convert WSL paths to Windows paths
+        if ($_adminRoot -match '^/mnt/([a-z])/(.+)$') {
+            $_adminRoot = "$($matches[1].ToUpper()):\$($matches[2] -replace '/', '\')"
+        }
+    }
+}
+if (-not $_adminRoot) { $_adminRoot = Join-Path $HOME ".admin" }
+$VaultFile = Join-Path $_adminRoot "vault.age"
 
 function Get-VaultMode {
     $satelliteEnv = Join-Path $HOME ".admin\.env"

@@ -118,7 +118,21 @@ check_dependencies() {
 }
 
 # --- Vault support ---
-AGE_KEY="${HOME}/.age/key.txt"
+resolve_age_key() {
+    if [[ -n "${AGE_KEY_PATH:-}" ]]; then
+        echo "$AGE_KEY_PATH"; return
+    fi
+    if [[ -f "$SATELLITE_ENV" ]]; then
+        local key_path
+        key_path=$(grep "^AGE_KEY_PATH=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        if [[ -n "$key_path" ]]; then
+            echo "$key_path"; return
+        fi
+    fi
+    echo "${HOME}/.age/key.txt"
+}
+
+AGE_KEY="$(resolve_age_key)"
 VAULT_FILE="${ADMIN_ROOT}/vault.age"
 ADMIN_VAULT_MODE="$(resolve_vault_mode)"
 

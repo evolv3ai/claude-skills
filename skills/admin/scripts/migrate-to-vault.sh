@@ -23,7 +23,6 @@ log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 SATELLITE_ENV="${HOME}/.admin/.env"
-AGE_KEY="${HOME}/.age/key.txt"
 
 # Resolve ADMIN_ROOT
 if [[ -n "${ADMIN_ROOT:-}" ]]; then
@@ -32,6 +31,14 @@ elif [[ -f "$SATELLITE_ENV" ]]; then
     ADMIN_ROOT=$(grep "^ADMIN_ROOT=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
 fi
 ADMIN_ROOT="${ADMIN_ROOT:-${HOME}/.admin}"
+
+# Resolve AGE_KEY from satellite .env or default
+if [[ -n "${AGE_KEY_PATH:-}" ]]; then
+    AGE_KEY="$AGE_KEY_PATH"
+elif [[ -f "$SATELLITE_ENV" ]]; then
+    AGE_KEY=$(grep "^AGE_KEY_PATH=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+fi
+AGE_KEY="${AGE_KEY:-${HOME}/.age/key.txt}"
 
 SOURCE_ENV="${1:-${ADMIN_ROOT}/.env}"
 VAULT_FILE="${ADMIN_ROOT}/vault.age"

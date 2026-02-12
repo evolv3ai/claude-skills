@@ -20,13 +20,20 @@ scoop install age
 
 ### 2. Generate key
 
+Choose a location accessible to all shells on this machine:
+
 ```bash
+# WSL + Windows (shared via NTFS - both sides can reach it)
+mkdir -p /mnt/c/Users/$USER/.age
+age-keygen -o /mnt/c/Users/$USER/.age/key.txt
+
+# macOS / Linux (single platform)
 mkdir -p ~/.age
 age-keygen -o ~/.age/key.txt
 chmod 600 ~/.age/key.txt
 ```
 
-Save the public key shown (starts with `age1...`). Back up `~/.age/key.txt` somewhere safe.
+Save the public key shown (starts with `age1...`). Back up the key somewhere safe.
 
 ### 3. Migrate existing .env
 
@@ -42,9 +49,12 @@ age -e -r "$PUBLIC_KEY" -a -o $ADMIN_ROOT/vault.age $ADMIN_ROOT/.env
 ### 4. Enable vault
 
 Add to `~/.admin/.env`:
-```
+```bash
 ADMIN_VAULT=enabled
+AGE_KEY_PATH=/mnt/c/Users/Owner/.age/key.txt   # Explicit path (cross-platform)
 ```
+
+`AGE_KEY_PATH` tells all scripts (bash, PowerShell, TypeScript) where to find the key. If omitted, defaults to `~/.age/key.txt`. Set it explicitly on WSL or multi-device setups where `$HOME` differs between shells.
 
 ### 5. Test
 
@@ -156,13 +166,14 @@ Requires: `npm install age-encryption`
 ## Architecture
 
 ```
-~/.admin/.env (satellite - 4 vars, no secrets)
+~/.admin/.env (satellite - per-device bootstrap, no secrets)
   ADMIN_ROOT=/mnt/c/Users/Owner/.admin
   ADMIN_DEVICE=WOPR3
   ADMIN_PLATFORM=wsl
-  ADMIN_VAULT=enabled              ← Feature flag
+  ADMIN_VAULT=enabled                                ← Feature flag
+  AGE_KEY_PATH=/mnt/c/Users/Owner/.age/key.txt       ← Explicit key location
 
-~/.age/key.txt (private key - NEVER commit/sync)
+$AGE_KEY_PATH (private key - NEVER commit/sync)
   AGE-SECRET-KEY-1...
 
 $ADMIN_ROOT/vault.age (encrypted - git-safe, sync-safe)
@@ -175,6 +186,35 @@ $ADMIN_ROOT/.env (plaintext fallback - used when vault disabled)
   OCI_TENANCY_OCID=xxx
   ...
 ```
+
+### Key Path Resolution
+
+All scripts (bash, PowerShell, TypeScript) resolve the age key in order:
+
+1. `$AGE_KEY_PATH` environment variable (if set)
+2. `AGE_KEY_PATH=` in `~/.admin/.env` (satellite config)
+3. `$HOME/.age/key.txt` (default fallback)
+
+This allows each device to store the key wherever makes sense for its platform while the vault file stays in the shared `$ADMIN_ROOT`.
+
+### WSL + Windows (Same Machine)
+
+On WSL/Windows dual setups, `$HOME` differs between shells:
+
+| Shell | `$HOME` | Default key path |
+|-------|---------|-----------------|
+| Bash (WSL) | `/home/user` | `/home/user/.age/key.txt` |
+| PowerShell (Win) | `C:\Users\Owner` | `C:\Users\Owner\.age\key.txt` |
+
+Store the key on the Windows filesystem so both sides can reach it:
+
+```
+Physical:   C:\Users\Owner\.age\key.txt
+WSL sees:   /mnt/c/Users/Owner/.age/key.txt
+PowerShell: C:\Users\Owner\.age\key.txt  (via auto WSL path conversion)
+```
+
+Set `AGE_KEY_PATH` in the satellite `.env` to the WSL-style path. PowerShell scripts automatically convert `/mnt/c/...` to `C:\...`.
 
 ## Feature Flag
 
@@ -203,15 +243,55 @@ The age private key at `~/.age/key.txt` is the single point of failure. If lost,
 - Sync via Dropbox/OneDrive (unless encrypted)
 - Store alongside vault.age (defeats encryption)
 
-## Multi-Device
+## Multi-Device with Sync
 
-To use the same vault on multiple devices:
+The vault integrates naturally with the admin suite's multi-device sync feature (`ADMIN_SYNC_PATH`). The vault file is age-encrypted, making it **safe to sync** via Dropbox, OneDrive, Google Drive, or any cloud storage.
 
-1. Copy `~/.age/key.txt` to the other device (secure channel: USB, SSH, password manager)
-2. Sync `$ADMIN_ROOT/vault.age` via git, Dropbox, or rsync
-3. Set `ADMIN_VAULT=enabled` in the device's `~/.admin/.env`
+### Setup
 
-The vault file is encrypted and safe to sync via any channel. Only the key must be transferred securely.
+```
+SYNCED ($ADMIN_ROOT on shared storage)       LOCAL (per-device, never synced)
+══════════════════════════════════════       ═══════════════════════════════
+/mnt/n/Dropbox/Admin/                        ~/.admin/.env  (satellite)
+  ├── profiles/WOPR3.json                    ~/.age/key.txt (or AGE_KEY_PATH)
+  ├── profiles/MACBOOK.json
+  ├── logs/
+  ├── issues/
+  └── vault.age  ← encrypted, safe ✅
+```
+
+### Steps
+
+1. **Set `ADMIN_ROOT` to the shared path** on each device's satellite `.env`:
+   ```bash
+   # Device A (WSL)
+   ADMIN_ROOT=/mnt/n/Dropbox/Admin
+   AGE_KEY_PATH=/mnt/c/Users/Owner/.age/key.txt
+
+   # Device B (macOS)
+   ADMIN_ROOT=/Users/jez/Dropbox/Admin
+   AGE_KEY_PATH=/Users/jez/.age/key.txt
+
+   # Device C (Linux)
+   ADMIN_ROOT=/home/jez/Dropbox/Admin
+   AGE_KEY_PATH=/home/jez/.age/key.txt
+   ```
+
+2. **Copy the age key** to each device via a secure channel (USB, SSH, password manager). The key is one line (~74 chars) - easy to transfer.
+
+3. **Set `ADMIN_VAULT=enabled`** in each device's satellite `.env`.
+
+All devices decrypt the same `vault.age` from the synced `$ADMIN_ROOT`. When one device runs `secrets --edit`, the updated vault syncs to all devices automatically.
+
+### What syncs vs. what stays local
+
+| Item | Synced? | Why |
+|------|---------|-----|
+| `vault.age` | Yes | Encrypted, opaque to cloud storage |
+| `profiles/*.json` | Yes | Device configs, no secrets |
+| `logs/`, `issues/` | Yes | "Wisdom of crowds" benefit |
+| `key.txt` | **No** | The one secret that unlocks everything |
+| `~/.admin/.env` | **No** | Per-device satellite bootstrap |
 
 ## Troubleshooting
 
