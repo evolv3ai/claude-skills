@@ -1,73 +1,59 @@
 # Session State
 
 **Project**: Admin Vault - age-encrypted secrets for admin suite
-**Current Phase**: Phase 5
-**Current Stage**: Implementation
-**Last Checkpoint**: [none yet] (2026-02-12)
+**Current Phase**: All 5 phases complete, needs testing + version bump
+**Current Stage**: Post-implementation verification
+**Last Checkpoint**: 62b0647 (2026-02-12)
 **Planning Docs**: `docs/IMPLEMENTATION_PHASES.md`, `PROJECT_BRIEF.md`
 
 ---
 
-## Phase 1: Foundation - age setup and secrets CLI wrapper ✅
-**Type**: Feature | **Completed**: 2026-02-12
+## What Was Built This Session
 
-- [x] Installed age v1.1.1 via apt
-- [x] Generated key at ~/.age/key.txt (chmod 600)
-- [x] Created `secrets` bash CLI wrapper adapted from josh-stephens
-- [x] Tested: --list, --export, -s, --decrypt, --encrypt, --status, single key, error handling
-- [x] Verified round-trip integrity (diff: identical)
-- [x] Vault uses ASCII armor (-a flag) for git-safe text format
+Added age-encrypted vault to admin skill. 8 new files, 4 modified files, committed as `62b0647`.
 
-## Phase 2: Bash integration - load-profile.sh vault support ✅
-**Type**: Feature | **Completed**: 2026-02-12
+**New**: `scripts/secrets` (bash CLI), `scripts/secrets.ps1`, `scripts/admin-vault.ts`, `scripts/migrate-to-vault.sh`, `scripts/migrate-to-vault.ps1`, `references/vault-guide.md`, `PROJECT_BRIEF.md`, `docs/IMPLEMENTATION_PHASES.md`
 
-- [x] Added `resolve_vault_mode()` to read ADMIN_VAULT from satellite .env
-- [x] Added `check_vault_deps()` for age/key/vault prereq checks
-- [x] Added `load_admin_secrets()` with vault decrypt + plaintext fallback
-- [x] Fixed BASH_REMATCH + set -u gotcha (switched to parameter expansion)
-- [x] Tested both modes: vault enabled (2 secrets) + disabled (12 vars from plaintext)
-- [x] Updated .env.template with ADMIN_VAULT variable
+**Modified**: `scripts/load-profile.sh` (vault decrypt + BASH_REMATCH/set-u fix), `scripts/Load-Profile.ps1` (vault functions), `.env.template` (ADMIN_VAULT flag), `assets/profile-schema.json` (vault section), `SKILL.md` (vault docs)
 
-## Phase 3: PowerShell integration - Load-Profile.ps1 vault support ✅
-**Type**: Feature | **Completed**: 2026-02-12
+## Known Issues / Next Actions
 
-- [x] Added Get-VaultMode, Test-VaultReady, Load-Vault, Load-AdminSecrets functions
-- [x] Created secrets.ps1 PowerShell CLI wrapper
-- [x] Integrated Load-AdminSecrets into main -Export flow
+1. **TEST ERRORS**: Ran a test (unspecified) that produced errors. Need to reproduce and fix. Start here.
 
-## Phase 4: TypeScript integration - admin-vault module ✅
-**Type**: Feature | **Completed**: 2026-02-12
+2. **Version not bumped**: `skills/admin/VERSION` is still `0.0.3`. Should be `0.0.4` after vault feature. Bump it, then regenerate manifests:
+   ```bash
+   echo "0.0.4" > skills/admin/VERSION
+   ./scripts/generate-plugin-manifests.sh admin
+   ```
 
-- [x] Created admin-vault.ts with age-encryption npm package
-- [x] Functions: decryptVault(), getSecret(), listSecrets(), exportSecrets()
-- [x] Handles ASCII armor detection, cross-platform paths, .env parsing
+3. **Plugin manifests not regenerated**: `./scripts/generate-plugin-manifests.sh` was NOT run after vault changes. The `skills/admin/.claude-plugin/plugin.json` is stale.
 
-## Phase 5: Migration tooling and documentation ✅
-**Type**: Enhancement | **Completed**: 2026-02-12
+4. **Marketplace not synced**: After pushing, run `/plugin marketplace update jezweb-skills`
 
-- [x] Created migrate-to-vault.sh (interactive migration with verify + enable)
-- [x] Created migrate-to-vault.ps1 (PowerShell equivalent)
-- [x] Created vault-guide.md reference documentation
-- [x] Updated profile-schema.json with vault config section
-- [x] Updated admin SKILL.md with vault section
+5. **Skill review not run**: Should run `./scripts/review-skill.sh admin` to validate the updated skill.
 
-**Key Files Created**:
-- `skills/admin/scripts/secrets` (bash CLI wrapper)
-- `skills/admin/scripts/secrets.ps1` (PowerShell CLI wrapper)
-- `skills/admin/scripts/admin-vault.ts` (TypeScript module)
-- `skills/admin/scripts/migrate-to-vault.sh` (migration script)
-- `skills/admin/references/vault-guide.md` (user documentation)
+6. **VERSION automation gap identified**: No agent/hook/command bumps versions. Consider building `bump-version.sh` or a pre-commit hook that warns when skill files change without a version bump.
 
-**Key Files Modified**:
-- `skills/admin/scripts/load-profile.sh` (vault support + BASH_REMATCH fix)
-- `skills/admin/scripts/Load-Profile.ps1` (vault support)
-- `skills/admin/.env.template` (ADMIN_VAULT variable)
+7. **Real migration not done**: Test vault used synthetic data. To encrypt real secrets: `./skills/admin/scripts/migrate-to-vault.sh`
+
+## Correct Post-Build Workflow (for reference)
+
+```
+1. ./scripts/review-skill.sh admin           # Verify skill quality
+2. echo "0.0.4" > skills/admin/VERSION       # Bump version
+3. ./scripts/generate-plugin-manifests.sh    # Regen plugin.json
+4. ./scripts/check-marketplace-sync.sh --fix # Sync marketplace
+5. git add skills/admin/ .claude-plugin/     # Stage all
+6. git commit && git push                    # Ship it
+7. /plugin marketplace update jezweb-skills  # Update marketplace
+```
 
 ---
 
-## Previous Session: Admin Plugin Fixes + Agent Teams (2026-02-11)
+## Previous Sessions
 
+### Admin Plugin Fixes + Agent Teams (2026-02-11)
 **Status**: COMPLETE | **Checkpoint**: 1a25583
-- Fixed admin command visibility (`/skill` name collision → renamed `skills-bot`)
-- Removed `admin-` prefix from 9 satellite skills
-- Agent teams research complete (RESEARCH_FINDINGS_admin.md)
+
+### Community Knowledge Research (2026-01-20)
+**Status**: COMPLETE
