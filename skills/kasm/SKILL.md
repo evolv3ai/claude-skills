@@ -1,126 +1,98 @@
 ---
 name: kasm
 description: |
-  Installs and manages KASM Workspaces, a container-based VDI platform for streaming desktops to browsers.
-  Supports Ubuntu ARM64, desktop streaming, isolated browser sessions, and remote workspace access.
+  Manage KASM Workspaces - a container-based VDI platform streaming desktops to browsers.
+  Covers installation, workspace configuration, persistent profiles, S3 storage, backup/recovery,
+  troubleshooting, and API operations for single-server and multi-server deployments.
 
-  Use when: installing KASM on Ubuntu ARM64, setting up VDI, configuring browser-based desktops, deploying on OCI instances.
-
-  Keywords: kasm workspaces, VDI, virtual desktop, browser streaming, ARM64, kasm port 8443, container desktop
+  Use when: installing KASM, configuring workspaces, setting up persistent profiles, troubleshooting
+  "No Resources Available", container destruction errors, backup to Backblaze B2, Cloudflare Tunnel setup,
+  database operations, or managing KASM services.
 license: MIT
 ---
 
-# KASM Workspaces - Container VDI
+# KASM Workspaces
 
-**Purpose**: Install KASM Workspaces on a single Ubuntu server and configure secure browser-based desktops.
+**Purpose**: Install, configure, manage, and troubleshoot KASM Workspaces on Linux servers.
 
-## Step 0: Gather Required Information (MANDATORY)
+## Step 0: Determine What the User Needs
 
-**STOP. Before ANY installation commands, collect ALL parameters from the user.**
+Ask the user which task they need help with:
 
-Copy this checklist and confirm each item:
+| Task | Reference |
+|------|-----------|
+| Fresh installation | `references/installation.md` |
+| Workspace configuration (profiles, volumes, Docker overrides) | `references/workspace-configuration.md` |
+| Troubleshooting errors | `references/troubleshooting.md` |
+| Backup and recovery | `references/backup-recovery.md` |
+| Cloudflare Tunnel or reverse proxy | `references/networking.md` |
+| Database queries or maintenance | `references/database-operations.md` |
+| API calls or automation | `references/api-reference.md` |
+| Service management (start/stop/logs) | `references/service-management.md` |
 
-```
-Required Parameters:
-- [ ] KASM_SERVER_IP       - Target server IP address
-- [ ] SSH_USER             - SSH username (default: ubuntu)
-- [ ] SSH_KEY_PATH         - Path to SSH private key (default: ~/.ssh/id_rsa)
-- [ ] KASM_ADMIN_PASSWORD  - Admin password (minimum 12 characters)
-- [ ] KASM_ADMIN_EMAIL     - Admin email (default: admin@kasm.local)
-
-Resource Parameters:
-- [ ] Server RAM           - Minimum 8GB (4GB KASM + 4GB per concurrent session)
-- [ ] SWAP_SIZE_GB         - Swap file size (default: 8GB, recommended for ARM64)
-
-Conditional Parameters (ask user):
-- [ ] Using Cloudflare Tunnel for HTTPS? (Y/N)
-      If Y: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, TUNNEL_HOSTNAME
-- [ ] Custom KASM port? (default: 443 after install, 8443 during install)
-```
-
-### Password Requirements (KASM enforced)
-
-- Minimum 12 characters
-- Recommended: use a password manager to generate
-
-**DO NOT proceed to Step 1 until ALL required parameters are confirmed.**
+Read the appropriate reference file and follow its instructions.
 
 ---
 
-## Step 1: Determine Installation Path
+## Quick Reference
 
-Based on user answers, follow the appropriate workflow:
+### System Requirements
+- Docker >= 25.0.5, Docker Compose >= 2.40.2
+- Minimum: 2 cores, 4GB RAM, 75GB SSD
+- Per session default: 2,768MB RAM + 2 cores
+- Swap partition strongly recommended
+- Supported: Ubuntu 22.04/24.04, Debian 11/12, RHEL 8/9/10, Oracle Linux 8/9, AlmaLinux/Rocky 8/9, Raspberry Pi OS 11/12
+- Architectures: amd64 and arm64
 
-### Path A: Fresh Installation
-**Use when**: New server, no existing KASM installation.
+### Key Paths
+| Path | Purpose |
+|------|---------|
+| `/opt/kasm/current/` | Installation root |
+| `/opt/kasm/current/bin/start` | Start all services |
+| `/opt/kasm/current/bin/stop` | Stop all services |
+| `/opt/kasm/current/log/` | Log files (raw + JSON) |
+| `/mnt/kasm_profiles/` | Persistent profiles (volume mount) |
+| `/var/lib/docker` | Docker storage |
 
-1. Read `references/INSTALLATION.md`
-2. Export all parameters collected in Step 0
-3. Follow step-by-step installation
+### Key Containers
+| Container | Role |
+|-----------|------|
+| `kasm_api` | API server |
+| `kasm_agent` | Agent (runs workspace containers) |
+| `kasm_manager` | Manager (orchestration) |
+| `kasm_proxy` | HTTPS proxy |
+| `kasm_db` | PostgreSQL database (user: kasmapp, db: kasm) |
 
-### Path B: Post-Installation Configuration
-**Use when**: KASM already installed, need to configure modules.
-
-1. Read `references/QUICKSTART.md`
-2. Run post-installation wizard
-
----
-
-## Step 2: Secure HTTPS Access
-
-**Determine access method based on Step 0 answers:**
-
-| Scenario | Action |
-|----------|--------|
-| Cloudflare Tunnel = Yes | Read `references/cloudflare-tunnel.md` (uses `noTLSVerify: true`) |
-| Direct IP only (dev) | Access via `https://SERVER_IP` (accept self-signed cert) |
-
----
-
-## Step 3: Verify Installation
-
-Run this verification checklist:
-
-```
-Verification:
-- [ ] KASM UI accessible at https://SERVER_IP (or tunnel hostname)
-- [ ] Login with admin credentials works
-- [ ] At least 8 KASM containers running (docker ps | grep kasm)
-- [ ] If tunnel: HTTPS working at TUNNEL_HOSTNAME
+### Service Control
+```bash
+sudo /opt/kasm/current/bin/stop     # Stop all
+sudo /opt/kasm/current/bin/start    # Start all
+sudo docker restart kasm_api        # Restart single service
+sudo docker logs -f kasm_api        # Live logs
 ```
 
-**If login fails**: Extract credentials from `install_log.txt` - see `references/INSTALLATION.md` section "Get Admin Credentials".
-
 ---
-
-## Navigation
-
-Detailed references (one level deep):
-- Manual installation: `references/INSTALLATION.md`
-- Cloudflare Tunnel: `references/cloudflare-tunnel.md`
-- Post-installation wizard: `references/QUICKSTART.md`
-- Wizard user guide: `references/README-WIZARD.md`
-- Wizard spec (draft): `references/post-installation-interview-spec.md`
 
 ## Critical Rules
 
-- Ensure Docker CE + Compose plugin installed before KASM.
-- Allocate sufficient RAM per concurrent session (2–4GB).
-- Do not expose installer port 8443 publicly without HTTPS/tunnel.
-
-## Logging Integration
-
-```bash
-log_admin "SUCCESS" "installation" "Installed KASM Workspaces" "version=1.x server=$SERVER_ID"
-log_admin "SUCCESS" "operation" "Ran KASM post-install wizard" "modules=$MODULES"
-```
+- Always install Docker CE + Compose plugin BEFORE KASM.
+- Always configure swap - KASM can be unstable without it even with sufficient RAM.
+- Each concurrent session needs ~2-4GB RAM. Size the server accordingly.
+- Do not expose port 8443 publicly without HTTPS.
+- KASM API uses JSON payload auth (NOT HTTP Basic Auth). See `references/api-reference.md`.
+- The API calls workspaces "images" - `get_images` not `get_workspaces`.
+- For S3 persistent profiles, always include `@endpoint` in the path. Missing it causes excessive API calls.
 
 ## Related Skills
 
-- `devops` for inventory and provisioning.
-- Provider skills (oci, hetzner, contabo, etc.) for server setup.
+- `devops` for server inventory and provisioning
+- `backblaze-b2` for S3-compatible storage
+- Provider skills (oci, hetzner, contabo, etc.) for server setup
+- `cloudflare-worker-base` for Cloudflare integrations
 
 ## References
 
 - KASM docs: https://kasmweb.com/docs/latest/
-- KASM GitHub: https://github.com/kasmtech
+- KASM new docs: https://docs.kasm.com/
+- KASM GitHub issues: https://github.com/kasmtech/workspaces-issues
+- KASM Docker images: https://github.com/kasmtech
