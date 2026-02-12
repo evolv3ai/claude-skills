@@ -8,6 +8,7 @@ tools:
   - Write
   - Bash
   - AskUserQuestion
+team_compatible: true
 ---
 
 # Tool Installer Agent

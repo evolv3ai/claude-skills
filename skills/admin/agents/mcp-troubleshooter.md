@@ -9,6 +9,7 @@ tools:
   - Bash
   - Glob
   - Grep
+team_compatible: true
 ---
 
 # MCP Troubleshooter Agent

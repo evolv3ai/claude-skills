@@ -7,6 +7,7 @@ tools:
   - Read
   - Bash
   - Glob
+team_compatible: true
 ---
 
 # Profile Validator Agent

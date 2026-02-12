@@ -6,6 +6,7 @@ allowed-tools:
   - Write
   - Bash
   - AskUserQuestion
+  - Task
 argument-hint: "[tool-name | repo-url | script-path]"
 ---
 
@@ -13,26 +14,29 @@ argument-hint: "[tool-name | repo-url | script-path]"
 
 Install software using the user's preferred package manager, clone repositories, or run custom installer scripts.
 
-## Prerequisites
+Uses a **subagent pipeline**: tool-installer → verify-agent → docs-agent.
 
-**MUST check profile exists first.** If no profile, run `/setup-profile` before proceeding.
+## Pipeline Overview
 
-## Workflow
-
-### Step 1: Profile Gate
-
-Load the profile to get user preferences:
-
-**PowerShell:**
-```powershell
-$result = pwsh -NoProfile -File "${CLAUDE_PLUGIN_ROOT}/scripts/Test-AdminProfile.ps1" | ConvertFrom-Json
-if (-not $result.exists) {
-    Write-Host "No profile found. Run /setup-profile first."
-    exit 1
-}
+```
+┌─────────────┐     ┌──────────────┐     ┌────────────┐
+│  /install    │ ──→ │ tool-installer│ ──→ │verify-agent│ ──→ docs-agent (log)
+│  (this cmd)  │     │  (install)   │     │ (verify)   │
+└─────────────┘     └──────────────┘     └────────────┘
+   Profile gate        Run install         Test it works
+   + TUI interview     commands            Binary + deps
 ```
 
-**Bash:**
+- **This command**: Profile gate, determine what to install, TUI prompts
+- **tool-installer agent**: Execute installation using profile preferences
+- **verify-agent**: Confirm the install actually works (binary, deps, functional test)
+- **docs-agent**: Log the operation and update profile inventory
+
+## Step 1: Profile Gate
+
+Load the profile to get user preferences. **HALT if no profile exists.**
+
+**Bash (WSL/Linux/macOS):**
 ```bash
 result=$("${CLAUDE_PLUGIN_ROOT}/scripts/test-admin-profile.sh")
 if [[ $(echo "$result" | jq -r '.exists') != "true" ]]; then
@@ -41,11 +45,20 @@ if [[ $(echo "$result" | jq -r '.exists') != "true" ]]; then
 fi
 ```
 
-### Step 2: Determine Install Type
+**PowerShell (Windows):**
+```powershell
+$result = pwsh -NoProfile -File "${CLAUDE_PLUGIN_ROOT}/scripts/Test-AdminProfile.ps1" | ConvertFrom-Json
+if (-not $result.exists) {
+    Write-Host "No profile found. Run /setup-profile first."
+    exit 1
+}
+```
+
+## Step 2: Determine Install Type
 
 If no argument provided, use TUI to ask:
 
-Ask: "What would you like to install?"
+Ask: **"What would you like to install?"**
 
 | Option | Description |
 |--------|-------------|
@@ -53,13 +66,28 @@ Ask: "What would you like to install?"
 | Git Repository | Clone a repository |
 | Custom Script | Run an installer script |
 
-### Step 3A: Package Installation
+### Package Selection (if no argument)
 
-If installing a package:
+Ask: **"Which tool would you like to install?"**
 
+Common options: git, node, python, docker, rust, go, 7zip, ripgrep, fd, fzf, jq, or specify other.
+
+## Step 3: Execute Pipeline
+
+### 3A: Package Installation
+
+**Stage 1 - tool-installer agent**: Spawn tool-installer with Task tool.
+
+Provide tool-installer with:
+- Tool name to install
+- Profile path (`~/.admin/profiles/{hostname}.json`)
+- Preferred package manager (from profile)
+- Platform (from `~/.admin/.env`)
+
+tool-installer will:
 1. Check if already installed via profile's `tools` section
-2. Get preferred package manager from profile
-3. Construct install command:
+2. Construct and run the install command using preferred manager
+3. Return: success/failure, version installed, install method
 
 | Manager | Install Command |
 |---------|-----------------|
@@ -71,87 +99,96 @@ If installing a package:
 | npm | `npm install -g <package>` |
 | pip/uv | `uv pip install <package>` or `pip install <package>` |
 
-4. Run the install command
-5. Update profile with new tool info
-6. Log the operation
+**Stage 2 - verify-agent**: If tool-installer succeeded, spawn verify-agent with Task tool.
 
-### Step 3B: Repository Clone
+Provide verify-agent with:
+- Tool name
+- Expected version (from tool-installer result)
+- Verification mode: post-install
 
-If cloning a repo:
+verify-agent will:
+1. Check binary exists and is in PATH
+2. Verify version matches
+3. Test dependencies
+4. Run functional test
+5. Return: pass/fail with details
 
-1. Ask for destination path (or use default `~/projects/`)
-2. Detect if URL is GitHub/GitLab/etc.
-3. Clone the repository:
-   ```bash
-   git clone <repo-url> <destination>
-   ```
-4. Ask if user wants to:
-   - Install dependencies (`npm install`, `pip install -r requirements.txt`, etc.)
-   - Open in editor
-   - Run setup scripts
-5. Log the operation
+**Stage 3 - docs-agent**: Spawn docs-agent with Task tool to record results.
 
-### Step 3C: Custom Script
+Provide docs-agent with:
+- Log entry: `[OK] Installed {tool} v{version} via {manager}` (or `[ERROR]` if failed)
+- Profile update: `.tools.{tool}` with version, manager, status, timestamp
+- If verify-agent found issues: Create issue (category: install, tags: tool name)
 
-If running a custom installer:
+### 3B: Repository Clone
+
+**Stage 1** - Clone directly (no agent needed for git clone):
+1. Ask for destination path (default: `~/projects/`)
+2. Clone: `git clone <repo-url> <destination>`
+
+**Stage 2** - Detect and install dependencies:
+- `package.json` → Ask: "Install Node dependencies?" → tool-installer agent
+- `requirements.txt` → Ask: "Install Python dependencies?" → tool-installer agent
+- `Cargo.toml` → Ask: "Build Rust project?" → run `cargo build`
+
+**Stage 3** - docs-agent: Log the clone operation.
+
+### 3C: Custom Script
 
 1. Validate script path exists
 2. Ask for confirmation before running
 3. Execute the script
-4. Report results
-5. Log the operation
+4. Spawn verify-agent if the script installed a tool
+5. Spawn docs-agent to log the operation
 
-### Step 4: Post-Install
+## Step 4: Report
 
-After any installation:
+After pipeline completes, summarize:
 
-1. Verify installation succeeded
-2. Update profile's tools inventory
-3. Log the operation using:
-   ```bash
-   source "${CLAUDE_PLUGIN_ROOT}/scripts/log-admin-event.sh"
-   log_admin_event "Installed <tool>" "OK"
-   ```
-4. Report success with usage tips
+```
+Install Complete: docker
+══════════════════════════
 
-## TUI Questions
+  Installed:   docker v27.5.0 via apt
+  Verified:    ✅ Binary OK, daemon running, hello-world passed
+  Logged:      ~/.admin/logs/operations.log
+  Profile:     Updated .tools.docker
 
-### Package Selection (if no argument)
+  Next steps:
+  - Add user to docker group: sudo usermod -aG docker $USER
+  - Log out and back in for group change to take effect
+```
 
-Ask: "Which tool would you like to install?"
+Or on failure:
 
-Common options:
-- git, node, python, docker, rust, go
-- 7zip, ripgrep, fd, fzf, jq
-- Other (specify)
+```
+Install Failed: docker
+══════════════════════════
 
-### Dependency Detection (for repos)
+  Install:     ✅ Package installed successfully
+  Verify:      ❌ Docker daemon not running
+    Error:     Cannot connect to Docker daemon
+    Fix:       sudo systemctl start docker
 
-If `package.json` found, ask: "Install Node dependencies? (npm/pnpm/yarn/bun)"
-If `requirements.txt` found, ask: "Install Python dependencies? (pip/uv)"
-If `Cargo.toml` found, ask: "Build Rust project? (cargo build)"
+  Issue created: issue_20260211_docker_daemon_not_running
+  Logged:      ~/.admin/logs/operations.log
+```
 
 ## Error Handling
 
-- Package not found: Suggest alternatives or correct package name
-- Permission denied: Suggest running with elevated privileges
-- Network error: Check connectivity, suggest retrying
-- Already installed: Report current version, offer to update instead
+- **Package not found**: tool-installer suggests alternatives or correct package name
+- **Permission denied**: tool-installer suggests elevated privileges
+- **Network error**: Check connectivity, suggest retrying
+- **Already installed**: Report current version, offer to update instead
+- **Verification failed**: verify-agent reports specific failure and fix suggestion
+- **Pipeline stage failed**: Skip subsequent stages, report where it broke
 
 ## Examples
 
 ```
 /install git
+/install docker
 /install https://github.com/user/repo
 /install ~/scripts/setup-dev.sh
-/install  # (interactive mode)
+/install  # (interactive mode with TUI)
 ```
-
-## Logging
-
-All installations are logged to `~/.admin/logs/operations.log` with:
-- Timestamp
-- Operation type
-- Tool/repo name
-- Success/failure status
-- Package manager used
