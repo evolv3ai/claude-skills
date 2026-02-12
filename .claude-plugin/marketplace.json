@@ -7,12 +7,12 @@
   "metadata": {
     "description": "Production-tested skills for Claude Code",
     "version": "1.0.0",
-    "updated": "2026-02-08"
+    "updated": "2026-02-11"
   },
   "plugins": [
     {
       "name": "all",
-      "description": "All 19 production-tested skills for Claude Code.",
+      "description": "All 20 production-tested skills for Claude Code.",
       "source": "./"
     },
     {
@@ -21,24 +21,24 @@
       "source": "./skills/admin"
     },
     {
+      "name": "contabo",
+      "description": "Deploys infrastructure on Contabo using Cloud VPS and Object Storage. Focuses on cost‑effective provisioning and Contabo-specific CLI/API quirks. Use when: provisioning Contabo Cloud VPS, configurin",
+      "source": "./skills/contabo"
+    },
+    {
       "name": "coolify",
       "description": "Installs and manages Coolify, an open-source self-hosted PaaS for deploying applications with Docker. Provides a Heroku-like experience on your own infrastructure. Use when: installing Coolify, deploy",
       "source": "./skills/coolify"
     },
     {
-      "name": "kasm",
-      "description": "Installs and manages KASM Workspaces, a container-based VDI platform for streaming desktops to browsers. Supports Ubuntu ARM64, desktop streaming, isolated browser sessions, and remote workspace acces",
-      "source": "./skills/kasm"
+      "name": "deckmate",
+      "description": "Stream Deck integration assistant for VSCode. Create, manage, and organize Stream Deck profiles, buttons, snippets, and scripts. Helps build productivity workflows for developers using Stream Deck wit",
+      "source": "./skills/deckmate"
     },
     {
       "name": "devops",
       "description": "REMOTE infrastructure administration (alpha v0.0.2). Server inventory, cloud provisioning (OCI, Hetzner, Linode, DigitalOcean, Contabo), and application deployment (Coolify, KASM). Profile-aware - rea",
       "source": "./skills/devops"
-    },
-    {
-      "name": "contabo",
-      "description": "Deploys infrastructure on Contabo using Cloud VPS and Object Storage. Focuses on cost‑effective provisioning and Contabo-specific CLI/API quirks. Use when: provisioning Contabo Cloud VPS, configurin",
-      "source": "./skills/contabo"
     },
     {
       "name": "digital-ocean",
@@ -51,29 +51,19 @@
       "source": "./skills/hetzner"
     },
     {
-      "name": "linode",
-      "description": "Deploys infrastructure on Linode (Akamai Cloud) with Linodes, Firewalls, and VLANs. Strong Kubernetes support with Cluster Autoscaler and Akamai edge network integration. Use when: setting up Linode/A",
-      "source": "./skills/linode"
-    },
-    {
-      "name": "oci",
-      "description": "Deploys infrastructure on Oracle Cloud Infrastructure (OCI) with ARM64 instances (Always Free tier eligible). Handles compartments, VCNs, subnets, security lists, and compute instances. Use when: sett",
-      "source": "./skills/oci"
-    },
-    {
-      "name": "vultr",
-      "description": "Deploys infrastructure on Vultr with Cloud Compute instances, High-Frequency servers, and VPCs. Excellent value with Kubernetes autoscaling support and global data centers. Use when: setting up Vultr ",
-      "source": "./skills/vultr"
-    },
-    {
-      "name": "deckmate",
-      "description": "Stream Deck integration assistant for VSCode. Create, manage, and organize Stream Deck profiles, buttons, snippets, and scripts. Helps build productivity workflows for developers using Stream Deck wit",
-      "source": "./skills/deckmate"
-    },
-    {
       "name": "imagemagick",
       "description": "Guide for using ImageMagick command-line tools to perform advanced image processing tasks including format conversion, resizing, cropping, effects, transformations, and batch operations. Use when mani",
       "source": "./skills/imagemagick"
+    },
+    {
+      "name": "kasm",
+      "description": "Manage KASM Workspaces - a container-based VDI platform streaming desktops to browsers. Covers installation, workspace configuration, persistent profiles, S3 storage, backup/recovery, troubleshooting,",
+      "source": "./skills/kasm"
+    },
+    {
+      "name": "linode",
+      "description": "Deploys infrastructure on Linode (Akamai Cloud) with Linodes, Firewalls, and VLANs. Strong Kubernetes support with Cluster Autoscaler and Akamai edge network integration. Use when: setting up Linode/A",
+      "source": "./skills/linode"
     },
     {
       "name": "mockoon-cli",
@@ -84,6 +74,16 @@
       "name": "obsidian-rlm",
       "description": "Process large files for Obsidian workflows using RLM (Recursive Language Models). Handles LLM conversation exports (64MB+), bulk note analysis, and large JSON processing that would overwhelm standard ",
       "source": "./skills/obsidian-rlm"
+    },
+    {
+      "name": "oci",
+      "description": "Deploys infrastructure on Oracle Cloud Infrastructure (OCI) with ARM64 instances (Always Free tier eligible). Handles compartments, VCNs, subnets, security lists, and compute instances. Use when: sett",
+      "source": "./skills/oci"
+    },
+    {
+      "name": "openclaw",
+      "description": "Deploy and configure OpenClaw AI gateway on KASM workspaces or standalone Docker. Multi-provider LLM routing (Anthropic, OpenAI, Gemini, Groq, Bedrock) with multi-channel messaging (WhatsApp, Telegram",
+      "source": "./skills/openclaw"
     },
     {
       "name": "ralphban",
@@ -99,6 +99,11 @@
       "name": "sharp",
       "description": "Processes images with Sharp, the high-performance Node.js library for resizing, converting, and optimizing images. Use when building image pipelines, generating thumbnails, batch processing client pho",
       "source": "./skills/sharp"
+    },
+    {
+      "name": "vultr",
+      "description": "Deploys infrastructure on Vultr with Cloud Compute instances, High-Frequency servers, and VPCs. Excellent value with Kubernetes autoscaling support and global data centers. Use when: setting up Vultr ",
+      "source": "./skills/vultr"
     },
     {
       "name": "winadmin-powershell",
