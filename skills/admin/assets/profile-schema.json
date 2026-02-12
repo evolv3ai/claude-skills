@@ -146,6 +146,37 @@
       "type": "object",
       "description": "Quick capability flags for routing decisions"
     },
+    "vault": {
+      "type": ["object", "null"],
+      "description": "Age-encrypted secrets vault configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether vault mode is active (matches ADMIN_VAULT env var)"
+        },
+        "vaultPath": {
+          "type": "string",
+          "description": "Path to vault.age file (default: $ADMIN_ROOT/vault.age)"
+        },
+        "keyPath": {
+          "type": "string",
+          "description": "Path to age private key (default: ~/.age/key.txt)"
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "Age public key (starts with age1...)"
+        },
+        "migratedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When plaintext .env was migrated to vault"
+        },
+        "secretCount": {
+          "type": "integer",
+          "description": "Number of secrets in vault"
+        }
+      }
+    },
     "deployments": {
       "type": "object",
       "description": "References to deployment configurations (.env.local files)",

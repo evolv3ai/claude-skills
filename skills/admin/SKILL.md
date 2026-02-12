@@ -122,6 +122,22 @@ Add `-MultiDevice` (PowerShell) or `--multi-device` (Bash) if user selected mult
 - `.env.template` files belong only in `templates/` within a skill.
 - Store live secrets in `~/.admin/.env` and reference from there.
 
+## Vault: Encrypted Secrets (age)
+
+Secrets can be encrypted at rest using [age encryption](https://age-encryption.org/). When `ADMIN_VAULT=enabled` in `~/.admin/.env`, `load-profile.sh` and `Load-Profile.ps1` decrypt `$ADMIN_ROOT/vault.age` instead of reading plaintext `.env`.
+
+**Setup**: `age-keygen -o ~/.age/key.txt` then `secrets --encrypt $ADMIN_ROOT/.env`
+
+**CLI**: `secrets KEYNAME` | `secrets --list` | `eval $(secrets -s)` | `secrets --edit`
+
+**Feature flag**: `ADMIN_VAULT=enabled|disabled` in satellite `~/.admin/.env`. Falls back to plaintext when disabled or deps missing.
+
+**Cross-platform**: Bash (`scripts/secrets`), PowerShell (`scripts/secrets.ps1`), TypeScript (`scripts/admin-vault.ts` with `age-encryption` npm).
+
+**Migration**: Run `scripts/migrate-to-vault.sh` (Linux/WSL) or `scripts/migrate-to-vault.ps1` (Windows).
+
+**Guide**: `references/vault-guide.md`
+
 ## Task Qualification (MANDATORY)
 - If the task involves **remote servers/VPS/cloud**, stop and hand off to **devops**.
 - If the task is **local machine administration**, continue.

@@ -39,6 +39,20 @@ resolve_admin_root() {
     echo "${HOME}/.admin"
 }
 
+resolve_vault_mode() {
+    if [[ -n "${ADMIN_VAULT:-}" ]]; then
+        echo "$ADMIN_VAULT"; return
+    fi
+    if [[ -f "$SATELLITE_ENV" ]]; then
+        local mode
+        mode=$(grep "^ADMIN_VAULT=" "$SATELLITE_ENV" 2>/dev/null | head -1 | cut -d'=' -f2-)
+        if [[ -n "$mode" ]]; then
+            echo "$mode"; return
+        fi
+    fi
+    echo "disabled"
+}
+
 resolve_device_name() {
     if [[ -n "${ADMIN_DEVICE:-}" ]]; then
         echo "$ADMIN_DEVICE"; return
@@ -100,6 +114,67 @@ check_dependencies() {
         log_error "jq is required but not installed"
         log_info "Install with: sudo apt install jq"
         return 1
+    fi
+}
+
+# --- Vault support ---
+AGE_KEY="${HOME}/.age/key.txt"
+VAULT_FILE="${ADMIN_ROOT}/vault.age"
+ADMIN_VAULT_MODE="$(resolve_vault_mode)"
+
+check_vault_deps() {
+    if ! command -v age &> /dev/null; then
+        log_warn "age not installed (needed for vault). Install: sudo apt install age"
+        return 1
+    fi
+    if [[ ! -f "$AGE_KEY" ]]; then
+        log_warn "Age key not found at $AGE_KEY. Generate: age-keygen -o ~/.age/key.txt"
+        return 1
+    fi
+    if [[ ! -f "$VAULT_FILE" ]]; then
+        log_warn "Vault not found at $VAULT_FILE. Run: secrets --encrypt /path/to/.env"
+        return 1
+    fi
+    return 0
+}
+
+load_admin_secrets() {
+    local export_vars="${1:-true}"
+
+    if [[ "$ADMIN_VAULT_MODE" == "enabled" ]]; then
+        if check_vault_deps; then
+            log_info "Decrypting vault: $VAULT_FILE"
+            local count=0
+            local key value
+            while IFS= read -r line || [[ -n "$line" ]]; do
+                [[ "$line" =~ ^[[:space:]]*# ]] && continue
+                [[ -z "${line// }" ]] && continue
+                [[ "$line" != *"="* ]] && continue
+
+                key="${line%%=*}"
+                [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+
+                value="${line#*=}"
+                value="${value#\"}"; value="${value%\"}"
+                value="${value#\'}"; value="${value%\'}"
+
+                if [[ "$export_vars" == "true" ]]; then
+                    export "$key=$value"
+                fi
+                count=$((count + 1))
+            done < <(age -d -i "$AGE_KEY" "$VAULT_FILE" 2>/dev/null)
+            log_ok "Loaded $count secrets from vault"
+            return 0
+        else
+            log_warn "Vault enabled but deps missing - falling back to plaintext .env"
+        fi
+    fi
+
+    # Fallback: load plaintext .env if it exists
+    local master_env="${ADMIN_ROOT}/.env"
+    if [[ -f "$master_env" ]]; then
+        log_info "Loading secrets from plaintext .env"
+        load_env_file "$master_env" "$export_vars"
     fi
 }
 
@@ -193,21 +268,24 @@ load_env_file() {
     log_info "Parsing: $env_path"
     
     local count=0
+    local key value
     while IFS= read -r line || [[ -n "$line" ]]; do
         [[ "$line" =~ ^[[:space:]]*# ]] && continue
         [[ -z "${line// }" ]] && continue
-        
-        if [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]]; then
-            local key="${BASH_REMATCH[1]}"
-            local value="${BASH_REMATCH[2]}"
-            value="${value#\"}"; value="${value%\"}"
-            value="${value#\'}"; value="${value%\'}"
-            
-            if [[ "$export_vars" == "true" ]]; then
-                export "$key=$value"
-            fi
-            ((count++))
+        [[ "$line" != *"="* ]] && continue
+
+        key="${line%%=*}"
+        # Validate key format
+        [[ "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || continue
+
+        value="${line#*=}"
+        value="${value#\"}"; value="${value%\"}"
+        value="${value#\'}"; value="${value%\'}"
+
+        if [[ "$export_vars" == "true" ]]; then
+            export "$key=$value"
         fi
+        count=$((count + 1))
     done < "$env_path"
     
     log_ok "Loaded $count variables"
@@ -338,6 +416,7 @@ py() {
 
 if [[ "${1:-}" ]]; then
     load_admin_profile
+    load_admin_secrets
     load_deployment "$1"
     show_admin_summary
 fi

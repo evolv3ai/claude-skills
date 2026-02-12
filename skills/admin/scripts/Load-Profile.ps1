@@ -145,6 +145,136 @@ function Load-EnvFile {
     return $vars
 }
 
+# --- Vault support ---
+$AgeKey = Join-Path $HOME ".age\key.txt"
+$VaultFile = Join-Path $HOME ".admin\vault.age"
+
+function Get-VaultMode {
+    $satelliteEnv = Join-Path $HOME ".admin\.env"
+    if ($env:ADMIN_VAULT) { return $env:ADMIN_VAULT }
+    if (Test-Path $satelliteEnv) {
+        $match = Select-String -Path $satelliteEnv -Pattern "^ADMIN_VAULT=(.+)$" | Select-Object -First 1
+        if ($match) { return $match.Matches.Groups[1].Value }
+    }
+    return "disabled"
+}
+
+function Test-VaultReady {
+    $status = @{ Ready = $true; Missing = @() }
+
+    if (-not (Get-Command age -ErrorAction SilentlyContinue)) {
+        $status.Ready = $false
+        $status.Missing += "age CLI (install: scoop install age)"
+    }
+    if (-not (Test-Path $AgeKey)) {
+        $status.Ready = $false
+        $status.Missing += "Age key ($AgeKey) - generate: age-keygen -o $AgeKey"
+    }
+
+    # Resolve vault path from ADMIN_ROOT
+    $adminRoot = $null
+    $satelliteEnv = Join-Path $HOME ".admin\.env"
+    if (Test-Path $satelliteEnv) {
+        $match = Select-String -Path $satelliteEnv -Pattern "^ADMIN_ROOT=(.+)$" | Select-Object -First 1
+        if ($match) { $adminRoot = $match.Matches.Groups[1].Value }
+    }
+    if (-not $adminRoot) { $adminRoot = Join-Path $HOME ".admin" }
+    $script:VaultFile = Join-Path $adminRoot "vault.age"
+
+    if (-not (Test-Path $script:VaultFile)) {
+        $status.Ready = $false
+        $status.Missing += "Vault file ($($script:VaultFile)) - run: secrets --encrypt .env"
+    }
+
+    return $status
+}
+
+function Load-Vault {
+    [CmdletBinding()]
+    param([switch]$ExportToEnvironment)
+
+    $vaultStatus = Test-VaultReady
+    if (-not $vaultStatus.Ready) {
+        foreach ($m in $vaultStatus.Missing) {
+            Write-Log "Vault dep missing: $m" "WARN"
+        }
+        return $null
+    }
+
+    Write-Log "Decrypting vault: $script:VaultFile"
+
+    try {
+        $plaintext = & age --decrypt -i $AgeKey $script:VaultFile 2>$null
+    }
+    catch {
+        Write-Log "Vault decryption failed: $_" "ERROR"
+        return $null
+    }
+
+    if (-not $plaintext) {
+        Write-Log "Vault decryption returned empty output" "ERROR"
+        return $null
+    }
+
+    $vars = @{}
+    foreach ($line in $plaintext -split "`n") {
+        if ($line -match '^\s*#' -or $line -match '^\s*$') { continue }
+        if ($line -match '^([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
+            $key = $matches[1]
+            $value = $matches[2].Trim()
+            if ($value -match '^"(.*)"$' -or $value -match "^'(.*)'$") {
+                $value = $matches[1]
+            }
+            $vars[$key] = $value
+            if ($ExportToEnvironment) {
+                [Environment]::SetEnvironmentVariable($key, $value, "Process")
+            }
+        }
+    }
+
+    Write-Log "Loaded $($vars.Count) secrets from vault" "OK"
+    return $vars
+}
+
+function Load-AdminSecrets {
+    [CmdletBinding()]
+    param([switch]$ExportToEnvironment)
+
+    $mode = Get-VaultMode
+
+    if ($mode -eq "enabled") {
+        $result = Load-Vault -ExportToEnvironment:$ExportToEnvironment
+        if ($result) {
+            if ($ExportToEnvironment) {
+                $global:AdminSecrets = $result
+            }
+            return $result
+        }
+        Write-Log "Vault enabled but failed - falling back to plaintext .env" "WARN"
+    }
+
+    # Fallback: plaintext .env
+    $adminRoot = $null
+    $satelliteEnv = Join-Path $HOME ".admin\.env"
+    if (Test-Path $satelliteEnv) {
+        $match = Select-String -Path $satelliteEnv -Pattern "^ADMIN_ROOT=(.+)$" | Select-Object -First 1
+        if ($match) { $adminRoot = $match.Matches.Groups[1].Value }
+    }
+    if (-not $adminRoot) { $adminRoot = Join-Path $HOME ".admin" }
+    $masterEnv = Join-Path $adminRoot ".env"
+
+    if (Test-Path $masterEnv) {
+        Write-Log "Loading secrets from plaintext .env"
+        $result = Load-EnvFile -Path $masterEnv -ExportToEnvironment:$ExportToEnvironment
+        if ($ExportToEnvironment -and $result) {
+            $global:AdminSecrets = $result
+        }
+        return $result
+    }
+
+    return $null
+}
+
 function Get-AdminTool {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Name)
@@ -234,7 +364,10 @@ function Show-AdminSummary {
 
 if ($Export) {
     $loadedProfile = Load-AdminProfile -Path $ProfilePath -DeploymentName $Deployment -ExportVars
-    if ($loadedProfile) { Show-AdminSummary }
+    if ($loadedProfile) {
+        Load-AdminSecrets -ExportToEnvironment
+        Show-AdminSummary
+    }
 }
 
 # Note: Functions are available after dot-sourcing this script

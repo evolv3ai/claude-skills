@@ -1,105 +1,73 @@
-# Current Session
+# Session State
 
-**Project**: Claude Skills Repository
-**Focus**: Admin Plugin Fixes + Satellite Skill Reorganization + Agent Teams Research
-**Started**: 2026-02-11
-**Last Updated**: 2026-02-11
-**Last Checkpoint**: 1a25583
-
-## Summary
-
-Fixed admin command visibility (blocked by `/skill` name collision), removed `admin-` prefix from 9 satellite skills, removed broken hooks, and researched agent teams for future admin architecture.
+**Project**: Admin Vault - age-encrypted secrets for admin suite
+**Current Phase**: Phase 5
+**Current Stage**: Implementation
+**Last Checkpoint**: [none yet] (2026-02-12)
+**Planning Docs**: `docs/IMPLEMENTATION_PHASES.md`, `PROJECT_BRIEF.md`
 
 ---
 
-## Completed This Session
+## Phase 1: Foundation - age setup and secrets CLI wrapper ✅
+**Type**: Feature | **Completed**: 2026-02-12
 
-### 1. Fix Admin Command Visibility
-- **Root cause**: `skills/admin/commands/skill.md` (name: `skill`) collided with built-in `/skills` command
-- **Fix**: Renamed to `skills-bot.md` (commit 267414f)
-- **Result**: All 5 admin commands now visible: install, mcp-manage, setup-profile, skills-bot, troubleshoot
+- [x] Installed age v1.1.1 via apt
+- [x] Generated key at ~/.age/key.txt (chmod 600)
+- [x] Created `secrets` bash CLI wrapper adapted from josh-stephens
+- [x] Tested: --list, --export, -s, --decrypt, --encrypt, --status, single key, error handling
+- [x] Verified round-trip integrity (diff: identical)
+- [x] Vault uses ASCII armor (-a flag) for git-safe text format
 
-### 2. Remove admin- Prefix from Satellite Skills
-- **Rationale**: Plugin system handles grouping; prefix diluted the admin keyword
-- **Renames** (commit df88847):
-  - admin-devops -> devops
-  - admin-infra-{oci,hetzner,contabo,digitalocean,vultr,linode} -> {oci,hetzner,contabo,digital-ocean,vultr,linode}
-  - admin-app-{coolify,kasm} -> {coolify,kasm}
-- Updated: SKILL.md frontmatter, plugin.json, marketplace.json, ~60 cross-reference files
+## Phase 2: Bash integration - load-profile.sh vault support ✅
+**Type**: Feature | **Completed**: 2026-02-12
 
-### 3. Remove Broken Hooks
-- Deleted `skills/admin/hooks/` (profile-gate on every prompt)
-- Deleted `skills/admin-devops/hooks/` (deployment-confirm on Bash)
-- Can be re-added once stable
+- [x] Added `resolve_vault_mode()` to read ADMIN_VAULT from satellite .env
+- [x] Added `check_vault_deps()` for age/key/vault prereq checks
+- [x] Added `load_admin_secrets()` with vault decrypt + plaintext fallback
+- [x] Fixed BASH_REMATCH + set -u gotcha (switched to parameter expansion)
+- [x] Tested both modes: vault enabled (2 secrets) + disabled (12 vars from plaintext)
+- [x] Updated .env.template with ADMIN_VAULT variable
 
-### 4. Agent Teams Research
-- Used skill-researcher to investigate Claude Code agent teams (experimental feature)
-- Output: `RESEARCH_FINDINGS_admin.md` (18 findings, 8 TIER 1, 7 TIER 2, 3 TIER 3)
-- Key insight: Most admin workflows should use subagent pipelines, not teams
-- Teams justified for: multi-cloud provisioning, competing hypothesis debugging, cross-layer deployments
+## Phase 3: PowerShell integration - Load-Profile.ps1 vault support ✅
+**Type**: Feature | **Completed**: 2026-02-12
 
----
+- [x] Added Get-VaultMode, Test-VaultReady, Load-Vault, Load-AdminSecrets functions
+- [x] Created secrets.ps1 PowerShell CLI wrapper
+- [x] Integrated Load-AdminSecrets into main -Export flow
 
-## Architecture Decisions
+## Phase 4: TypeScript integration - admin-vault module ✅
+**Type**: Feature | **Completed**: 2026-02-12
 
-### Agent Teams vs Subagents for Admin
-- `/install`, `/mcp-manage`: Use **subagent pipeline** (lead orchestrates focused workers)
-- `/provision` multi-cloud: Use **agent team** (provisioners share capacity info)
-- `/troubleshoot` complex: Use **agent team** (competing hypotheses)
-- Cost threshold: Teams = 2.2x cost; only when parallel coordination adds real value
+- [x] Created admin-vault.ts with age-encryption npm package
+- [x] Functions: decryptVault(), getSecret(), listSecrets(), exportSecrets()
+- [x] Handles ASCII armor detection, cross-platform paths, .env parsing
 
-### Proposed New Agents (Not Yet Built)
-- **docs-agent**: Profile I/O, issue lifecycle, admin log, inventory I/O (absorbs profile-validator)
-- **verify-agent**: Test installations, verify services, SSH connectivity
-- **web-researcher**: Already exists as Task agent in jezweb-skills
+## Phase 5: Migration tooling and documentation ✅
+**Type**: Enhancement | **Completed**: 2026-02-12
 
-### docs-agent Design
-```
-Responsibilities:
-- Profile I/O (read/write device profile)
-- Issue lifecycle (create/update/close ISSUE-{id}.md)
-- Admin log (append-only operation log)
-- Inventory I/O (server inventory for devops)
-- Session notes (what happened this session)
+- [x] Created migrate-to-vault.sh (interactive migration with verify + enable)
+- [x] Created migrate-to-vault.ps1 (PowerShell equivalent)
+- [x] Created vault-guide.md reference documentation
+- [x] Updated profile-schema.json with vault config section
+- [x] Updated admin SKILL.md with vault section
 
-Frontmatter:
-  model: haiku (fast, cheap - just file I/O)
-  tools: [Read, Write, Glob, Grep]
-  team_compatible: true
-```
+**Key Files Created**:
+- `skills/admin/scripts/secrets` (bash CLI wrapper)
+- `skills/admin/scripts/secrets.ps1` (PowerShell CLI wrapper)
+- `skills/admin/scripts/admin-vault.ts` (TypeScript module)
+- `skills/admin/scripts/migrate-to-vault.sh` (migration script)
+- `skills/admin/references/vault-guide.md` (user documentation)
 
----
-
-## Known Issues
-
-- `admin-infra-oci` appears as standalone stale cache entry (from before rename) - will clear on next plugin cache refresh
-- RESEARCH_FINDINGS_admin.md is untracked - needs decision: commit or gitignore
+**Key Files Modified**:
+- `skills/admin/scripts/load-profile.sh` (vault support + BASH_REMATCH fix)
+- `skills/admin/scripts/Load-Profile.ps1` (vault support)
+- `skills/admin/.env.template` (ADMIN_VAULT variable)
 
 ---
 
-## Next Actions
+## Previous Session: Admin Plugin Fixes + Agent Teams (2026-02-11)
 
-1. **Build docs-agent** at `skills/admin/agents/docs-agent.md` - the keystone agent for issue tracking and profile I/O
-2. **Build verify-agent** at `skills/admin/agents/verify-agent.md` - post-install verification
-3. **Refactor /install command** to use subagent pipeline pattern (docs-agent -> web-researcher -> installer -> verify-agent -> docs-agent)
-4. **Add agent teams reference** at `skills/admin/references/agent-teams.md` from RESEARCH_FINDINGS_admin.md
-5. **Add `team_compatible: true`** to existing agent frontmatter
-
----
-
-## Previous Session: Community Knowledge Research (2026-01-20)
-
-**Status**: COMPLETE
-- Researched 62 skills, added ~350+ new documented errors
-- Created skill-researcher and skill-findings-applier QA agents
-- All HIGH/MEDIUM/LOW priority tiers complete
-
----
-
-## Last Checkpoint
-
-**Date**: 2026-02-11
-**Commit**: 1a25583
-**Message**: "checkpoint: Admin plugin fixes + agent teams research"
-
-**Status**: SESSION COMPLETE - Admin fixes landed, agent teams research done
+**Status**: COMPLETE | **Checkpoint**: 1a25583
+- Fixed admin command visibility (`/skill` name collision → renamed `skills-bot`)
+- Removed `admin-` prefix from 9 satellite skills
+- Agent teams research complete (RESEARCH_FINDINGS_admin.md)
