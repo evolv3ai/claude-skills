@@ -18,8 +18,8 @@ Profile-aware local machine administration for Windows, WSL, macOS, and Linux.
 | `/setup-profile` | Create or reconfigure device profile via TUI interview |
 | `/install` | Install tools, clone repos, run custom installers |
 | `/troubleshoot` | Track and resolve issues using markdown files |
-| `/mcp-manage` | Manage MCP servers (install, diagnose, list, remove) |
-| `/skill` | Manage Claude Code skills registry |
+| `/mcp-bot` | Manage MCP servers (install, diagnose, list, remove) |
+| `/skills-bot` | Manage Claude Code skills registry |
 
 ## Agents
 
@@ -27,7 +27,9 @@ Profile-aware local machine administration for Windows, WSL, macOS, and Linux.
 |-------|-------------|
 | `profile-validator` | Validates profile completeness and consistency |
 | `tool-installer` | Autonomous installation with preference awareness |
-| `mcp-troubleshooter` | Diagnoses MCP server issues |
+| `mcp-bot` | Diagnoses and manages MCP servers |
+| `docs-agent` | Structured file I/O (profiles, issues, logs) |
+| `verify-agent` | Dynamic system health verification |
 
 ## Quick Start
 
@@ -42,7 +44,7 @@ Profile-aware local machine administration for Windows, WSL, macOS, and Linux.
 /troubleshoot new
 
 # Manage MCP servers
-/mcp-manage diagnose
+/mcp-bot diagnose
 ```
 
 ## Features

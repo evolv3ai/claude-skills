@@ -1,5 +1,5 @@
 ---
-name: mcp-manage
+name: mcp-bot
 description: Manage MCP servers - install, configure, diagnose, and troubleshoot
 allowed-tools:
   - Read
@@ -9,7 +9,7 @@ allowed-tools:
 argument-hint: "[install | diagnose | list | remove | registry]"
 ---
 
-# /mcp-manage Command
+# /mcp-bot Command
 
 Manage Model Context Protocol (MCP) servers for Claude Desktop and Claude Code CLI.
 
@@ -26,7 +26,7 @@ Claude Desktop config location (from profile):
 
 ## Workflow by Subcommand
 
-### `/mcp-manage list` - List MCP Servers
+### `/mcp-bot list` - List MCP Servers
 
 Read the MCP registry and display status:
 
@@ -44,7 +44,7 @@ Status values:
 - `pending` - Newly added, not yet tested
 - `disabled` - Manually disabled
 
-### `/mcp-manage install` - Install New MCP Server
+### `/mcp-bot install` - Install New MCP Server
 
 Use TUI to guide installation:
 
@@ -89,7 +89,7 @@ Then run the installation:
   -Client "desktop"
 ```
 
-### `/mcp-manage diagnose` - Diagnose MCP Issues
+### `/mcp-bot diagnose` - Diagnose MCP Issues
 
 Run comprehensive diagnostics:
 
@@ -111,7 +111,7 @@ Output detailed report with:
 - Warnings
 - Errors with suggested fixes
 
-### `/mcp-manage remove` - Remove MCP Server
+### `/mcp-bot remove` - Remove MCP Server
 
 Use TUI to select server to remove:
 
@@ -129,7 +129,7 @@ Then:
 & "${CLAUDE_PLUGIN_ROOT}/scripts/mcp-remove-server.ps1" -ServerName "filesystem"
 ```
 
-### `/mcp-manage registry` - Manage Registry
+### `/mcp-bot registry` - Manage Registry
 
 #### View Registry
 ```bash
@@ -234,5 +234,5 @@ Requires: `npm install -g @package/mcp-server`
 - Always backup config before changes (automatic with scripts)
 - Use absolute paths for local clones
 - Restart Claude Desktop after config changes
-- Check `/mcp-manage diagnose` first when troubleshooting
+- Check `/mcp-bot diagnose` first when troubleshooting
 - NPX pattern is most reliable for published packages

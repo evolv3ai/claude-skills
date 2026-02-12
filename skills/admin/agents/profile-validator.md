@@ -135,7 +135,7 @@ Generate a structured report:
 
 ## Recommendations
 1. Run `/setup-profile --reset` to fix errors
-2. Run `/mcp-manage diagnose` to verify MCP servers
+2. Run `/mcp-bot diagnose` to verify MCP servers
 3. Consider removing unused MCP servers
 ```
 

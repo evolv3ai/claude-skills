@@ -62,7 +62,7 @@ All admin/devops agents are team-compatible:
 | verify-agent | sonnet | Quality gate - validates work | none (read + Bash only) |
 | tool-installer | sonnet | Software installer | none (delegates writes to docs-agent) |
 | profile-validator | haiku | Static profile checker | none (read only) |
-| mcp-troubleshooter | sonnet | MCP diagnostics | MCP config files only |
+| mcp-bot | sonnet | MCP diagnostics | MCP config files only |
 | server-provisioner | sonnet | Cloud infrastructure | provider API calls |
 | deployment-coordinator | sonnet | App deployment | deployment scripts |
 
@@ -75,7 +75,7 @@ To prevent conflicts where two teammates edit the same file:
 | `~/.admin/profiles/*.json` | docs-agent | Read only |
 | `~/.admin/issues/*.md` | docs-agent | Read only |
 | `~/.admin/logs/*.log` | docs-agent | Read only |
-| MCP config files | mcp-troubleshooter | Read only |
+| MCP config files | mcp-bot | Read only |
 | Provider API calls | server-provisioner | Do not call |
 | System commands (install) | tool-installer | Do not run |
 

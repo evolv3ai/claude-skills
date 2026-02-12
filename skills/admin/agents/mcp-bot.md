@@ -1,5 +1,5 @@
 ---
-name: mcp-troubleshooter
+name: mcp-bot
 description: Diagnoses and fixes MCP server issues for Claude Desktop and Claude Code CLI
 model: sonnet
 color: red
@@ -27,17 +27,17 @@ Use this agent when:
 
 <example>
 user: "My MCP filesystem tools aren't showing up"
-assistant: [Uses mcp-troubleshooter agent to diagnose]
+assistant: [Uses mcp-bot agent to diagnose]
 </example>
 
 <example>
 user: "Getting spawn ENOENT error with MCP"
-assistant: [Uses mcp-troubleshooter agent to fix path issues]
+assistant: [Uses mcp-bot agent to fix path issues]
 </example>
 
 <example>
 user: "Claude Desktop tools stopped working after update"
-assistant: [Uses mcp-troubleshooter agent to diagnose]
+assistant: [Uses mcp-bot agent to diagnose]
 </example>
 
 ## Diagnostic Checklist
