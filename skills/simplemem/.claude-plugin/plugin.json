@@ -1,0 +1,12 @@
+{
+  "name": "simplemem",
+  "description": "Build persistent LLM agent memory with SimpleMem - semantic lossless compression with 30x token reduction. MCP server (cloud/self-hosted), Python API, cross-session memory. Use when: adding long-term memory to agents, cross-session context recall, semantic dialogue search, memory consolidation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}
