@@ -1,7 +1,7 @@
 {
   "name": "admin",
   "description": "Local machine administration for Windows, WSL, macOS, Linux. Install tools, check if software is installed, manage packages, configure dev environments. Works with winget, scoop, brew, apt, npm, pip, uv. Profile-aware: adapts to your preferences. Use when: install 7zip, is git installed, clone repo, check if node installed, add to PATH, configure MCP servers, manage dev tools, set up environment. NOT for: VPS, cloud servers, remote infrastructure → use devops skill.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": {
     "name": "evolv3ai",
     "email": "hello@evolv3.ai"
