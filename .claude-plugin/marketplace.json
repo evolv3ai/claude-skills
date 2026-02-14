@@ -7,12 +7,12 @@
   "metadata": {
     "description": "Production-tested skills for Claude Code",
     "version": "1.0.0",
-    "updated": "2026-02-12"
+    "updated": "2026-02-13"
   },
   "plugins": [
     {
       "name": "all",
-      "description": "All 20 production-tested skills for Claude Code.",
+      "description": "All 21 production-tested skills for Claude Code.",
       "source": "./"
     },
     {
@@ -92,13 +92,18 @@
     },
     {
       "name": "session-scout",
-      "description": "Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows and WSL. PowerShell script extracts project paths, session IDs, and timestamps from session arti",
+      "description": "Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows, macOS, and Linux. Scripts extract project paths, session IDs, and timestamps from session artif",
       "source": "./skills/session-scout"
     },
     {
       "name": "sharp",
       "description": "Processes images with Sharp, the high-performance Node.js library for resizing, converting, and optimizing images. Use when building image pipelines, generating thumbnails, batch processing client pho",
       "source": "./skills/sharp"
+    },
+    {
+      "name": "simplemem",
+      "description": "Build persistent LLM agent memory with SimpleMem - semantic lossless compression with 30x token reduction. MCP server (cloud/self-hosted), Python API, cross-session memory. Use when: adding long-term ",
+      "source": "./skills/simplemem"
     },
     {
       "name": "vultr",
