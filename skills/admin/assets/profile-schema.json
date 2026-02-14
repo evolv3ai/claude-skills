@@ -11,6 +11,21 @@
       "const": "3.0",
       "description": "Schema version for migration support"
     },
+    "adminSkillVersion": {
+      "type": "string",
+      "description": "Version of admin skill that created/last updated this profile"
+    },
+    "multiDevice": {
+      "type": "boolean",
+      "description": "Whether this is a multi-device setup with cloud-synced storage"
+    },
+    "skillVersions": {
+      "type": "object",
+      "description": "Version tracking for all admin suite skills",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
     "device": {
       "type": "object",
       "description": "Core device identity and hardware",

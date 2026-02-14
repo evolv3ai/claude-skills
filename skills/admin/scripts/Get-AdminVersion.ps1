@@ -91,6 +91,50 @@ function Get-AdminVersion {
             Write-Host "[WARN] Profile predates versioning system" -ForegroundColor $ColorYellow
             Write-Host "       Run Setup-Interview.ps1 to create a versioned profile" -ForegroundColor $ColorYellow
         }
+        # Display skill versions comparison
+        Write-Host ""
+        Write-Host "--- Suite Skill Versions ---" -ForegroundColor $ColorCyan
+        $SkillsRootDir = Split-Path -Parent $SkillRoot
+        $SiblingSkills = @("admin", "devops", "oci", "hetzner", "contabo", "digital-ocean", "vultr", "linode", "coolify", "kasm")
+        $HasMismatch = $false
+
+        foreach ($sName in $SiblingSkills) {
+            # Current version from VERSION file
+            $currentVer = "n/a"
+            $sibVerFile = Join-Path $SkillsRootDir "$sName\VERSION"
+            if (Test-Path $sibVerFile) {
+                $currentVer = (Get-Content $sibVerFile -First 1).Trim()
+            }
+
+            # Profile version from skillVersions
+            $profileSV = $null
+            if ($profile.skillVersions) {
+                $profileSV = $profile.skillVersions.$sName
+            }
+
+            $label = $sName.PadRight(16)
+            if (-not $profileSV) {
+                Write-Host "  $label" -NoNewline
+                Write-Host "$currentVer".PadRight(10) -ForegroundColor $ColorYellow -NoNewline
+                Write-Host " (not in profile)"
+                $HasMismatch = $true
+            } elseif ($profileSV -eq $currentVer) {
+                Write-Host "  $label" -NoNewline
+                Write-Host $currentVer -ForegroundColor $ColorGreen
+            } else {
+                Write-Host "  $label" -NoNewline
+                Write-Host "$profileSV".PadRight(10) -ForegroundColor $ColorYellow -NoNewline
+                Write-Host " -> " -NoNewline
+                Write-Host $currentVer -ForegroundColor $ColorGreen
+                $HasMismatch = $true
+            }
+        }
+
+        if ($HasMismatch) {
+            Write-Host ""
+            Write-Host "[WARN] Some skill versions differ from profile" -ForegroundColor $ColorYellow
+            Write-Host "       Re-run profile setup to update skillVersions" -ForegroundColor $ColorYellow
+        }
     } else {
         Write-Host "Profile:          " -NoNewline
         Write-Host "Not found" -ForegroundColor $ColorYellow

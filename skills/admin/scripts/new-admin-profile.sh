@@ -188,6 +188,22 @@ if [[ -f "$VERSION_FILE" ]]; then
     ADMIN_SKILL_VERSION=$(head -1 "$VERSION_FILE" | tr -d '[:space:]')
 fi
 
+# Read sibling skill VERSION files for skillVersions tracking
+SKILLS_ROOT="$(dirname "$SKILL_ROOT")"
+SIBLING_SKILLS=("admin" "devops" "oci" "hetzner" "contabo" "digital-ocean" "vultr" "linode" "coolify" "kasm")
+SKILL_VERSIONS_JSON="{"
+first_sv=true
+for skill_name in "${SIBLING_SKILLS[@]}"; do
+    ver_file="${SKILLS_ROOT}/${skill_name}/VERSION"
+    ver="unknown"
+    if [[ -f "$ver_file" ]]; then
+        ver=$(head -1 "$ver_file" | tr -d '[:space:]')
+    fi
+    if [[ "$first_sv" == "true" ]]; then first_sv=false; else SKILL_VERSIONS_JSON+=","; fi
+    SKILL_VERSIONS_JSON+="\"${skill_name}\":\"${ver}\""
+done
+SKILL_VERSIONS_JSON+="}"
+
 DEVICE_NAME=$(hostname)
 PROFILE_PATH="${ADMIN_ROOT}/profiles/${DEVICE_NAME}.json"
 
@@ -403,6 +419,7 @@ cat > "$PROFILE_PATH" <<EOF
   "schemaVersion": "3.0",
   "adminSkillVersion": "$ADMIN_SKILL_VERSION",
   "multiDevice": $MULTI_DEVICE,
+  "skillVersions": $SKILL_VERSIONS_JSON,
   "device": {
     "name": "$DEVICE_NAME",
     "platform": "$PLATFORM",

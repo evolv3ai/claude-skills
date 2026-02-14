@@ -2,6 +2,18 @@
   "schemaVersion": "3.0",
   "adminSkillVersion": "1.0.0",
   "multiDevice": false,
+  "skillVersions": {
+    "admin": "1.0.0",
+    "devops": "1.0.0",
+    "oci": "1.0.0",
+    "hetzner": "1.0.0",
+    "contabo": "1.0.0",
+    "digital-ocean": "1.0.0",
+    "vultr": "1.0.0",
+    "linode": "1.0.0",
+    "coolify": "1.0.0",
+    "kasm": "1.0.0"
+  },
 
   "device": {
     "name": "DEVICE_NAME",

@@ -12,6 +12,12 @@ Format: [Semantic Versioning](https://semver.org/)
 ## [0.0.4] - 2026-02-14
 
 ### Added
+- `skillVersions` object in profile schema - tracks all 10 admin suite skill versions
+  - admin, devops, oci, hetzner, contabo, digital-ocean, vultr, linode, coolify, kasm
+- Profile creators (`new-admin-profile.sh`, `New-AdminProfile.ps1`) read sibling VERSION files
+- Version checkers (`get-admin-version.sh`, `Get-AdminVersion.ps1`) show suite-wide comparison table
+  - Green = profile matches current VERSION, yellow + arrow = drift detected
+- `adminSkillVersion` and `multiDevice` added to `profile-schema.json` (were in template but missing from schema)
 - `rules/admin.md` - Cross-platform CLI correction rules (ISSUE-0007/0008/0009/0010)
   - curl JSON escape on Windows → use .ps1 + ConvertTo-Json
   - MCP HTTP session init protocol → 2-step flow with Mcp-Session-Id

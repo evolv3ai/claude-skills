@@ -66,6 +66,19 @@ if (Test-Path $VersionFile) {
     $AdminSkillVersion = (Get-Content $VersionFile -First 1).Trim()
 }
 
+# Read sibling skill VERSION files for skillVersions tracking
+$SkillsRoot = Split-Path -Parent $SkillRoot
+$SiblingSkills = @("admin", "devops", "oci", "hetzner", "contabo", "digital-ocean", "vultr", "linode", "coolify", "kasm")
+$SkillVersions = [ordered]@{}
+foreach ($skillName in $SiblingSkills) {
+    $siblingVersionFile = Join-Path $SkillsRoot "$skillName\VERSION"
+    if (Test-Path $siblingVersionFile) {
+        $SkillVersions[$skillName] = (Get-Content $siblingVersionFile -First 1).Trim()
+    } else {
+        $SkillVersions[$skillName] = "unknown"
+    }
+}
+
 # Set defaults based on platform
 if (-not $AdminRoot) {
     $AdminRoot = Join-Path $HOME ".admin"
@@ -149,6 +162,7 @@ $profile = [ordered]@{
     schemaVersion = "3.0"
     adminSkillVersion = $AdminSkillVersion
     multiDevice = [bool]$MultiDevice
+    skillVersions = $SkillVersions
     device = [ordered]@{
         name = $DeviceName
         platform = "windows"
