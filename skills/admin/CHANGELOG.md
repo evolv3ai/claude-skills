@@ -9,6 +9,31 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [0.0.4] - 2026-02-14
+
+### Added
+- `rules/admin.md` - Cross-platform CLI correction rules (ISSUE-0007/0008/0009/0010)
+  - curl JSON escape on Windows → use .ps1 + ConvertTo-Json
+  - MCP HTTP session init protocol → 2-step flow with Mcp-Session-Id
+  - PowerShell inline in Bash tool → write .ps1 file, run pwsh -File
+  - `del` not found in Bash → use `rm`
+  - Log-AdminEvent hallucinated parameter correction
+
+### Verified
+- `/install` pipeline tested end-to-end (profile gate → SimpleMem recall → tool-installer → verify-agent → SimpleMem store → logging)
+
+## [0.0.3] - 2026-02-13
+
+### Added
+- SimpleMem MCP integration across all agents (graceful degradation)
+- `memory_query` recall in `/install` and `/mcp-manage` commands
+- `memory_add` store after pipeline completion
+- Speaker convention: `admin:tool-installer`, `admin:verify-agent`, etc.
+
+### Fixed
+- ISSUE-0005: MCP config path corrected to `~/.claude.json`
+- ISSUE-0006: REST API `/api/*` documented as cloud-only
+
 ## [0.0.2] - 2026-02-02
 
 ### Added

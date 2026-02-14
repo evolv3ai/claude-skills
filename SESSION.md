@@ -33,23 +33,24 @@ Commits: `9a7adb5` → `c622e6a` → `e16fc11`
 - Added `SIMPLEMEM_URL` and `SIMPLEMEM_TOKEN` to `~/.admin/.env`
 - Added `.admin/.env` sourcing to `~/.zshrc`
 
-## Open Issues
+### ISSUE-0007/0008/0009/0010: Correction Rules Created
+- Created `skills/admin/rules/admin.md` with 5 WRONG/RIGHT correction rules:
+  - ISSUE-0007: curl JSON escape on Windows → .ps1 + ConvertTo-Json
+  - ISSUE-0008: MCP HTTP session init → 2-step protocol
+  - ISSUE-0009: PowerShell inline in Bash → write .ps1 file
+  - ISSUE-0010: `del` not found → use `rm`
+  - Bonus: Log-AdminEvent hallucinated params
 
-### Learnings to Capture as Rules (ISSUE-0007/0008/0009/0010)
-- **ISSUE-0007**: curl JSON escape errors on Windows → use PowerShell script file with ConvertTo-Json
-- **ISSUE-0008**: MCP HTTP requires session init before tool calls → document 2-step protocol
-- **ISSUE-0009**: Complex PowerShell inline fails in Bash tool → write .ps1 file, run with `pwsh -File`
-- **ISSUE-0010**: `del` command not found → use `rm` in Bash tool
-
-Note: 0007/0009/0010 already captured in MEMORY.md cross-platform gotchas. Still need formal rules in admin skill.
+### /install Pipeline Test: PASSED
+- Tested `/install jq` end-to-end on WSL
+- Pipeline stages all executed: profile gate → memory recall → tool-installer → verify-agent → memory store → logging
+- jq v1.7.1 already at latest for Ubuntu 24.04 apt (Windows has 1.8.1 via scoop)
+- SimpleMem: stored 5 entries, query returned correctly
+- Logging: written to operations.log
 
 ## Next Actions
 
-1. **Capture ISSUE-0007/0008/0009/0010 as correction rules** in `skills/admin/rules/` - create cross-platform CLI rules and MCP HTTP protocol rules
-
-2. **Test `/install` pipeline end-to-end** - verify the admin install command works with SimpleMem memory recall/store
-
-3. **memsearch evaluation**: Deferred to later (complementary to SimpleMem, wait for v0.2+)
+1. **memsearch evaluation**: Deferred to later (complementary to SimpleMem, wait for v0.2+)
 
 ---
 
