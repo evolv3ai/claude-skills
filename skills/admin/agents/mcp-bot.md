@@ -293,6 +293,42 @@ Copy-Item $configPath $backup
 ### Re-add Servers One by One
 Test after each addition to isolate the problem.
 
+## SimpleMem Integration
+
+When the SimpleMem MCP server is available (`memory_add` / `memory_query` tools present), mcp-bot queries past diagnostic history and stores new findings.
+
+### During Diagnostics - Query Past Issues
+
+Before running a full diagnostic, query SimpleMem:
+
+```
+memory_query: "What MCP server issues have occurred on {DEVICE}?"
+```
+
+Or for specific servers:
+
+```
+memory_query: "What issues have I had with the {server_name} MCP server?"
+```
+
+This surfaces past fixes, avoiding repeat investigation of known issues.
+
+### After Fixing - Store Solution
+
+After diagnosing and resolving an issue:
+
+```
+memory_add:
+  speaker: "admin:mcp-bot"
+  content: "Fixed MCP issue on {DEVICE}: {problem}. Root cause: {cause}. Solution: {fix}."
+```
+
+### Graceful Degradation
+
+If `memory_query` / `memory_add` are not available, skip silently. **Never fail a diagnostic because SimpleMem is unavailable.**
+
+---
+
 ## Output
 
 Always provide:

@@ -153,6 +153,7 @@ Secrets can be encrypted at rest using [age encryption](https://age-encryption.o
 | macOS/Linux admin | references/unix.md |
 | MCP server management | references/mcp.md |
 | Skill registry | references/skills-registry.md |
+| Memory integration | references/memory-integration.md |
 | **Remote servers/cloud** | **→ Use devops skill** |
 
 ## Profile-Aware Adaptation (Always Check Preferences)
