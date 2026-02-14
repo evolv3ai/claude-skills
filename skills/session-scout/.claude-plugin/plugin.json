@@ -1,6 +1,6 @@
 {
   "name": "session-scout",
-  "description": "Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows and WSL. PowerShell script extracts project paths, session IDs, and timestamps from session artifacts. Use when: finding recent coding sessions, reviewing AI session history, exporting session logs to CSV, troubleshooting missing sessions, or auditing Claude Code/OpenCode usage across environments.",
+  "description": "Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows, macOS, and Linux. Scripts extract project paths, session IDs, and timestamps from session artifacts. PowerShell for Windows, Bash for macOS/Linux. Use when: finding recent coding sessions, reviewing AI session history, exporting session logs to CSV, troubleshooting missing sessions, or auditing Claude Code/OpenCode usage across environments.",
   "version": "1.0.0",
   "author": {
     "name": "evolv3ai",

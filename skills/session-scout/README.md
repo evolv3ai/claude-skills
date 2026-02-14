@@ -1,7 +1,7 @@
 # Session Scout
 
 **Status**: Production Ready
-**Last Updated**: 2026-01-27
+**Last Updated**: 2026-02-13
 **Production Tested**: Used daily on WOPR3 workstation
 
 ---
@@ -36,11 +36,11 @@ Claude Code automatically discovers this skill when you mention:
 
 ## What This Skill Does
 
-Discovers and lists recent AI coding sessions across multiple tools and environments. The PowerShell script scans session storage locations for Claude Code, Claude Desktop, and OpenCode on both Windows and WSL.
+Discovers and lists recent AI coding sessions across multiple tools and environments. Scripts scan session storage locations for Claude Code, Claude Desktop, and OpenCode on Windows, macOS, and Linux.
 
 ### Core Capabilities
 
-- Discovers Claude Code sessions (Windows + all WSL distros)
+- Discovers Claude Code sessions (Windows, macOS, Linux + WSL distros)
 - Discovers Claude Desktop sessions
 - Discovers OpenCode sessions (differentiates Desktop vs CLI)
 - Extracts project paths, session IDs, timestamps
@@ -69,22 +69,34 @@ Discovers and lists recent AI coding sessions across multiple tools and environm
 
 ### Don't Use When:
 - Reading actual session content (use Read tool on .jsonl files)
-- Managing Claude Code settings (use admin-windows)
-- Working inside WSL (script is Windows-native)
+- Managing Claude Code settings (use admin skill)
 
 ---
 
 ## Quick Usage Example
 
-```powershell
+**macOS / Linux:**
+```bash
 # List recent sessions
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1
+~/.claude/skills/session-scout/scripts/session-scout.sh
 
 # Export to CSV
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -Csv
+~/.claude/skills/session-scout/scripts/session-scout.sh --csv
 
 # Custom export path
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\exports\sessions.csv"
+~/.claude/skills/session-scout/scripts/session-scout.sh --file ~/exports/sessions.csv
+```
+
+**Windows (PowerShell):**
+```powershell
+# List recent sessions
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1
+
+# Export to CSV
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1 -Csv
+
+# Custom export path
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1 -File "D:\exports\sessions.csv"
 ```
 
 **Result**: Table of sessions with Tool, When, ProjectPath, Project, SessionId columns
@@ -105,10 +117,10 @@ pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\
 
 ## Dependencies
 
-**Prerequisites**: PowerShell 7+ (pwsh), Windows environment
+**Windows**: PowerShell 7+ (pwsh), optional WSL2 for WSL session discovery
+**macOS / Linux**: Bash 4+ (for associative arrays)
 
 **Optional**:
-- WSL2 (for WSL session discovery)
 - OpenCode installed (for OpenCode session discovery)
 
 ---
@@ -119,18 +131,15 @@ pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\
 session-scout/
 ├── SKILL.md              # Complete documentation
 ├── README.md             # This file
-├── scripts/              # (empty - main script in D:\admin\scripts)
-├── references/           # (empty)
-└── assets/               # (empty)
+└── scripts/
+    ├── Session-Scout.ps1 # Windows (PowerShell 7+)
+    └── session-scout.sh  # macOS / Linux (Bash 4+)
 ```
-
-**Note**: The actual script lives at `D:\admin\scripts\session-scout.ps1`
 
 ---
 
 ## Related Skills
 
-- **admin-windows** - Windows system administration
 - **admin** - Central orchestrator for admin tasks
 
 ---

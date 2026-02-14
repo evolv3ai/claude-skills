@@ -1,18 +1,18 @@
 ---
 name: session-scout
 description: |
-  Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows and WSL. PowerShell script extracts project paths, session IDs, and timestamps from session artifacts.
+  Discover and list recent AI coding sessions across Claude Code, Claude Desktop, and OpenCode on Windows, macOS, and Linux. Scripts extract project paths, session IDs, and timestamps from session artifacts. PowerShell for Windows, Bash for macOS/Linux.
 
   Use when: finding recent coding sessions, reviewing AI session history, exporting session logs to CSV, troubleshooting missing sessions, or auditing Claude Code/OpenCode usage across environments.
+license: MIT
 source: plugin
 ---
 
 # Session Scout
 
 **Status**: Production Ready
-**Last Updated**: 2026-01-27
-**Dependencies**: PowerShell 7+ (pwsh), WSL2 (for WSL session discovery)
-**Script Location**: `D:\admin\scripts\session-scout.ps1`
+**Last Updated**: 2026-02-13
+**Dependencies**: PowerShell 7+ (Windows) or Bash 4+ (macOS/Linux)
 
 ---
 
@@ -20,12 +20,22 @@ source: plugin
 
 ### 1. Run the Script
 
-```powershell
+**macOS / Linux:**
+```bash
 # Show recent sessions (default: top 12)
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1
+~/.claude/skills/session-scout/scripts/session-scout.sh
 
 # Show more sessions
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -Top 20
+~/.claude/skills/session-scout/scripts/session-scout.sh --top 20
+```
+
+**Windows (PowerShell):**
+```powershell
+# Show recent sessions (default: top 12)
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1
+
+# Show more sessions
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1 -Top 20
 ```
 
 **Output columns:**
@@ -37,12 +47,22 @@ pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -Top 20
 
 ### 2. Export to CSV
 
-```powershell
+**macOS / Linux:**
+```bash
 # Export to default location (~/.admin/logs/session-scout-YYYY-MM-DD.csv)
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -Csv
+~/.claude/skills/session-scout/scripts/session-scout.sh --csv
 
 # Export to custom path
-pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\exports\sessions.csv"
+~/.claude/skills/session-scout/scripts/session-scout.sh --file ~/exports/sessions.csv
+```
+
+**Windows (PowerShell):**
+```powershell
+# Export to default location (~/.admin/logs/session-scout-YYYY-MM-DD.csv)
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1 -Csv
+
+# Export to custom path
+pwsh -ExecutionPolicy Bypass -File ~/.claude/skills/session-scout/scripts/Session-Scout.ps1 -File "D:\exports\sessions.csv"
 ```
 
 ---
@@ -51,16 +71,19 @@ pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\
 
 ### Claude Code Sessions
 - **Windows**: `%USERPROFILE%\.claude\projects\*\*.jsonl`
-- **WSL**: `~/.claude/projects/*/*.jsonl` (per distro)
+- **WSL/Linux**: `~/.claude/projects/*/*.jsonl`
+- **macOS**: `~/.claude/projects/*/*.jsonl`
 - Extracts: cwd, project slug, session UUID
 
 ### Claude Desktop Sessions
 - **Windows**: `%APPDATA%\Claude` and `%LOCALAPPDATA%\Claude`
+- **macOS**: `~/Library/Application Support/Claude/` and `~/Library/Application Support/Anthropic/`
+- **Linux**: `~/.config/Claude/` and `~/.config/Anthropic/`
 - Looks for: chat, conversation, transcript, history files
 
 ### OpenCode Sessions
 - **Windows**: `%USERPROFILE%\.local\share\opencode\log\*.log`
-- **WSL**: `~/.local/share/opencode/log/*.log` (per distro)
+- **macOS/Linux**: `~/.local/share/opencode/log/*.log`
 - Differentiates: Desktop (multiple dirs) vs CLI (single dir)
 
 ---
@@ -69,15 +92,16 @@ pwsh -ExecutionPolicy Bypass -File D:\admin\scripts\session-scout.ps1 -File "D:\
 
 ### Always Do
 
-- Run with `pwsh` (PowerShell 7+), not Windows PowerShell 5.1
-- Use `-ExecutionPolicy Bypass` when running directly
-- Check WSL is running if WSL sessions are missing
+- **Windows**: Run with `pwsh` (PowerShell 7+), not Windows PowerShell 5.1
+- **Windows**: Use `-ExecutionPolicy Bypass` when running directly
+- **macOS/Linux**: Use `session-scout.sh` (requires Bash 4+ for associative arrays)
+- Check WSL is running if WSL sessions are missing (Windows only)
 
 ### Never Do
 
 - Don't modify session `.jsonl` files directly
-- Don't assume all sessions have extractable paths (some may show $null)
-- Don't run from inside WSL (script is Windows-native)
+- Don't assume all sessions have extractable paths (some may show empty)
+- Don't run the PowerShell script from inside WSL (use the Bash script instead)
 
 ---
 
@@ -104,11 +128,21 @@ This skill prevents **3** documented issues:
 
 ## Parameters Reference
 
+**PowerShell (Session-Scout.ps1):**
+
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `-Top` | int | 12 | Maximum sessions to display |
 | `-Csv` | switch | - | Export to default path: `~/.admin/logs/session-scout-YYYY-MM-DD.csv` |
 | `-File` | string | - | Export to specified CSV path |
+
+**Bash (session-scout.sh):**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `--top`, `-t` | int | 12 | Maximum sessions to display |
+| `--csv` | flag | - | Export to default path: `~/.admin/logs/session-scout-YYYY-MM-DD.csv` |
+| `--file`, `-f` | string | - | Export to specified CSV path |
 
 ---
 
@@ -118,17 +152,25 @@ This skill prevents **3** documented issues:
 Claude Code (Windows):
   %USERPROFILE%\.claude\projects\{project-slug}\{uuid}.jsonl
 
-Claude Code (WSL):
+Claude Code (macOS/Linux):
   ~/.claude/projects/{project-slug}/{uuid}.jsonl
 
-Claude Desktop:
+Claude Desktop (Windows):
   %APPDATA%\Claude\
   %LOCALAPPDATA%\Claude\
+
+Claude Desktop (macOS):
+  ~/Library/Application Support/Claude/
+  ~/Library/Application Support/Anthropic/
+
+Claude Desktop (Linux):
+  ~/.config/Claude/
+  ~/.config/Anthropic/
 
 OpenCode (Windows):
   %USERPROFILE%\.local\share\opencode\log\{timestamp}.log
 
-OpenCode (WSL):
+OpenCode (macOS/Linux):
   ~/.local/share/opencode/log/{timestamp}.log
 ```
 
@@ -138,15 +180,16 @@ OpenCode (WSL):
 
 ### Problem: No sessions found
 **Solution**: Check expected locations manually:
+```bash
+# macOS / Linux
+find ~/.claude/projects -name '*.jsonl' 2>/dev/null | wc -l
+```
 ```powershell
-# Windows Claude Code
+# Windows
 dir $env:USERPROFILE\.claude\projects -Recurse -Filter *.jsonl | measure
-
-# WSL Claude Code
-wsl -e bash -c 'find ~/.claude/projects -name "*.jsonl" 2>/dev/null | wc -l'
 ```
 
-### Problem: WSL sessions not appearing
+### Problem: WSL sessions not appearing (Windows only)
 **Solution**: Ensure WSL is running and distros are accessible:
 ```powershell
 wsl -l -q
@@ -173,7 +216,7 @@ Claude Desktop                  1/26/2026 10:10:18 AM                           
 
 ## Integration with Admin Skills
 
-This script is part of the Windows admin toolkit (`D:\admin`). Session data can be used for:
+This script is part of the admin toolkit. Session data can be used for:
 - Auditing AI tool usage across projects
 - Finding previous sessions to resume
 - Tracking which projects have active Claude Code configurations
@@ -183,8 +226,13 @@ This script is part of the Windows admin toolkit (`D:\admin`). Session data can 
 
 ## Complete Setup Checklist
 
+**macOS / Linux:**
+- [ ] Bash 4+ installed (`bash --version`)
+- [ ] Script is executable (`chmod +x session-scout.sh`)
+- [ ] At least one Claude Code/OpenCode session exists to test
+
+**Windows:**
 - [ ] PowerShell 7+ installed (`pwsh --version`)
-- [ ] Script exists at `D:\admin\scripts\session-scout.ps1`
 - [ ] WSL2 installed (for WSL session discovery)
 - [ ] At least one Claude Code/OpenCode session exists to test
 
