@@ -46,12 +46,12 @@ The satellite `.env` prevents this by making `~/.admin/` exist with a pointer to
 
 **Bash (WSL/Linux/macOS):**
 ```bash
-~/.claude/skills/admin/scripts/test-admin-profile.sh
+scripts/test-admin-profile.sh
 ```
 
 **PowerShell (Windows):**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
+pwsh -NoProfile -File "scripts/Test-AdminProfile.ps1"
 ```
 
 Returns JSON: `{"exists":true|false,"path":"...","device":"...","platform":"...",...}`
@@ -68,7 +68,7 @@ If profile doesn't exist, use the TUI interview defined in `SKILL.md`:
 
 **Bash:**
 ```bash
-~/.claude/skills/admin/scripts/new-admin-profile.sh \
+scripts/new-admin-profile.sh \
   --admin-root "$HOME/.admin" \
   --pkg-mgr "brew" \
   --py-mgr "uv" \
@@ -79,7 +79,7 @@ If profile doesn't exist, use the TUI interview defined in `SKILL.md`:
 
 **PowerShell:**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\New-AdminProfile.ps1" `
+pwsh -NoProfile -File "scripts/New-AdminProfile.ps1" `
   -AdminRoot "$HOME/.admin" `
   -PkgMgr "winget" `
   -PyMgr "uv" `
@@ -100,13 +100,13 @@ Add `--multi-device` (Bash) or `-MultiDevice` (PowerShell) for cloud-synced stor
 
 **Bash:**
 ```bash
-source ~/.claude/skills/admin/scripts/load-profile.sh
+source scripts/load-profile.sh
 load_admin_profile
 ```
 
 **PowerShell:**
 ```powershell
-. "$HOME\.claude\skills\admin\scripts\Load-Profile.ps1"
+. "scripts/Load-Profile.ps1"
 Load-AdminProfile -Export
 ```
 

@@ -15,6 +15,9 @@ source: plugin
 
 # Admin - Local Machine Companion (Alpha)
 
+**Script paths**: All paths below are relative to this skill's base directory.
+Prepend the base directory shown above when running scripts (e.g., `{base}/scripts/test-admin-profile.sh`).
+
 ---
 
 ## 🛑 PROFILE GATE — MANDATORY FIRST STEP
@@ -28,12 +31,12 @@ during setup and contains 3 vars: `ADMIN_ROOT`, `ADMIN_DEVICE`, `ADMIN_PLATFORM`
 
 **Bash (WSL/Linux/macOS):**
 ```bash
-~/.claude/skills/admin/scripts/test-admin-profile.sh
+scripts/test-admin-profile.sh
 ```
 
 **PowerShell (Windows):**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
+pwsh -NoProfile -File "scripts/Test-AdminProfile.ps1"
 ```
 
 Returns JSON: `{"exists":true|false,"path":"...","device":"...","platform":"..."}`
@@ -86,7 +89,7 @@ Pass the user's answers to the setup script.
 
 **PowerShell:**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\New-AdminProfile.ps1" `
+pwsh -NoProfile -File "scripts/New-AdminProfile.ps1" `
   -AdminRoot "C:/Users/You/.admin" `
   -PkgMgr "winget" `
   -PyMgr "uv" `
@@ -97,7 +100,7 @@ pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\New-AdminProfile.ps1" 
 
 **Bash:**
 ```bash
-~/.claude/skills/admin/scripts/new-admin-profile.sh \
+scripts/new-admin-profile.sh \
   --admin-root "$HOME/.admin" \
   --pkg-mgr "brew" \
   --py-mgr "uv" \
@@ -128,7 +131,9 @@ Secrets can be encrypted at rest using [age encryption](https://age-encryption.o
 
 **Setup**: `age-keygen -o ~/.age/key.txt` then `secrets --encrypt $ADMIN_ROOT/.env`
 
-**CLI**: `secrets KEYNAME` | `secrets --list` | `eval $(secrets -s)` | `secrets --edit`
+**CLI (Bash)**: `secrets KEYNAME` | `secrets --list` | `eval $(secrets -s)` | `secrets --edit`
+
+**CLI (PowerShell)**: `secrets.ps1 KEY` | `secrets.ps1 -List` | `secrets.ps1 -Source` | `secrets.ps1 -Status`
 
 **Feature flag**: `ADMIN_VAULT=enabled|disabled` in satellite `~/.admin/.env`. Falls back to plaintext when disabled or deps missing.
 
@@ -174,16 +179,20 @@ Never suggest install commands without checking preferences first.
 
 ## Logging (MANDATORY)
 
-Log every operation with the shared helpers:
+Log every operation with the shared helpers.
 
-- PowerShell: `scripts/Log-AdminEvent.ps1`
-- Bash: `scripts/log-admin-event.sh`
-
-Example (bash):
+**Bash** — params: `MESSAGE` `LEVEL` (INFO|WARN|ERROR|OK):
 ```bash
-source ~/.claude/skills/admin/scripts/log-admin-event.sh
+source scripts/log-admin-event.sh
 log_admin_event "Installed ripgrep" "OK"
 ```
+
+**PowerShell** — params: `-Message` `-Level` (INFO|WARN|ERROR|OK):
+```powershell
+pwsh -NoProfile -File "scripts/Log-AdminEvent.ps1" -Message "Installed ripgrep" -Level OK
+```
+
+**Note**: There are no `-Tool`, `-Action`, `-Status`, or `-Details` parameters. Use `-Message` with a descriptive string.
 
 ## Scripts / References
 

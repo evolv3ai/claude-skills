@@ -25,7 +25,7 @@ _Consolidated from `skills/admin (windows)` on 2026-02-02_
 
 ```powershell
 # Use the helper script - it handles path resolution correctly
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
+pwsh -NoProfile -File "scripts/Test-AdminProfile.ps1"
 ```
 
 Returns JSON: `{"exists":true,"path":"...","device":"CASATEN",...}`
@@ -34,7 +34,7 @@ Returns JSON: `{"exists":true,"path":"...","device":"CASATEN",...}`
 
 If `exists` is `false`:
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Setup-Interview.ps1"
+pwsh -NoProfile -File "scripts/Setup-Interview.ps1"
 ```
 
 **DO NOT proceed with ANY task until profile exists.**
@@ -42,7 +42,7 @@ pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Setup-Interview.ps1"
 ### Step 3: Load Profile
 
 ```powershell
-. "$HOME\.claude\skills\admin\scripts\Load-Profile.ps1"
+. "scripts/Load-Profile.ps1"
 Load-AdminProfile -Export
 ```
 
@@ -256,7 +256,7 @@ if ($tool.present -and $tool.installStatus -eq "working") {
 
 ```powershell
 # Source the logging helper
-. "$HOME\.claude\skills\admin\scripts\Log-AdminEvent.ps1"
+. "scripts/Log-AdminEvent.ps1"
 
 # Log success
 Log-AdminEvent -Message "Installed 7zip via winget" -Level OK
@@ -268,7 +268,7 @@ Log-AdminEvent -Message "Failed to install 7zip: access denied" -Level ERROR
 ### On Failure: Create Issue
 
 ```powershell
-. "$HOME\.claude\skills\admin\scripts\New-AdminIssue.ps1"
+. "scripts/New-AdminIssue.ps1"
 New-AdminIssue -Title "7zip installation failed" -Category install -Tags @("winget","7zip")
 ```
 

@@ -58,6 +58,7 @@ AGE_KEY_PATH=/mnt/c/Users/Owner/.age/key.txt   # Explicit path (cross-platform)
 
 ### 5. Test
 
+**Bash:**
 ```bash
 secrets --status           # Check everything is wired up
 secrets --list             # See all keys
@@ -65,10 +66,21 @@ secrets HCLOUD_TOKEN       # Get a single value
 eval $(secrets -s)         # Load all to shell
 ```
 
+**PowerShell:**
+```powershell
+.\secrets.ps1 -Status     # Check everything is wired up
+.\secrets.ps1 -List        # See all keys
+.\secrets.ps1 HCLOUD_TOKEN # Get a single value
+.\secrets.ps1 -Source | Invoke-Expression  # Load all to env
+```
+
+> **Note**: Bash uses `--double-dash` flags. PowerShell uses `-PascalCase` switches. Do not mix them.
+
 ## Daily Usage
 
 ### Retrieve secrets
 
+**Bash:**
 ```bash
 # Single value
 secrets HCLOUD_TOKEN
@@ -84,10 +96,26 @@ secrets --list
 secrets --decrypt
 ```
 
+**PowerShell:**
+```powershell
+# Single value
+.\secrets.ps1 HCLOUD_TOKEN
+$token = .\secrets.ps1 HCLOUD_TOKEN
+
+# All values as env vars
+.\secrets.ps1 -Source | Invoke-Expression
+
+# List keys
+.\secrets.ps1 -List
+
+# View all (for debugging)
+.\secrets.ps1 -Decrypt
+```
+
 ### Edit vault
 
 ```bash
-# Opens vault in $EDITOR, re-encrypts on save
+# Opens vault in $EDITOR, re-encrypts on save (Bash only)
 secrets --edit
 ```
 

@@ -25,7 +25,7 @@ _Consolidated from `skills/admin (wsl)` on 2026-02-02_
 
 ```bash
 # Use the helper script - it handles WSL path detection correctly
-~/.claude/skills/admin/scripts/test-admin-profile.sh
+scripts/test-admin-profile.sh
 ```
 
 Returns JSON: `{"exists":true,"path":"/mnt/c/Users/Owner/.admin/profiles/CASATEN.json",...}`
@@ -34,7 +34,7 @@ Returns JSON: `{"exists":true,"path":"/mnt/c/Users/Owner/.admin/profiles/CASATEN
 
 If `exists` is `false`:
 ```bash
-~/.claude/skills/admin/scripts/setup-interview.sh
+scripts/setup-interview.sh
 ```
 
 **DO NOT proceed with ANY task until profile exists.**
@@ -42,18 +42,18 @@ If `exists` is `false`:
 ### Step 3: Load Profile
 
 ```bash
-source ~/.claude/skills/admin/scripts/load-profile.sh
+source scripts/load-profile.sh
 load_admin_profile
 ```
 
 ### Step 4: After ANY Operation → Log It
 
 ```bash
-source ~/.claude/skills/admin/scripts/log-admin-event.sh
+source scripts/log-admin-event.sh
 log_admin_event "Installed docker via apt" "OK"
 
 # On failure, also create issue:
-source ~/.claude/skills/admin/scripts/new-admin-issue.sh
+source scripts/new-admin-issue.sh
 new_admin_issue "Docker installation failed" "install" "docker,apt"
 ```
 

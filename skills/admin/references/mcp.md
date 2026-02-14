@@ -25,12 +25,12 @@ _Consolidated from `skills/admin (mcp)` on 2026-02-02_
 
 **PowerShell (Windows):**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Test-AdminProfile.ps1"
+pwsh -NoProfile -File "scripts/Test-AdminProfile.ps1"
 ```
 
 **Bash (WSL/Linux/macOS):**
 ```bash
-~/.claude/skills/admin/scripts/test-admin-profile.sh
+scripts/test-admin-profile.sh
 ```
 
 Returns JSON: `{"exists":true,"path":"...","device":"...",...}`
@@ -39,12 +39,12 @@ Returns JSON: `{"exists":true,"path":"...","device":"...",...}`
 
 **PowerShell:**
 ```powershell
-pwsh -NoProfile -File "$HOME\.claude\skills\admin\scripts\Setup-Interview.ps1"
+pwsh -NoProfile -File "scripts/Setup-Interview.ps1"
 ```
 
 **Bash:**
 ```bash
-~/.claude/skills/admin/scripts/setup-interview.sh
+scripts/setup-interview.sh
 ```
 
 **DO NOT proceed with ANY MCP operation until profile exists.**
@@ -55,13 +55,13 @@ After ANY MCP operation (install, remove, scan), log it:
 
 **PowerShell:**
 ```powershell
-. "$HOME\.claude\skills\admin\scripts\Log-AdminEvent.ps1"
+. "scripts/Log-AdminEvent.ps1"
 Log-AdminEvent -Message "Installed MCP server: filesystem" -Level OK
 ```
 
 **Bash:**
 ```bash
-source ~/.claude/skills/admin/scripts/log-admin-event.sh
+source scripts/log-admin-event.sh
 log_admin_event "Installed MCP server: filesystem" "OK"
 ```
 

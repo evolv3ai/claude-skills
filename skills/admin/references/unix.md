@@ -24,7 +24,7 @@ _Consolidated from `skills/admin (unix)` on 2026-02-02_
 ### Step 1: Check Profile Exists
 
 ```bash
-~/.claude/skills/admin/scripts/test-admin-profile.sh
+scripts/test-admin-profile.sh
 ```
 
 Returns JSON: `{"exists":true,"path":"~/.admin/profiles/hostname.json",...}`
@@ -32,7 +32,7 @@ Returns JSON: `{"exists":true,"path":"~/.admin/profiles/hostname.json",...}`
 ### Step 2: If Profile Missing → Run Setup
 
 ```bash
-~/.claude/skills/admin/scripts/setup-interview.sh
+scripts/setup-interview.sh
 ```
 
 **DO NOT proceed with ANY task until profile exists.**
@@ -40,7 +40,7 @@ Returns JSON: `{"exists":true,"path":"~/.admin/profiles/hostname.json",...}`
 ### Step 3: Load Profile
 
 ```bash
-source ~/.claude/skills/admin/scripts/load-profile.sh
+source scripts/load-profile.sh
 load_admin_profile
 show_admin_summary
 ```
