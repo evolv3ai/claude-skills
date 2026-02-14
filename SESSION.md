@@ -1,72 +1,63 @@
 # Session State
 
 **Project**: evolv3ai-skills - Claude Code skills repo
-**Current Phase**: SimpleMem integration + admin bug fixes
-**Current Stage**: Testing / Issue resolution
-**Last Checkpoint**: 7ba8f5b (2026-02-13)
+**Current Phase**: SimpleMem MCP integration (complete) + remaining learnings capture
+**Current Stage**: Implementation
+**Last Checkpoint**: 8e43fdc (2026-02-14)
 **Planning Docs**: N/A (ad-hoc session)
 
 ---
 
-## What Was Built This Session
+## Completed This Session (2026-02-14)
 
-### 1. SimpleMem Skill (commit `19a5bd7`)
-Created production skill for SimpleMem persistent LLM agent memory:
-- `skills/simplemem/SKILL.md` - Knowledge-first hybrid approach, 295-char description
-- `skills/simplemem/README.md` - Auto-trigger keywords
-- `skills/simplemem/rules/simplemem.md` - 7 correction rules
-- `skills/simplemem/references/` - 5 reference docs (architecture, mcp-setup, cross-session, cli-reference, api-reference)
-- `skills/simplemem/templates/config.py.example` - Multi-provider config template
+### ISSUE-0005 Resolution: SimpleMem MCP Tools Not Appearing
+Root cause chain (3 problems stacked):
+1. **Wrong config file**: MCP servers go in `~/.claude.json` (under `mcpServers` key), NOT `~/.claude/.mcp.json`
+2. **Plugin `.mcp.json` conflict**: Plugin-level config with `${ENV_VAR}` placeholders registered a broken server entry (`plugin:simplemem:simplemem`) that overrode working global config
+3. **Missing `type` field**: User-level config needs `"type": "http"` explicitly
 
-### 2. Admin SimpleMem Integration (commit `6d7589e`)
-Integrated SimpleMem MCP with admin skill agents and commands:
-- `skills/admin/references/memory-integration.md` - Architecture, patterns, privacy rules
-- Updated 4 agents (docs-agent, verify-agent, tool-installer, mcp-bot) with SimpleMem sections
-- Updated `/install` and `/troubleshoot` commands with memory recall/store steps
-- Added SimpleMem to MCP reference (community servers, HTTP transport pattern)
-- All memory operations use graceful degradation (skip silently when unavailable)
+Fix applied:
+- Removed plugin `skills/simplemem/.mcp.json` (broken env var approach)
+- Added `mcpServers.simplemem` to `~/.claude.json` on both WSL and Windows
+- Corrected all doc references from `~/.claude/.mcp.json` to `~/.claude.json`
+- Verified: 7 MCP tools discovered on both platforms (`mcp__simplemem__memory_*`)
 
-### 3. Session Scout Renovation (commit `082425c`, by user)
-- Bundled `Session-Scout.ps1` into `scripts/` (was external at `D:\admin\scripts\`)
-- Created cross-platform `session-scout.sh` Bash equivalent
-- Updated SKILL.md and README.md for both platforms
-- Removed scaffolding leftovers
+Commits: `9a7adb5` → `c622e6a` → `e16fc11`
 
-### 4. Admin Bug Fixes (commit `7ba8f5b`)
-Fixed 3 reported issues:
-- **ISSUE-0002**: Replaced 25+ hardcoded `~/.claude/skills/admin/scripts/` paths with relative `scripts/` across SKILL.md + 5 reference files
-- **ISSUE-0003**: Added PowerShell syntax (`-List`, `-Status`) alongside bash (`--list`, `--status`) in SKILL.md and vault-guide.md
-- **ISSUE-0004**: Clarified Log-AdminEvent interface (only `-Message` + `-Level`, no `-Tool`/`-Action`/`-Details`)
+### ISSUE-0006 Documentation
+- REST API `/api/*` is cloud-only, documented in `rules/simplemem.md` and `references/mcp-setup.md`
+- Self-hosted uses `/mcp` endpoint exclusively
 
-## Open Issues (from testing)
+### Additional Fixes
+- Added `memory_delete` to tool table (server exposes 7 tools, not 6)
+- Added `SIMPLEMEM_URL` and `SIMPLEMEM_TOKEN` to `~/.admin/.env`
+- Added `.admin/.env` sourcing to `~/.zshrc`
 
-### ISSUE-0005: SimpleMem MCP tools not deferred (PRIORITY)
-SimpleMem configured in `~/.claude/.mcp.json` with `type: "http"` but its 6 tools don't appear in ToolSearch. May be a Claude Code limitation with HTTP transport MCP servers, or server not responding to discovery handshake. **This blocks native MCP integration.**
+## Open Issues
 
-### ISSUE-0006: SimpleMem REST API 404
-`POST /api/stats` returns 404 on self-hosted instance (`mem.self-host.io`). Self-hosted likely exposes MCP endpoint only (`/mcp`), not REST API (`/api/*`). **Fix**: Update simplemem skill docs to clarify REST is cloud-only.
-
-### Resolved Issues (learnings to capture)
+### Learnings to Capture as Rules (ISSUE-0007/0008/0009/0010)
 - **ISSUE-0007**: curl JSON escape errors on Windows → use PowerShell script file with ConvertTo-Json
 - **ISSUE-0008**: MCP HTTP requires session init before tool calls → document 2-step protocol
 - **ISSUE-0009**: Complex PowerShell inline fails in Bash tool → write .ps1 file, run with `pwsh -File`
 - **ISSUE-0010**: `del` command not found → use `rm` in Bash tool
 
+Note: 0007/0009/0010 already captured in MEMORY.md cross-platform gotchas. Still need formal rules in admin skill.
+
 ## Next Actions
 
-1. **Investigate ISSUE-0005**: Why SimpleMem MCP tools aren't deferred. Check if `type: "http"` MCP servers are supported by Claude Code tool discovery. Test with `curl` to verify server responds to `tools/list` JSON-RPC.
+1. **Capture ISSUE-0007/0008/0009/0010 as correction rules** in `skills/admin/rules/` - create cross-platform CLI rules and MCP HTTP protocol rules
 
-2. **Fix simplemem skill for ISSUE-0006**: Update `references/mcp-setup.md` to clarify that `/api/*` REST endpoints are cloud-service only. Self-hosted uses MCP JSON-RPC exclusively at `/mcp`.
+2. **Test `/install` pipeline end-to-end** - verify the admin install command works with SimpleMem memory recall/store
 
-3. **Add learnings as rules**: Capture ISSUE-0007/0008/0009/0010 patterns into admin and simplemem rules.
-
-4. **URL discrepancy**: User said `mem.self-host.ai` but actual config uses `mem.self-host.io`. The `.io` domain is correct (confirmed in working MCP config).
-
-5. **memsearch evaluation**: Decided to keep as separate future skill (complementary to SimpleMem, not replacement). Build when it reaches v0.2+.
+3. **memsearch evaluation**: Deferred to later (complementary to SimpleMem, wait for v0.2+)
 
 ---
 
 ## Previous Sessions
+
+### SimpleMem Skill + Admin Integration (2026-02-13)
+**Status**: COMPLETE | **Checkpoint**: 7ba8f5b
+Created simplemem skill (knowledge-first hybrid approach), integrated SimpleMem MCP across 4 admin agents + 2 commands, renovated session-scout, fixed admin bugs (ISSUE-0002/0003/0004)
 
 ### Admin Vault Implementation (2026-02-12)
 **Status**: COMPLETE | **Checkpoint**: 62b0647
