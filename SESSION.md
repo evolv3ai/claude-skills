@@ -1,56 +1,76 @@
 # Session State
 
-**Project**: Admin Vault - age-encrypted secrets for admin suite
-**Current Phase**: All 5 phases complete, needs testing + version bump
-**Current Stage**: Post-implementation verification
-**Last Checkpoint**: 62b0647 (2026-02-12)
-**Planning Docs**: `docs/IMPLEMENTATION_PHASES.md`, `PROJECT_BRIEF.md`
+**Project**: evolv3ai-skills - Claude Code skills repo
+**Current Phase**: SimpleMem integration + admin bug fixes
+**Current Stage**: Testing / Issue resolution
+**Last Checkpoint**: 7ba8f5b (2026-02-13)
+**Planning Docs**: N/A (ad-hoc session)
 
 ---
 
 ## What Was Built This Session
 
-Added age-encrypted vault to admin skill. 8 new files, 4 modified files, committed as `62b0647`.
+### 1. SimpleMem Skill (commit `19a5bd7`)
+Created production skill for SimpleMem persistent LLM agent memory:
+- `skills/simplemem/SKILL.md` - Knowledge-first hybrid approach, 295-char description
+- `skills/simplemem/README.md` - Auto-trigger keywords
+- `skills/simplemem/rules/simplemem.md` - 7 correction rules
+- `skills/simplemem/references/` - 5 reference docs (architecture, mcp-setup, cross-session, cli-reference, api-reference)
+- `skills/simplemem/templates/config.py.example` - Multi-provider config template
 
-**New**: `scripts/secrets` (bash CLI), `scripts/secrets.ps1`, `scripts/admin-vault.ts`, `scripts/migrate-to-vault.sh`, `scripts/migrate-to-vault.ps1`, `references/vault-guide.md`, `PROJECT_BRIEF.md`, `docs/IMPLEMENTATION_PHASES.md`
+### 2. Admin SimpleMem Integration (commit `6d7589e`)
+Integrated SimpleMem MCP with admin skill agents and commands:
+- `skills/admin/references/memory-integration.md` - Architecture, patterns, privacy rules
+- Updated 4 agents (docs-agent, verify-agent, tool-installer, mcp-bot) with SimpleMem sections
+- Updated `/install` and `/troubleshoot` commands with memory recall/store steps
+- Added SimpleMem to MCP reference (community servers, HTTP transport pattern)
+- All memory operations use graceful degradation (skip silently when unavailable)
 
-**Modified**: `scripts/load-profile.sh` (vault decrypt + BASH_REMATCH/set-u fix), `scripts/Load-Profile.ps1` (vault functions), `.env.template` (ADMIN_VAULT flag), `assets/profile-schema.json` (vault section), `SKILL.md` (vault docs)
+### 3. Session Scout Renovation (commit `082425c`, by user)
+- Bundled `Session-Scout.ps1` into `scripts/` (was external at `D:\admin\scripts\`)
+- Created cross-platform `session-scout.sh` Bash equivalent
+- Updated SKILL.md and README.md for both platforms
+- Removed scaffolding leftovers
 
-## Known Issues / Next Actions
+### 4. Admin Bug Fixes (commit `7ba8f5b`)
+Fixed 3 reported issues:
+- **ISSUE-0002**: Replaced 25+ hardcoded `~/.claude/skills/admin/scripts/` paths with relative `scripts/` across SKILL.md + 5 reference files
+- **ISSUE-0003**: Added PowerShell syntax (`-List`, `-Status`) alongside bash (`--list`, `--status`) in SKILL.md and vault-guide.md
+- **ISSUE-0004**: Clarified Log-AdminEvent interface (only `-Message` + `-Level`, no `-Tool`/`-Action`/`-Details`)
 
-1. **TEST ERRORS**: Ran a test (unspecified) that produced errors. Need to reproduce and fix. Start here.
+## Open Issues (from testing)
 
-2. **Version not bumped**: `skills/admin/VERSION` is still `0.0.3`. Should be `0.0.4` after vault feature. Bump it, then regenerate manifests:
-   ```bash
-   echo "0.0.4" > skills/admin/VERSION
-   ./scripts/generate-plugin-manifests.sh admin
-   ```
+### ISSUE-0005: SimpleMem MCP tools not deferred (PRIORITY)
+SimpleMem configured in `~/.claude/.mcp.json` with `type: "http"` but its 6 tools don't appear in ToolSearch. May be a Claude Code limitation with HTTP transport MCP servers, or server not responding to discovery handshake. **This blocks native MCP integration.**
 
-3. **Plugin manifests not regenerated**: `./scripts/generate-plugin-manifests.sh` was NOT run after vault changes. The `skills/admin/.claude-plugin/plugin.json` is stale.
+### ISSUE-0006: SimpleMem REST API 404
+`POST /api/stats` returns 404 on self-hosted instance (`mem.self-host.io`). Self-hosted likely exposes MCP endpoint only (`/mcp`), not REST API (`/api/*`). **Fix**: Update simplemem skill docs to clarify REST is cloud-only.
 
-4. **Marketplace not synced**: After pushing, run `/plugin marketplace update jezweb-skills`
+### Resolved Issues (learnings to capture)
+- **ISSUE-0007**: curl JSON escape errors on Windows → use PowerShell script file with ConvertTo-Json
+- **ISSUE-0008**: MCP HTTP requires session init before tool calls → document 2-step protocol
+- **ISSUE-0009**: Complex PowerShell inline fails in Bash tool → write .ps1 file, run with `pwsh -File`
+- **ISSUE-0010**: `del` command not found → use `rm` in Bash tool
 
-5. **Skill review not run**: Should run `./scripts/review-skill.sh admin` to validate the updated skill.
+## Next Actions
 
-6. **VERSION automation gap identified**: No agent/hook/command bumps versions. Consider building `bump-version.sh` or a pre-commit hook that warns when skill files change without a version bump.
+1. **Investigate ISSUE-0005**: Why SimpleMem MCP tools aren't deferred. Check if `type: "http"` MCP servers are supported by Claude Code tool discovery. Test with `curl` to verify server responds to `tools/list` JSON-RPC.
 
-7. **Real migration not done**: Test vault used synthetic data. To encrypt real secrets: `./skills/admin/scripts/migrate-to-vault.sh`
+2. **Fix simplemem skill for ISSUE-0006**: Update `references/mcp-setup.md` to clarify that `/api/*` REST endpoints are cloud-service only. Self-hosted uses MCP JSON-RPC exclusively at `/mcp`.
 
-## Correct Post-Build Workflow (for reference)
+3. **Add learnings as rules**: Capture ISSUE-0007/0008/0009/0010 patterns into admin and simplemem rules.
 
-```
-1. ./scripts/review-skill.sh admin           # Verify skill quality
-2. echo "0.0.4" > skills/admin/VERSION       # Bump version
-3. ./scripts/generate-plugin-manifests.sh    # Regen plugin.json
-4. ./scripts/check-marketplace-sync.sh --fix # Sync marketplace
-5. git add skills/admin/ .claude-plugin/     # Stage all
-6. git commit && git push                    # Ship it
-7. /plugin marketplace update jezweb-skills  # Update marketplace
-```
+4. **URL discrepancy**: User said `mem.self-host.ai` but actual config uses `mem.self-host.io`. The `.io` domain is correct (confirmed in working MCP config).
+
+5. **memsearch evaluation**: Decided to keep as separate future skill (complementary to SimpleMem, not replacement). Build when it reaches v0.2+.
 
 ---
 
 ## Previous Sessions
+
+### Admin Vault Implementation (2026-02-12)
+**Status**: COMPLETE | **Checkpoint**: 62b0647
+Added age-encrypted vault, secrets CLI, migration scripts, vault-guide.md
 
 ### Admin Plugin Fixes + Agent Teams (2026-02-11)
 **Status**: COMPLETE | **Checkpoint**: 1a25583
