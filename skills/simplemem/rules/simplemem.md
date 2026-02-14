@@ -149,7 +149,7 @@ WRONG - Expecting plugin `.mcp.json` to auto-configure:
 # Plugin .mcp.json with env vars creates broken server entries
 ```
 
-RIGHT - Configure via user-level `~/.claude/.mcp.json`:
+RIGHT - Configure via user-level `~/.claude.json`:
 ```json
 {
   "mcpServers": {

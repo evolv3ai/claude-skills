@@ -23,7 +23,7 @@
 }
 ```
 
-**Claude Code** (`~/.claude/.mcp.json`):
+**Claude Code** (`~/.claude.json`):
 ```json
 {
   "mcpServers": {

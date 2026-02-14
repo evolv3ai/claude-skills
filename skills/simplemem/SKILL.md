@@ -35,7 +35,7 @@ The fastest path. Uses the hosted service at `mcp.simplemem.cloud`.
 2. Enter your OpenRouter API key to get an auth token
 3. Add to your MCP client config:
 
-**Claude Desktop / Claude Code (`~/.claude/.mcp.json`):**
+**Claude Desktop / Claude Code (`~/.claude.json`):**
 
 ```json
 {
