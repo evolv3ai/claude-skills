@@ -65,28 +65,6 @@ The fastest path. Uses the hosted service at `mcp.simplemem.cloud`.
 }
 ```
 
-### Plugin Auto-Configuration (Claude Code)
-
-When installed as a Claude Code plugin, SimpleMem's MCP server is configured automatically via the bundled `.mcp.json`. Set these environment variables:
-
-```bash
-# For self-hosted:
-export SIMPLEMEM_URL="https://your-instance.example.com/mcp"
-export SIMPLEMEM_TOKEN="your-jwt-token"
-
-# For cloud service:
-export SIMPLEMEM_URL="https://mcp.simplemem.cloud/mcp"
-export SIMPLEMEM_TOKEN="your-cloud-token"
-```
-
-After setting env vars, restart Claude Code. SimpleMem tools (`memory_add`, `memory_query`, `memory_retrieve`, `memory_stats`, `memory_clear`, `memory_add_batch`) appear as deferred tools available via `ToolSearch`.
-
-**Important:** Install simplemem individually for MCP tool discovery. The `all` bundle places `.mcp.json` in a nested directory that Claude Code does not scan:
-
-```bash
-/plugin install simplemem@evolv3ai-skills
-```
-
 ### Self-Hosted (Docker)
 
 For privacy-sensitive deployments or custom infrastructure:

@@ -140,23 +140,29 @@ RIGHT - Include /mcp path and Bearer token:
 }
 ```
 
-## Plugin MCP Discovery
+## MCP Tool Discovery
 
-WRONG - Expecting MCP tools from the `all` bundle install:
-```bash
-/plugin install all@evolv3ai-skills
-# Expects mcp__simplemem__* tools to appear - they won't
-```
-
-RIGHT - Install simplemem individually for MCP tool discovery:
+WRONG - Expecting plugin `.mcp.json` to auto-configure:
 ```bash
 /plugin install simplemem@evolv3ai-skills
-# Set required env vars:
-export SIMPLEMEM_URL="https://your-instance.example.com/mcp"
-export SIMPLEMEM_TOKEN="your-jwt-token"
-# Restart Claude Code
-# Tools appear as mcp__simplemem__memory_query, etc.
+# Expects mcp__simplemem__* tools to appear - they won't
+# Plugin .mcp.json with env vars creates broken server entries
 ```
+
+RIGHT - Configure via user-level `~/.claude/.mcp.json`:
+```json
+{
+  "mcpServers": {
+    "simplemem": {
+      "url": "https://your-instance.example.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_JWT_TOKEN"
+      }
+    }
+  }
+}
+```
+Then restart Claude Code. Tools appear as deferred tools.
 
 ## REST API vs MCP (Self-Hosted)
 
