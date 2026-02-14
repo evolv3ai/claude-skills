@@ -1,5 +1,25 @@
 # MCP Server Setup
 
+## Plugin Installation (Claude Code)
+
+When installed as a Claude Code plugin, SimpleMem configures MCP automatically.
+
+**Prerequisites:**
+1. Set environment variables:
+   - `SIMPLEMEM_URL` - Your SimpleMem MCP endpoint (e.g., `https://mcp.simplemem.cloud/mcp` or `https://your-instance.example.com/mcp`)
+   - `SIMPLEMEM_TOKEN` - Your JWT authentication token
+
+2. Install the plugin individually (not via the `all` bundle):
+   ```bash
+   /plugin install simplemem@evolv3ai-skills
+   ```
+
+3. Restart Claude Code
+
+**Verify:** Search for `simplemem` in ToolSearch. You should see tools like `mcp__simplemem__memory_query`.
+
+**Why individual install?** The `all` bundle places `.mcp.json` in a nested directory that Claude Code does not scan. Individual plugin install places it at the plugin root where it is discovered.
+
 ## Cloud Service (Quickest)
 
 1. Visit https://mcp.simplemem.cloud
@@ -74,8 +94,8 @@ docker compose up -d
 
 The server runs on port 8000:
 - Web UI: http://localhost:8000/
-- REST API: http://localhost:8000/api/
-- MCP endpoint: http://localhost:8000/mcp
+- REST API: http://localhost:8000/api/ (**cloud-only**; self-hosted returns 404)
+- MCP endpoint: http://localhost:8000/mcp (use this for all programmatic interaction)
 
 ### Option 2: Python Direct
 

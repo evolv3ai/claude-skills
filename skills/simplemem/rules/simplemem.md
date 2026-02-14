@@ -139,3 +139,38 @@ RIGHT - Include /mcp path and Bearer token:
   }
 }
 ```
+
+## Plugin MCP Discovery
+
+WRONG - Expecting MCP tools from the `all` bundle install:
+```bash
+/plugin install all@evolv3ai-skills
+# Expects mcp__simplemem__* tools to appear - they won't
+```
+
+RIGHT - Install simplemem individually for MCP tool discovery:
+```bash
+/plugin install simplemem@evolv3ai-skills
+# Set required env vars:
+export SIMPLEMEM_URL="https://your-instance.example.com/mcp"
+export SIMPLEMEM_TOKEN="your-jwt-token"
+# Restart Claude Code
+# Tools appear as mcp__simplemem__memory_query, etc.
+```
+
+## REST API vs MCP (Self-Hosted)
+
+WRONG - Using REST API on self-hosted instance:
+```bash
+curl https://your-instance.example.com/api/stats
+# Returns 404 - REST API is cloud-only
+```
+
+RIGHT - Self-hosted exposes MCP endpoint only:
+```bash
+# Use MCP JSON-RPC at /mcp endpoint
+curl -X POST https://your-instance.example.com/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"jsonrpc":"2.0","method":"tools/list","id":1}'
+```

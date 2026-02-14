@@ -1,0 +1,9 @@
+{
+  "simplemem": {
+    "type": "http",
+    "url": "${SIMPLEMEM_URL}",
+    "headers": {
+      "Authorization": "Bearer ${SIMPLEMEM_TOKEN}"
+    }
+  }
+}
