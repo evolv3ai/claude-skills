@@ -143,6 +143,68 @@ Secrets can be encrypted at rest using [age encryption](https://age-encryption.o
 
 **Guide**: `references/vault-guide.md`
 
+## Architecture
+
+### Ecosystem Map
+
+```
+admin (core)
+  ├── 9 satellite skills: devops, oci, hetzner, contabo, digital-ocean, vultr, linode, coolify, kasm
+  ├── 6 agents: profile-validator, docs-agent, verify-agent, tool-installer, mcp-bot, ops-bot
+  ├── Profile system: ~/.admin/.env (satellite) → $ADMIN_ROOT/profiles/*.json
+  ├── Vault: $ADMIN_ROOT/vault.age (age-encrypted secrets)
+  └── SimpleMem: Long-term memory across sessions (graceful degradation)
+```
+
+### Data Flow
+
+```
+Satellite .env (bootstrap)  →  profile.json (device config)  →  Agent decisions
+        ↓                              ↓                              ↓
+  ADMIN_ROOT, DEVICE,          tools, servers, prefs,          SimpleMem storage
+  PLATFORM, VAULT flag         capabilities, history           (speaker convention)
+```
+
+- **Satellite `.env`** (`~/.admin/.env`): Per-device bootstrap. Points to `ADMIN_ROOT`.
+- **Root `.env`** (`$ADMIN_ROOT/.env`): Manifest (all keys visible, secrets in vault).
+- **Profile JSON** (`$ADMIN_ROOT/profiles/{DEVICE}.json`): Full device config.
+- **Vault** (`$ADMIN_ROOT/vault.age`): Encrypted secrets, decrypted at runtime.
+
+### Agent Roster
+
+| Agent | Model | Role | Tools |
+|-------|-------|------|-------|
+| profile-validator | haiku | JSON validation, read-only health check | Read, Bash, Glob |
+| docs-agent | haiku | File I/O documentation updates | Read, Write, Glob, Grep |
+| verify-agent | sonnet | System health checks, no Write | Read, Bash, Glob, Grep |
+| tool-installer | sonnet | Install software per profile prefs | Read, Write, Bash, AskUserQuestion |
+| mcp-bot | sonnet | MCP server diagnostics and config | Read, Write, Bash, Glob, Grep |
+| ops-bot | sonnet | Multi-step operations (migration, import, bulk config) | Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion |
+
+All agents use SimpleMem graceful degradation and profile gate as first step.
+Details: `references/agent-teams.md`, `references/memory-integration.md`
+
+### Satellite Dependency Graph
+
+```
+admin (core) ─── required by all satellites
+  │
+  ├── devops ─── required by provider + app skills
+  │     │
+  │     ├── oci, hetzner, contabo, digital-ocean, vultr, linode
+  │     │        (provision servers)
+  │     │              │
+  │     └── coolify, kasm
+  │           (deploy apps TO provisioned servers)
+  │
+  └── Profile system provides: server inventory, SSH keys, credentials (via vault)
+```
+
+- **admin**: Core profile, logging, tool installation. Required by everything.
+- **devops**: Server inventory, SSH, deployment coordination. Required by all infrastructure.
+- **Provider skills** (oci, hetzner, etc.): Provision VMs. Independent of each other.
+- **App skills** (coolify, kasm): Deploy TO servers. Require a provisioned server from a provider skill.
+
 ## Task Qualification (MANDATORY)
 - If the task involves **remote servers/VPS/cloud**, stop and hand off to **devops**.
 - If the task is **local machine administration**, continue.

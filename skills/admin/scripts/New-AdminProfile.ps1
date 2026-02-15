@@ -61,7 +61,7 @@ $VersionFile = Join-Path $SkillRoot "VERSION"
 $EnvTemplate = Join-Path $SkillRoot "templates\.env.template"
 
 # Read admin skill version
-$AdminSkillVersion = "0.0.3"
+$AdminSkillVersion = "0.1.0"
 if (Test-Path $VersionFile) {
     $AdminSkillVersion = (Get-Content $VersionFile -First 1).Trim()
 }
@@ -353,7 +353,7 @@ Write-Section "Saving Profile"
 $profile | ConvertTo-Json -Depth 10 | Set-Content -Path $ProfilePath -Encoding UTF8
 Write-OK "Profile: $ProfilePath"
 
-# Create/update .env
+# Create/update .env (root - at ADMIN_ROOT)
 $EnvFile = Join-Path $AdminRoot ".env"
 if (-not (Test-Path $EnvFile) -and (Test-Path $EnvTemplate)) {
     Copy-Item $EnvTemplate $EnvFile
@@ -369,10 +369,21 @@ if (-not (Test-Path $EnvFile)) {
     }
     $lines | Set-Content $EnvFile -Encoding UTF8
 }
-Write-OK ".env updated"
 
-# Set environment variable for current session
+# Ensure ADMIN_DEVICE and ADMIN_PLATFORM are in root .env
+$envContent = Get-Content $EnvFile
+if (-not ($envContent -match '^ADMIN_DEVICE=')) {
+    Add-Content $EnvFile "ADMIN_DEVICE=$DeviceName"
+}
+if (-not ($envContent -match '^ADMIN_PLATFORM=')) {
+    Add-Content $EnvFile "ADMIN_PLATFORM=windows"
+}
+Write-OK ".env updated (ADMIN_ROOT, ADMIN_DEVICE, ADMIN_PLATFORM)"
+
+# Set environment variables for current session
 $env:ADMIN_ROOT = $AdminRoot
+$env:ADMIN_DEVICE = $DeviceName
+$env:ADMIN_PLATFORM = "windows"
 
 # Copy AGENTS.md template if exists
 $AgentsMdTemplate = Join-Path $SkillRoot "templates\AGENTS.md"

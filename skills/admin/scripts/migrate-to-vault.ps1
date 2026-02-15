@@ -119,20 +119,63 @@ if (Test-Path $SatelliteEnv) {
     }
 }
 
-# Step 7: Offer to delete plaintext
+# Step 7: Generate manifest .env (keys visible, secrets in vault)
 Write-Host ""
-Write-Host "[WARN] Plaintext source still exists: $SourceEnv" -ForegroundColor Yellow
-$delete = Read-Host "Delete plaintext .env? (recommended after verifying vault works) [y/N]"
-if ($delete -eq "y") {
-    Remove-Item $SourceEnv -Force
-    Write-Host "[OK] Plaintext deleted: $SourceEnv" -ForegroundColor Green
-} else {
-    Write-Host "[INFO] Keeping plaintext. Delete manually when confident." -ForegroundColor Cyan
+Write-Host "[INFO] Generating manifest .env (keys visible, secrets in vault)..." -ForegroundColor Cyan
+
+# Known non-secret keys that should keep their values
+$NonSecretKeys = @(
+    "ADMIN_ROOT", "ADMIN_DEVICE", "ADMIN_PLATFORM", "ADMIN_VAULT", "AGE_KEY_PATH",
+    "ADMIN_SYNC_ENABLED", "ADMIN_SYNC_PATH", "ADMIN_LOG_PATH", "ADMIN_PROFILE_PATH",
+    "ADMIN_USER", "DEVICE_NAME", "WIN_USER_HOME", "WIN_ADMIN_PATH",
+    "WSL_ADMIN_PATH", "WSL_DISTRO", "SSH_KEY_PATH", "SSH_PUBLIC_KEY_PATH",
+    "SSH_CONFIG_PATH", "OCI_CONFIG_PATH", "OCI_REGION", "HCLOUD_CONTEXT",
+    "COOLIFY_DOMAIN", "COOLIFY_ADMIN_EMAIL", "COOLIFY_WILDCARD_DOMAIN",
+    "KASM_DOMAIN", "SIMPLEMEM_URL", "CLOUDFLARE_TUNNEL_NAME"
+)
+
+$manifestLines = @(
+    "# ======================================================================"
+    "# Admin Profile Configuration"
+    "# Secret values stored in vault.age"
+    "# Non-secret values editable directly here"
+    "# ======================================================================"
+    ""
+)
+
+foreach ($line in $plaintext -split "`n") {
+    $trimmed = $line.Trim()
+
+    # Pass through comments and blank lines
+    if ($trimmed -match '^\s*#' -or [string]::IsNullOrWhiteSpace($trimmed)) {
+        $manifestLines += $trimmed
+        continue
+    }
+
+    # Skip lines without =
+    if ($trimmed -notmatch '=') { continue }
+
+    $eqIdx = $trimmed.IndexOf('=')
+    $key = $trimmed.Substring(0, $eqIdx)
+    $value = $trimmed.Substring($eqIdx + 1)
+
+    if ($NonSecretKeys -contains $key) {
+        # Keep non-secret values populated
+        $manifestLines += "${key}=${value}"
+    } else {
+        # Secret: show key, empty value, comment
+        $manifestLines += "${key}=".PadRight(45) + "# in vault"
+    }
 }
+
+$manifestLines | Set-Content -Path $SourceEnv -Encoding UTF8
+Write-Host "[OK] Manifest .env written: $SourceEnv" -ForegroundColor Green
+Write-Host "[INFO] All keys visible. Secret values stored only in vault.age" -ForegroundColor Cyan
 
 # Done
 Write-Host "`n=== Migration Complete ===" -ForegroundColor Green
 Write-Host "Vault:     $VaultFile ($secretCount secrets)"
+Write-Host "Manifest:  $SourceEnv (keys visible, secrets empty)"
 Write-Host "Key:       $AgeKey"
 Write-Host ""
 Write-Host "Test with:"

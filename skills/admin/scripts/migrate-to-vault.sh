@@ -128,21 +128,68 @@ if [[ -f "$SATELLITE_ENV" ]]; then
     fi
 fi
 
-# --- Step 7: Offer to delete plaintext ---
+# --- Step 7: Generate manifest .env ---
+# Instead of deleting the plaintext, replace it with a manifest that shows
+# all keys but keeps secret values empty (with "# in vault" comment).
+# Non-secret values (bootstrap vars) remain populated.
 echo ""
-log_warn "Plaintext source still exists: $SOURCE_ENV"
-read -rp "Delete plaintext .env? (recommended after verifying vault works) [y/N] " DELETE
-if [[ "${DELETE,,}" == "y" ]]; then
-    rm "$SOURCE_ENV"
-    log_ok "Plaintext deleted: $SOURCE_ENV"
-else
-    log_info "Keeping plaintext. Delete manually when confident: rm $SOURCE_ENV"
-fi
+log_info "Generating manifest .env (keys visible, secrets in vault)..."
+
+# Known non-secret keys that should keep their values
+NON_SECRET_KEYS="ADMIN_ROOT ADMIN_DEVICE ADMIN_PLATFORM ADMIN_VAULT AGE_KEY_PATH ADMIN_SYNC_ENABLED ADMIN_SYNC_PATH ADMIN_LOG_PATH ADMIN_PROFILE_PATH ADMIN_USER DEVICE_NAME WIN_USER_HOME WIN_ADMIN_PATH WSL_ADMIN_PATH WSL_DISTRO SSH_KEY_PATH SSH_PUBLIC_KEY_PATH SSH_CONFIG_PATH OCI_CONFIG_PATH OCI_REGION HCLOUD_CONTEXT COOLIFY_DOMAIN COOLIFY_ADMIN_EMAIL COOLIFY_WILDCARD_DOMAIN KASM_DOMAIN SIMPLEMEM_URL CLOUDFLARE_TUNNEL_NAME"
+
+MANIFEST_FILE="${SOURCE_ENV}.manifest"
+{
+    echo "# ======================================================================"
+    echo "# Admin Profile Configuration"
+    echo "# Secret values stored in vault.age"
+    echo "# Non-secret values editable directly here"
+    echo "# ======================================================================"
+    echo ""
+
+    local_section=""
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        # Pass through comments and blank lines
+        if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "${line// }" ]]; then
+            echo "$line"
+            continue
+        fi
+
+        # Skip lines without =
+        [[ "$line" != *"="* ]] && continue
+
+        key="${line%%=*}"
+        value="${line#*=}"
+
+        # Check if this is a non-secret key
+        is_nonsecret=false
+        for ns_key in $NON_SECRET_KEYS; do
+            if [[ "$key" == "$ns_key" ]]; then
+                is_nonsecret=true
+                break
+            fi
+        done
+
+        if [[ "$is_nonsecret" == "true" ]]; then
+            # Keep non-secret values populated
+            echo "${key}=${value}"
+        else
+            # Secret: show key, empty value, comment
+            printf '%-45s # in vault\n' "${key}="
+        fi
+    done < <(age -d -i "$AGE_KEY" "$VAULT_FILE" 2>/dev/null)
+} > "$MANIFEST_FILE"
+
+# Replace original .env with manifest
+mv "$MANIFEST_FILE" "$SOURCE_ENV"
+log_ok "Manifest .env written: $SOURCE_ENV"
+log_info "All keys visible. Secret values stored only in vault.age"
 
 # --- Done ---
 echo ""
 echo -e "${GREEN}=== Migration Complete ===${NC}"
 echo "Vault:     $VAULT_FILE ($SECRET_COUNT secrets)"
+echo "Manifest:  $SOURCE_ENV (keys visible, secrets empty)"
 echo "Key:       $AGE_KEY"
 echo ""
 echo "Test with:"

@@ -183,7 +183,7 @@ if [[ -z "$SHELL_DEFAULT" ]]; then
 fi
 
 # Read version
-ADMIN_SKILL_VERSION="0.0.3"
+ADMIN_SKILL_VERSION="0.1.0"
 if [[ -f "$VERSION_FILE" ]]; then
     ADMIN_SKILL_VERSION=$(head -1 "$VERSION_FILE" | tr -d '[:space:]')
 fi
@@ -490,7 +490,15 @@ else
         echo "ADMIN_ROOT=$ADMIN_ROOT" >> "$ENV_FILE"
     fi
 fi
-ok "ADMIN_ROOT .env updated: $ENV_FILE"
+
+# Ensure ADMIN_DEVICE and ADMIN_PLATFORM are in root .env
+if ! grep -q "^ADMIN_DEVICE=" "$ENV_FILE" 2>/dev/null; then
+    echo "ADMIN_DEVICE=$DEVICE_NAME" >> "$ENV_FILE"
+fi
+if ! grep -q "^ADMIN_PLATFORM=" "$ENV_FILE" 2>/dev/null; then
+    echo "ADMIN_PLATFORM=$PLATFORM" >> "$ENV_FILE"
+fi
+ok "ADMIN_ROOT .env updated: $ENV_FILE (ADMIN_ROOT, ADMIN_DEVICE, ADMIN_PLATFORM)"
 
 # Write satellite .env to ~/.admin/.env
 # This is the primary discovery mechanism for all scripts.
