@@ -1,6 +1,6 @@
 # Skills Catalog
 
-**20 production-ready skills** organized by category.
+**21 production-ready skills** organized by category.
 
 Total errors prevented: **0+**
 
@@ -10,11 +10,11 @@ Total errors prevented: **0+**
 
 ## Quick Navigation
 
-- [Other](#other) (20 skills)
+- [Other](#other) (21 skills)
 
 ---
 
-## Other (20 skills)
+## Other (21 skills)
 
 ### admin
 Local machine administration for Windows, WSL, macOS, Linux. Install tools, check
@@ -54,6 +54,13 @@ Deploys infrastructure on DigitalOcean with Droplets (VMs), Firewalls, and VPCs.
 
 ### hetzner
 Deploys infrastructure on Hetzner Cloud with ARM64 or x86 servers.
+
+---
+
+### iii
+Build cross-language backends with the iii engine. Register functions in TypeScript,
+
+**Triggers**: `The handler receives an`, `object:`
 
 ---
 

@@ -7,7 +7,7 @@
   "metadata": {
     "description": "Production-tested skills for Claude Code",
     "version": "1.0.0",
-    "updated": "2026-02-13"
+    "updated": "2026-02-14"
   },
   "plugins": [
     {
@@ -49,6 +49,11 @@
       "name": "hetzner",
       "description": "Deploys infrastructure on Hetzner Cloud with ARM64 or x86 servers. Cost-effective European cloud with excellent price/performance ratio. Use when: setting up Hetzner Cloud infrastructure, deploying AR",
       "source": "./skills/hetzner"
+    },
+    {
+      "name": "iii",
+      "description": "Build cross-language backends with the iii engine. Register functions in TypeScript, Python, or Rust callable from any connected service via WebSocket. Covers iii-sdk, state, streams, triggers (HTTP/c",
+      "source": "./skills/iii"
     },
     {
       "name": "imagemagick",
