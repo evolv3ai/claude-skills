@@ -27,7 +27,8 @@ Prepend the base directory shown above when running scripts (e.g., `{base}/scrip
 ### Step 1: Check Satellite .env
 
 The fastest check is whether `~/.admin/.env` exists. This satellite file is created
-during setup and contains 3 vars: `ADMIN_ROOT`, `ADMIN_DEVICE`, `ADMIN_PLATFORM`.
+during setup and contains bootstrap vars (`ADMIN_ROOT`, `ADMIN_DEVICE`, `ADMIN_PLATFORM`)
+plus per-device preference vars (`ADMIN_PKG_MGR`, `ADMIN_WIN_PKG_MGR`, etc.).
 
 **Bash (WSL/Linux/macOS):**
 ```bash
@@ -69,11 +70,13 @@ If "Multiple devices" selected, follow up: **"Enter the path to your cloud-synce
 
 Ask: **"Set tool preferences now, or use defaults?"**
 
-If yes, ask each:
-- **Package manager:** winget (default) / scoop / choco / brew / apt
+If yes, ask each (platform-aware):
+- **Package manager (Linux-side):** apt (default on WSL/Linux) / brew (default on macOS) / dnf / pacman
+- **Windows package manager (WSL only):** winget (default) / scoop / choco / none
+- **Package manager (Windows native):** winget (default) / scoop / choco
 - **Python manager:** uv (default) / pip / conda / poetry
 - **Node manager:** npm (default) / pnpm / yarn / bun
-- **Default shell:** pwsh (default) / powershell / bash / zsh
+- **Default shell:** pwsh (default on Windows) / bash (default on Linux) / zsh (default on macOS) / fish
 
 ### Q3: Inventory Scan (Optional)
 
@@ -106,6 +109,16 @@ scripts/new-admin-profile.sh \
   --py-mgr "uv" \
   --node-mgr "npm" \
   --shell-default "zsh" \
+  --run-inventory
+```
+
+**Bash (WSL with Windows path + dual package managers):**
+```bash
+scripts/new-admin-profile.sh \
+  --admin-root "N:\Dropbox\08_Admin" \
+  --multi-device \
+  --pkg-mgr "apt" \
+  --win-pkg-mgr "winget" \
   --run-inventory
 ```
 

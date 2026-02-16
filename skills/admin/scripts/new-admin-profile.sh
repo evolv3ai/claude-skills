@@ -13,6 +13,7 @@
 #   -a, --admin-root PATH    Path to .admin directory (default: ~/.admin)
 #   -m, --multi-device       Multi-device setup (cloud-synced storage)
 #   -p, --pkg-mgr MGR        Package manager: brew/apt/dnf/pacman (default: auto-detect)
+#   --win-pkg-mgr MGR        Windows package manager (WSL only): winget/scoop/choco (default: auto-detect)
 #   --py-mgr MGR             Python manager: uv/pip/conda/poetry (default: uv)
 #   -n, --node-mgr MGR       Node manager: npm/pnpm/yarn/bun (default: npm)
 #   -s, --shell-default SH   Default shell: bash/zsh/fish (default: $SHELL)
@@ -23,6 +24,7 @@
 # Examples:
 #   ./new-admin-profile.sh --run-inventory
 #   ./new-admin-profile.sh --admin-root ~/Dropbox/.admin --multi-device --pkg-mgr brew
+#   ./new-admin-profile.sh --admin-root "N:\Dropbox\08_Admin" --multi-device --win-pkg-mgr winget
 # =============================================================================
 
 set -eo pipefail
@@ -41,10 +43,51 @@ warn() { echo -e "${YELLOW}[!]${NC} $1"; }
 err() { echo -e "${RED}[-]${NC} $1"; }
 section() { echo -e "\n${CYAN}=== $1 ===${NC}"; }
 
+# Translate Windows paths to WSL paths (e.g., N:\Dropbox\08_Admin → /mnt/n/Dropbox/08_Admin)
+# Only transforms on WSL; passthrough on other platforms.
+translate_path() {
+    local input_path="$1"
+
+    # Only translate on WSL
+    if ! grep -qi microsoft /proc/version 2>/dev/null; then
+        echo "$input_path"
+        return
+    fi
+
+    # Already a Unix path - no translation needed
+    if [[ "$input_path" == /* ]]; then
+        echo "$input_path"
+        return
+    fi
+
+    # Try wslpath first (most reliable)
+    if command -v wslpath &>/dev/null; then
+        local translated
+        translated=$(wslpath -u "$input_path" 2>/dev/null)
+        if [[ $? -eq 0 && -n "$translated" ]]; then
+            echo "$translated"
+            return
+        fi
+    fi
+
+    # Manual fallback: D:\Foo\Bar → /mnt/d/Foo/Bar
+    if [[ "$input_path" =~ ^([A-Za-z]):[/\\] ]]; then
+        local drive=$(echo "${BASH_REMATCH[1]}" | tr '[:upper:]' '[:lower:]')
+        local rest="${input_path:2}"
+        rest="${rest//\\//}"
+        echo "/mnt/${drive}${rest}"
+        return
+    fi
+
+    # Not a Windows path - return as-is
+    echo "$input_path"
+}
+
 # Defaults
 ADMIN_ROOT=""
 MULTI_DEVICE=false
 PKG_MGR=""
+WIN_PKG_MGR=""
 PY_MGR="uv"
 NODE_MGR="npm"
 SHELL_DEFAULT=""
@@ -71,6 +114,10 @@ while [[ $# -gt 0 ]]; do
             PKG_MGR="$2"
             shift 2
             ;;
+        --win-pkg-mgr)
+            WIN_PKG_MGR="$2"
+            shift 2
+            ;;
         --py-mgr)
             PY_MGR="$2"
             shift 2
@@ -92,7 +139,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -h|--help)
-            head -35 "$0" | tail -30
+            head -36 "$0" | tail -30
             exit 0
             ;;
         *)
@@ -164,6 +211,9 @@ if [[ -z "$ADMIN_ROOT" ]]; then
     fi
 fi
 
+# Translate Windows paths to WSL-compatible paths
+ADMIN_ROOT=$(translate_path "$ADMIN_ROOT")
+
 if [[ -z "$PKG_MGR" ]]; then
     case "$PLATFORM" in
         macos) PKG_MGR="brew" ;;
@@ -176,6 +226,14 @@ if [[ -z "$PKG_MGR" ]]; then
             ;;
         *) PKG_MGR="apt" ;;
     esac
+fi
+
+# WSL: auto-detect Windows-side package manager if not specified
+if [[ "$PLATFORM" == "wsl" && -z "$WIN_PKG_MGR" ]]; then
+    if command -v winget.exe &>/dev/null; then WIN_PKG_MGR="winget"
+    elif command -v scoop &>/dev/null || command -v scoop.exe &>/dev/null; then WIN_PKG_MGR="scoop"
+    elif command -v choco.exe &>/dev/null; then WIN_PKG_MGR="choco"
+    fi
 fi
 
 if [[ -z "$SHELL_DEFAULT" ]]; then
@@ -397,6 +455,35 @@ if [[ "$RUN_INVENTORY" == "true" ]]; then
 
     CAPABILITIES_JSON+='"canRunBash":true}'
 
+    # WSL: probe Windows-side package managers
+    if [[ "$PLATFORM" == "wsl" ]]; then
+        if command -v winget.exe &>/dev/null; then
+            WINGET_VER=$(winget.exe --version 2>/dev/null | tr -d '\r\nv')
+            PKG_MANAGERS["winget"]='{"present":true,"version":"'"$WINGET_VER"'","path":"winget.exe","side":"windows"}'
+            ok "winget (win): $WINGET_VER"
+        fi
+
+        if command -v scoop &>/dev/null || command -v scoop.exe &>/dev/null; then
+            PKG_MANAGERS["scoop"]='{"present":true,"side":"windows"}'
+            ok "scoop (win): found"
+        fi
+
+        if command -v choco.exe &>/dev/null; then
+            CHOCO_VER=$(choco.exe --version 2>/dev/null | tr -d '\r')
+            PKG_MANAGERS["choco"]='{"present":true,"version":"'"$CHOCO_VER"'","path":"choco.exe","side":"windows"}'
+            ok "choco (win): $CHOCO_VER"
+        fi
+
+        # Rebuild package managers JSON to include windows-side entries
+        PKG_MANAGERS_JSON="{"
+        first=true
+        for key in "${!PKG_MANAGERS[@]}"; do
+            if [[ "$first" == "true" ]]; then first=false; else PKG_MANAGERS_JSON+=","; fi
+            PKG_MANAGERS_JSON+='"'"$key"'":'"${PKG_MANAGERS[$key]}"
+        done
+        PKG_MANAGERS_JSON+="}"
+    fi
+
     # Build tools JSON
     TOOLS_JSON="{"
     first=true
@@ -408,6 +495,13 @@ if [[ "$RUN_INVENTORY" == "true" ]]; then
 else
     CAPABILITIES_JSON='{"hasDocker":false,"hasSsh":false,"canRunBash":true}'
 fi
+
+# Build preferences JSON
+PREFERENCES_JSON='{"packages":{"manager":"'"$PKG_MGR"'"}'
+if [[ -n "$WIN_PKG_MGR" ]]; then
+    PREFERENCES_JSON+=',"winPackages":{"manager":"'"$WIN_PKG_MGR"'"}'
+fi
+PREFERENCES_JSON+=',"python":{"manager":"'"$PY_MGR"'"},"node":{"manager":"'"$NODE_MGR"'"},"shell":{"default":"'"$SHELL_DEFAULT"'"}}'
 
 # Build profile JSON
 section "Saving Profile"
@@ -451,12 +545,7 @@ cat > "$PROFILE_PATH" <<EOF
   },
   "packageManagers": $PKG_MANAGERS_JSON,
   "tools": $TOOLS_JSON,
-  "preferences": {
-    "packages": {"manager": "$PKG_MGR"},
-    "python": {"manager": "$PY_MGR"},
-    "node": {"manager": "$NODE_MGR"},
-    "shell": {"default": "$SHELL_DEFAULT"}
-  },
+  "preferences": $PREFERENCES_JSON,
   "wsl": {},
   "docker": {},
   "mcp": {"servers": {}},
@@ -491,14 +580,7 @@ else
     fi
 fi
 
-# Ensure ADMIN_DEVICE and ADMIN_PLATFORM are in root .env
-if ! grep -q "^ADMIN_DEVICE=" "$ENV_FILE" 2>/dev/null; then
-    echo "ADMIN_DEVICE=$DEVICE_NAME" >> "$ENV_FILE"
-fi
-if ! grep -q "^ADMIN_PLATFORM=" "$ENV_FILE" 2>/dev/null; then
-    echo "ADMIN_PLATFORM=$PLATFORM" >> "$ENV_FILE"
-fi
-ok "ADMIN_ROOT .env updated: $ENV_FILE (ADMIN_ROOT, ADMIN_DEVICE, ADMIN_PLATFORM)"
+ok "ADMIN_ROOT .env updated: $ENV_FILE (ADMIN_ROOT only — device vars in satellite)"
 
 # Write satellite .env to ~/.admin/.env
 # This is the primary discovery mechanism for all scripts.
@@ -507,13 +589,20 @@ ok "ADMIN_ROOT .env updated: $ENV_FILE (ADMIN_ROOT, ADMIN_DEVICE, ADMIN_PLATFORM
 SATELLITE_DIR="${HOME}/.admin"
 SATELLITE_ENV="${SATELLITE_DIR}/.env"
 mkdir -p "$SATELLITE_DIR"
-cat > "$SATELLITE_ENV" <<SATELLITE
-# Admin satellite config - points to centralized profile
-# Do not store secrets here. See \$ADMIN_ROOT/.env for credentials.
-ADMIN_ROOT=$ADMIN_ROOT
-ADMIN_DEVICE=$DEVICE_NAME
-ADMIN_PLATFORM=$PLATFORM
-SATELLITE
+{
+    echo "# Admin satellite config - points to centralized profile"
+    echo "# Do not store secrets here. See \$ADMIN_ROOT/.env for credentials."
+    echo "ADMIN_ROOT=$ADMIN_ROOT"
+    echo "ADMIN_DEVICE=$DEVICE_NAME"
+    echo "ADMIN_PLATFORM=$PLATFORM"
+    echo ""
+    echo "# Preferences (per-device, no JSON parsing needed)"
+    echo "ADMIN_PKG_MGR=$PKG_MGR"
+    [[ -n "$WIN_PKG_MGR" ]] && echo "ADMIN_WIN_PKG_MGR=$WIN_PKG_MGR"
+    echo "ADMIN_PY_MGR=$PY_MGR"
+    echo "ADMIN_NODE_MGR=$NODE_MGR"
+    echo "ADMIN_SHELL=$SHELL_DEFAULT"
+} > "$SATELLITE_ENV"
 ok "Satellite .env written: $SATELLITE_ENV"
 
 # Clean up legacy breadcrumb if it exists
@@ -538,11 +627,14 @@ echo -e "${GREEN}ADMIN_ROOT:${NC}   $ADMIN_ROOT"
 echo -e "Multi-device: $MULTI_DEVICE"
 echo ""
 echo -e "${YELLOW}Preferences:${NC}"
-echo "  Packages: $PKG_MGR"
-echo "  Python:   $PY_MGR"
-echo "  Node:     $NODE_MGR"
-echo "  Shell:    $SHELL_DEFAULT"
+echo "  Packages:     $PKG_MGR"
+[[ -n "$WIN_PKG_MGR" ]] && echo "  Win packages: $WIN_PKG_MGR"
+echo "  Python:       $PY_MGR"
+echo "  Node:         $NODE_MGR"
+echo "  Shell:        $SHELL_DEFAULT"
 echo ""
 
 # Output JSON for agent consumption
-echo '{"success":true,"path":"'"$PROFILE_PATH"'","adminRoot":"'"$ADMIN_ROOT"'","device":"'"$DEVICE_NAME"'","preferences":{"packages":"'"$PKG_MGR"'","python":"'"$PY_MGR"'","node":"'"$NODE_MGR"'","shell":"'"$SHELL_DEFAULT"'"}}'
+WIN_PKG_JSON=""
+[[ -n "$WIN_PKG_MGR" ]] && WIN_PKG_JSON=',"winPackages":"'"$WIN_PKG_MGR"'"'
+echo '{"success":true,"path":"'"$PROFILE_PATH"'","adminRoot":"'"$ADMIN_ROOT"'","device":"'"$DEVICE_NAME"'","preferences":{"packages":"'"$PKG_MGR"'"'"$WIN_PKG_JSON"',"python":"'"$PY_MGR"'","node":"'"$NODE_MGR"'","shell":"'"$SHELL_DEFAULT"'"}}'

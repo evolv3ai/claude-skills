@@ -3,7 +3,7 @@
 # Test Admin Profile - Checks if admin profile exists
 # =============================================================================
 # Checks for the satellite .env at ~/.admin/.env, reads ADMIN_ROOT, ADMIN_DEVICE,
-# and ADMIN_PLATFORM, then checks if the profile JSON exists at ADMIN_ROOT.
+# ADMIN_PLATFORM, and preference vars, then checks if the profile JSON exists.
 #
 # Resolution order:
 #   1. ADMIN_ROOT env var (if already set)
@@ -65,6 +65,11 @@ test_admin_profile() {
     local admin_root=""
     local device_name=""
     local platform=""
+    local pkg_mgr=""
+    local win_pkg_mgr=""
+    local py_mgr=""
+    local node_mgr=""
+    local shell_pref=""
 
     # Priority 1: ADMIN_ROOT env var already set
     if [[ -n "${ADMIN_ROOT:-}" ]]; then
@@ -77,6 +82,11 @@ test_admin_profile() {
         admin_root=$(read_satellite_var "ADMIN_ROOT" "$SATELLITE_ENV")
         device_name=$(read_satellite_var "ADMIN_DEVICE" "$SATELLITE_ENV")
         platform=$(read_satellite_var "ADMIN_PLATFORM" "$SATELLITE_ENV")
+        pkg_mgr=$(read_satellite_var "ADMIN_PKG_MGR" "$SATELLITE_ENV")
+        win_pkg_mgr=$(read_satellite_var "ADMIN_WIN_PKG_MGR" "$SATELLITE_ENV")
+        py_mgr=$(read_satellite_var "ADMIN_PY_MGR" "$SATELLITE_ENV")
+        node_mgr=$(read_satellite_var "ADMIN_NODE_MGR" "$SATELLITE_ENV")
+        shell_pref=$(read_satellite_var "ADMIN_SHELL" "$SATELLITE_ENV")
         device_name="${device_name:-$(hostname)}"
 
     # Priority 3: Legacy fallback (no satellite .env yet)
@@ -112,9 +122,17 @@ test_admin_profile() {
         fi
     fi
 
+    # Build preferences JSON fragment
+    local prefs_json=""
+    if [[ -n "$pkg_mgr" || -n "$py_mgr" || -n "$node_mgr" || -n "$shell_pref" ]]; then
+        prefs_json=',"preferences":{"packages":"'"${pkg_mgr}"'"'
+        [[ -n "$win_pkg_mgr" ]] && prefs_json+=',"winPackages":"'"${win_pkg_mgr}"'"'
+        prefs_json+=',"python":"'"${py_mgr}"'","node":"'"${node_mgr}"'","shell":"'"${shell_pref}"'"}'
+    fi
+
     # Output JSON
     cat <<JSON
-{"exists":${exists},"path":"${profile_path}","device":"${device_name}","adminRoot":"${admin_root}","schemaVersion":"${schema_version}","adminSkillVersion":"${skill_version}","platform":"${platform}"}
+{"exists":${exists},"path":"${profile_path}","device":"${device_name}","adminRoot":"${admin_root}","schemaVersion":"${schema_version}","adminSkillVersion":"${skill_version}","platform":"${platform}"${prefs_json}}
 JSON
 }
 

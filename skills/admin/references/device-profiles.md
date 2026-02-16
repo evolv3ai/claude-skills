@@ -7,11 +7,19 @@ Device profiles provide **context-aware assistance** by tracking your installed 
 All platforms use a **satellite .env** at `~/.admin/.env` to find the profile:
 
 ```
-~/.admin/.env            ← Satellite (always at $HOME, 3 vars)
+~/.admin/.env            ← Satellite (always at $HOME, per-device)
+  # Bootstrap vars
   ADMIN_ROOT=<path>      ← Points to centralized data
   ADMIN_DEVICE=<name>    ← Device name (used for profile filename)
   ADMIN_PLATFORM=<os>    ← wsl/linux/macos/windows
     └─ resolves to → $ADMIN_ROOT/profiles/$ADMIN_DEVICE.json
+
+  # Preference vars (per-device, no JSON parsing needed)
+  ADMIN_PKG_MGR=apt          ← Linux-side package manager
+  ADMIN_WIN_PKG_MGR=winget   ← Windows-side (WSL only, optional)
+  ADMIN_PY_MGR=uv            ← Python manager
+  ADMIN_NODE_MGR=npm         ← Node manager
+  ADMIN_SHELL=zsh            ← Default shell
 ```
 
 ### Examples by Platform
@@ -24,6 +32,18 @@ All platforms use a **satellite .env** at `~/.admin/.env` to find the profile:
 | Multi-device | `~/.admin/.env` | `/mnt/nas/.admin` | `.../profiles/myhost.json` |
 
 On WSL, `~/.admin/` contains **only** the satellite `.env`. All data lives at `ADMIN_ROOT`.
+
+### WSL Dual Package Managers
+
+WSL devices have two package manager contexts:
+- **Linux-side** (`ADMIN_PKG_MGR`): apt, dnf, pacman — manages Linux packages
+- **Windows-side** (`ADMIN_WIN_PKG_MGR`): winget, scoop, choco — manages Windows packages
+
+The profile JSON stores both under `preferences.packages` and `preferences.winPackages`.
+The satellite `.env` stores both as flat vars for quick shell access without JSON parsing.
+
+**Path translation**: Windows paths (e.g., `N:\Dropbox\08_Admin`) are automatically translated
+to WSL paths (e.g., `/mnt/n/Dropbox/08_Admin`) during profile setup via `wslpath` or manual conversion.
 
 ## Schema Version
 

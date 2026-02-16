@@ -370,15 +370,7 @@ if (-not (Test-Path $EnvFile)) {
     $lines | Set-Content $EnvFile -Encoding UTF8
 }
 
-# Ensure ADMIN_DEVICE and ADMIN_PLATFORM are in root .env
-$envContent = Get-Content $EnvFile
-if (-not ($envContent -match '^ADMIN_DEVICE=')) {
-    Add-Content $EnvFile "ADMIN_DEVICE=$DeviceName"
-}
-if (-not ($envContent -match '^ADMIN_PLATFORM=')) {
-    Add-Content $EnvFile "ADMIN_PLATFORM=windows"
-}
-Write-OK ".env updated (ADMIN_ROOT, ADMIN_DEVICE, ADMIN_PLATFORM)"
+Write-OK ".env updated (ADMIN_ROOT only - device vars in satellite)"
 
 # Set environment variables for current session
 $env:ADMIN_ROOT = $AdminRoot
