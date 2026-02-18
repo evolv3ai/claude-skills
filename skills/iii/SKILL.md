@@ -7,7 +7,7 @@ description: |
   state, streams, triggers (HTTP/cron), OpenTelemetry, and Docker Compose patterns.
 
   Use when: setting up iii engine, cross-language function calls, iii-sdk integration,
-  registerTrigger configuration, or debugging "ECONNREFUSED 49134", "trigger_type_not_found".
+  registerTrigger configuration, or debugging "ECONNREFUSED 49134", "type_not_found".
 ---
 
 # iii - Cross-Language Backend Engine
@@ -15,10 +15,10 @@ description: |
 Script paths are relative to this skill's base directory.
 
 **Status**: Alpha (active development)
-**SDK**: `iii-sdk@0.1.0` (npm) | Python `iii` | Rust `iii_sdk`
+**SDK**: `iii-sdk@0.2.0` (npm) | Python `iii` | Rust `iii_sdk`
 **License**: Apache-2.0
 **Docs**: https://iii.dev/docs
-**Last Verified**: 2026-02-14
+**Last Verified**: 2026-02-17
 
 ---
 
@@ -38,7 +38,7 @@ Services connect to the iii engine over WebSocket. The engine handles routing, r
 ### 1. Install the Engine
 
 ```bash
-curl -fsSL https://install.iii.dev/latest.sh | sh
+curl -fsSL https://install.iii.dev/iii/main/install.sh | sh
 iii --version
 ```
 
@@ -132,7 +132,7 @@ const health = registerFunction({ id: "my-service::health" }, async () => {
 
 // Expose as HTTP endpoint via the engine's REST API module
 registerTrigger({
-  trigger_type: "http",
+  type: "http",
   function_id: health.id,
   config: { api_path: "health", http_method: "GET" },
 });
@@ -163,8 +163,8 @@ Test: `curl http://localhost:3111/health`
 - Never use `process.env` in function IDs (they must be static strings)
 - Never assume all services are available - handle missing services gracefully
 - Never use 6-field cron expressions - iii supports **7 fields** (seconds included): `"*/30 * * * * * *"`
-- Never call `registerTrigger` with `type` - the correct field is `trigger_type`
-- Never import from `iii-sdk/state` or `iii-sdk/stream` for basic state operations - use `sdk.call("state::set", ...)` instead
+- Never call `registerTrigger` with `trigger_type` - the correct field is `type` (changed in 0.2.0)
+- Never import from `iii-sdk/state` or `iii-sdk/stream` for basic state operations - use `sdk.call("state::set", ...)` instead. Note: `iii-sdk/state` will be **removed in 0.3.0**
 
 ---
 
@@ -172,7 +172,7 @@ Test: `curl http://localhost:3111/health`
 
 | Import | Purpose |
 |--------|---------|
-| `iii-sdk` | Core: `init`, `getContext`, `withContext`, `Logger` (+ types). `init()` returns `ISdk` with `registerFunction`, `registerTrigger`, `call`, `callVoid` methods |
+| `iii-sdk` | Core: `init`, `getContext`, `withContext`, `Logger` (+ types). `init()` returns `ISdk` with `registerFunction`, `registerTrigger`, `call`, `callVoid`, `shutdown` methods |
 | `iii-sdk/state` | Advanced: Direct `IState` interface (get/set/delete/list/update) |
 | `iii-sdk/stream` | Advanced: Direct `IStream` interface with groups |
 | `iii-sdk/telemetry` | OpenTelemetry: `initOtel`, `withSpan`, `getTracer`, `getMeter` |
@@ -229,9 +229,14 @@ await call("state::set", { scope: "shared", key: "VERSION", value: 1 });
 const val = await call("state::get", { scope: "shared", key: "VERSION" });
 
 // Engine introspection
-const functions = await call("engine.functions.list", {});
-const workers = await call("engine.workers.list", {});
+const functions = await call("engine::functions::list", {});
+const workers = await call("engine::workers::list", {});
+
+// Graceful shutdown (new in 0.2.0)
+await sdk.shutdown();  // Closes WebSocket, cleans up resources
 ```
+
+> **Note**: `shutdown()` was added in 0.2.0. Always call it during graceful process termination.
 
 ---
 
@@ -243,7 +248,7 @@ Exposes a function as an HTTP endpoint on the engine's REST API (default port 31
 
 ```typescript
 registerTrigger({
-  trigger_type: "http",
+  type: "http",
   function_id: "service::handler",
   config: {
     api_path: "users/:id",           // Path params supported
@@ -272,7 +277,7 @@ Supports **7-field cron expressions** (seconds granularity):
 
 ```typescript
 registerTrigger({
-  trigger_type: "cron",
+  type: "cron",
   function_id: "service::cleanup",
   config: { expression: "*/30 * * * * * *" },  // Every 30 seconds
 });
@@ -452,6 +457,16 @@ my-iii-project/
 - **Port 49134 conflicts**: The engine's WebSocket port is fixed at 49134; ensure nothing else uses it
 - **Docker networking**: On Linux Docker <20.10, `host.docker.internal` requires explicit `extra_hosts` mapping
 - **Reconnection**: SDK auto-reconnects with exponential backoff (1s initial, 30s max, infinite retries by default)
+- **CJS support**: 0.2.0 adds CommonJS exports alongside ESM - both `import` and `require` now work
+
+### Upcoming in 0.3.0 (from alpha pre-release)
+
+Based on `0.3.0-alpha.20260210122502`, expect these breaking changes in a future release:
+
+- **`iii-sdk/state` export removed** - Use `call("state::set", ...)` and `call("state::get", ...)` instead of the direct `IState` interface
+- **`iii-sdk/stream` renamed to `iii-sdk/streams`** (plural)
+- **Trigger field reverts**: `type` may change back to `trigger_type`
+- **`ISdk` type no longer exported** from the main entry point
 
 ---
 
@@ -460,9 +475,9 @@ my-iii-project/
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `ECONNREFUSED 127.0.0.1:49134` | Engine not running | Start with `iii -c iii-config.yaml` |
-| Function call times out (30s) | Target service not connected | Start the service; check `engine.workers.list` |
+| Function call times out (30s) | Target service not connected | Start the service; check `engine::workers::list` |
 | `Cannot find module 'iii-sdk'` | SDK not installed | `npm install iii-sdk` |
 | HTTP endpoint returns 404 | Trigger not registered or wrong path | Verify `registerTrigger` config matches URL |
 | Cron not firing | Wrong expression format | Use 7-field format: `sec min hour dom mon dow year` |
 | State returns null | Wrong scope or key | Check scope/key strings match exactly |
-| `trigger_type_not_found` | Used `type` instead of `trigger_type` | Change field to `trigger_type` in `registerTrigger` |
+| `trigger_type_not_found` | Used `trigger_type` instead of `type` (changed in 0.2.0) | Change field to `type` in `registerTrigger` |

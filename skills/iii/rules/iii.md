@@ -1,28 +1,43 @@
 # iii Engine - Correction Rules
 
-## Trigger Registration
+## Trigger Registration (changed in 0.2.0)
 
-The `registerTrigger` field for trigger kind is `trigger_type`, NOT `type`.
+The `registerTrigger` field for trigger kind is `type`, NOT `trigger_type`.
 
 ```typescript
-// CORRECT
+// CORRECT (iii-sdk@0.2.0)
 registerTrigger({
-  trigger_type: "http",
+  type: "http",
   function_id: "service::handler",
   config: { api_path: "endpoint", http_method: "GET" },
 });
 
-// WRONG - will fail with "trigger_type_not_found"
+// WRONG - will fail with "type_not_found"
 registerTrigger({
-  type: "http",  // <-- wrong field name
+  trigger_type: "http",  // <-- wrong field name in 0.2.0
   function_id: "service::handler",
   config: { api_path: "endpoint", http_method: "GET" },
 });
 ```
 
+> **Note**: In 0.1.0 the field was `trigger_type`. It changed to `type` in 0.2.0. The 0.3.0-alpha suggests it may revert to `trigger_type` again in a future release.
+
+## Engine Function Paths (changed in 0.2.0)
+
+Engine built-in functions use `::` separator, not dots.
+
+```typescript
+// CORRECT (0.2.0)
+await call("engine::functions::list", {});
+await call("engine::workers::list", {});
+
+// WRONG - old 0.1.0 dot syntax
+await call("engine.functions.list", {});  // <-- won't resolve in 0.2.0
+```
+
 ## ESM Required
 
-Always set `"type": "module"` in `package.json`. The SDK uses ESM imports.
+Always set `"type": "module"` in `package.json`. The SDK uses ESM imports. CJS is also supported in 0.2.0 via `require()`.
 
 ## Cron Expressions
 
@@ -53,3 +68,13 @@ import { registerFunction, call } from "iii-sdk";  // these don't exist as expor
 ## Function ID Convention
 
 Use `service-name::function-name` format. IDs must be static strings, never dynamic.
+
+## Graceful Shutdown (new in 0.2.0)
+
+Always call `shutdown()` during graceful process termination to close WebSocket connections cleanly.
+
+```typescript
+const sdk = init(url);
+// ... register functions, do work ...
+await sdk.shutdown();  // Clean up before exit
+```

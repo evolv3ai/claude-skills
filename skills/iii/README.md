@@ -22,12 +22,13 @@ iii, iii-sdk, iii engine, iii-dev, cross-language rpc, service orchestration, fu
 - "iii streams"
 - "ECONNREFUSED 49134"
 - "port 49134"
+- "type_not_found"
 
 ## Quick Start
 
 ```bash
 # Install engine
-curl -fsSL https://install.iii.dev/latest.sh | sh
+curl -fsSL https://install.iii.dev/iii/main/install.sh | sh
 
 # Start engine
 iii -c iii-config.yaml
@@ -68,4 +69,4 @@ npm install iii-sdk
 | Cross-language integration | ~15k tokens | ~5k tokens | ~67% |
 | State + triggers config | ~8k tokens | ~3k tokens | ~63% |
 
-**Errors prevented**: 7-field cron format, ESM module type, trigger field names, state call patterns, Docker networking
+**Errors prevented**: 7-field cron format, ESM module type, trigger field names (type vs trigger_type), engine path separators (:: vs dots), state call patterns, Docker networking, shutdown cleanup

@@ -1,6 +1,6 @@
 # iii-sdk API Reference
 
-> Full type definitions for `iii-sdk@0.1.0`
+> Full type definitions for `iii-sdk@0.2.0`
 
 ## Core SDK (`iii-sdk`)
 
@@ -47,6 +47,7 @@ interface ISdk {
   onFunctionsAvailable(callback: FunctionsAvailableCallback): () => void;
   onLog(callback: LogCallback, config?: LogConfig): () => void;
   on(event: string, callback: (arg?: unknown) => void): void;
+  shutdown(): Promise<void>;
 }
 ```
 
@@ -78,9 +79,9 @@ type RemoteFunctionHandler<TInput = any, TOutput = any> = (data: TInput) => Prom
 
 ```typescript
 type RegisterTriggerInput = {
-  trigger_type: string;  // 'http', 'cron', 'event', or custom
+  type: string;          // 'http', 'cron', 'event', or custom
   function_id: string;
-  config: any;
+  config: unknown;
 };
 
 // HTTP trigger config
@@ -176,9 +177,16 @@ type IIIConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconne
 
 ```typescript
 const EngineFunctions = {
-  LIST_FUNCTIONS: "engine.functions.list",
-  LIST_WORKERS: "engine.workers.list",
-  REGISTER_WORKER: "engine.workers.register",
+  LIST_FUNCTIONS: "engine::functions::list",
+  LIST_WORKERS: "engine::workers::list",
+  REGISTER_WORKER: "engine::workers::register",
+};
+
+const LogFunctions = {
+  INFO: "engine::log::info",
+  WARN: "engine::log::warn",
+  ERROR: "engine::log::error",
+  DEBUG: "engine::log::debug",
 };
 
 const DEFAULT_INVOCATION_TIMEOUT_MS = 30000;
