@@ -1,6 +1,6 @@
 # iii-sdk API Reference
 
-> Full type definitions for `iii-sdk@0.2.0`
+> Full type definitions for `iii-sdk@0.2.0` | Engine modules reference
 
 ## Core SDK (`iii-sdk`)
 
@@ -194,6 +194,70 @@ const DEFAULT_INVOCATION_TIMEOUT_MS = 30000;
 
 ---
 
+## Engine Built-in Functions
+
+All engine built-in functions are called via `sdk.call(function_path, params)`.
+
+### State Module Functions
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `state::get` | `{ scope: string, key: string }` | `T \| null` |
+| `state::set` | `{ scope: string, key: string, value: any }` | `{ old_value?: T, new_value: T } \| null` |
+| `state::delete` | `{ scope: string, key: string }` | `{ old_value?: any }` |
+| `state::list` | `{ scope: string }` | `T[]` |
+| `state::update` | `{ scope: string, key: string, ops: UpdateOp[] }` | `{ old_value?: T, new_value: T } \| null` |
+
+### KV Server Functions
+
+KV Server uses `index` (not `scope`) as its namespace parameter.
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `kv_server::get` | `{ index: string, key: string }` | `any \| null` |
+| `kv_server::set` | `{ index: string, key: string, value: any }` | `object` |
+| `kv_server::delete` | `{ index: string, key: string }` | `any \| null` |
+| `kv_server::list` | `{ index: string, key: string }` | `any[]` |
+| `kv_server::list_keys_with_prefix` | `{ prefix: string }` | `string[]` |
+
+### Queue Functions
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `enqueue` | `{ topic: string, data: any }` | `null` |
+
+### Stream Functions
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `stream::set` | `{ stream_name: string, group_id: string, item_id: string, data: any }` | `{ old_value?: T, new_value: T }` |
+| `stream::get` | `{ stream_name: string, group_id: string, item_id: string }` | `T \| null` |
+| `stream::delete` | `{ stream_name: string, group_id: string, item_id: string }` | `{ old_value?: any }` |
+| `stream::list` | `{ stream_name: string, group_id: string }` | `T[]` |
+
+### Engine Introspection
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `engine::functions::list` | `{}` | `FunctionInfo[]` |
+| `engine::workers::list` | `{}` | `WorkerInfo[]` |
+| `engine::workers::register` | `WorkerRegistration` | `void` |
+| `engine::log::info` | `{ message: string, data?: any }` | `void` |
+| `engine::log::warn` | `{ message: string, data?: any }` | `void` |
+| `engine::log::error` | `{ message: string, data?: any }` | `void` |
+| `engine::log::debug` | `{ message: string, data?: any }` | `void` |
+
+### Bridge Module Functions
+
+Available when `BridgeClientModule` is configured:
+
+| Function | Input | Output |
+|----------|-------|--------|
+| `bridge::invoke` | `{ function_path: string, data?: any, timeout_ms?: number }` | `any` |
+| `bridge::invoke_async` | `{ function_path: string, data?: any }` | `void` |
+
+---
+
 ## State Module (`iii-sdk/state`)
 
 ```typescript
@@ -353,4 +417,64 @@ type WorkerMetrics = {
   timestamp_ms: number;
   runtime: string;
 };
+```
+
+---
+
+## `@iii-dev/sdk` — Upcoming SDK (NOT on npm)
+
+> **WARNING**: `@iii-dev/sdk` is documented at iii.dev/docs but does **not exist on npm** as of 2026-02-17. `npm install @iii-dev/sdk` returns 404. Use `iii-sdk@0.2.0` instead. This section is provided for forward-compatibility reference only.
+
+### Bridge Class
+
+```typescript
+import { Bridge } from "@iii-dev/sdk";  // NOT ON NPM — future package
+
+const bridge = new Bridge(process.env.III_BRIDGE_URL ?? "ws://localhost:49134");
+```
+
+### Key API Differences vs `iii-sdk@0.2.0`
+
+| Aspect | `iii-sdk@0.2.0` (use this) | `@iii-dev/sdk` (docs only) |
+|--------|----------------------------|---------------------------|
+| Entry point | `init(address)` → `ISdk` | `new Bridge(url)` |
+| Register function | `registerFunction({ id: "svc::fn" }, handler)` | `bridge.registerFunction({ function_path: "svc.fn", handler })` |
+| Register trigger | `registerTrigger({ type: "http", function_id })` | `bridge.registerTrigger({ trigger_type: "api", function_path })` |
+| Call function | `call<I, O>(function_id, data)` | `bridge.invokeFunction(function_path, data)` |
+| Fire-and-forget | `callVoid(function_id, data)` | `bridge.invokeFunctionAsync(function_path, data)` |
+| Register service | N/A | `bridge.registerService({ name, description })` |
+| Separator | `::` (double colon) | `.` (dot) |
+| HTTP trigger type | `"http"` | `"api"` |
+
+### Methods (docs-only reference)
+
+```typescript
+// NOT ON NPM — for reference only
+interface Bridge {
+  registerFunction(input: { function_path: string; handler: Function }): void;
+  registerTrigger(input: { trigger_type: string; function_path: string; config: unknown }): Trigger;
+  registerService(input: { name: string; description?: string }): void;
+  registerTriggerType<TConfig>(type: { id: string; description: string }, handler: TriggerHandler<TConfig>): void;
+  unregisterTriggerType(type: { id: string }): void;
+  invokeFunction<TInput, TOutput>(function_path: string, data: TInput): Promise<TOutput>;
+  invokeFunctionAsync<TInput>(function_path: string, data: TInput): void;
+}
+```
+
+### Translation Examples
+
+```typescript
+// @iii-dev/sdk style (docs) → iii-sdk@0.2.0 style (npm)
+
+// Register function
+// DOCS: bridge.registerFunction({ function_path: "users.create", handler: fn })
+// NPM:  registerFunction({ id: "users::create" }, fn)
+
+// Register trigger
+// DOCS: bridge.registerTrigger({ trigger_type: "api", function_path: "users.create", config: { api_path: "/users", http_method: "POST" } })
+// NPM:  registerTrigger({ type: "http", function_id: "users::create", config: { api_path: "users", http_method: "POST" } })
+
+// Call function
+// DOCS: await bridge.invokeFunction("kv_server::get", { index: "default", key: "user:123" })
+// NPM:  await call("kv_server::get", { index: "default", key: "user:123" })
 ```

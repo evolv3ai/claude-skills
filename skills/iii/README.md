@@ -4,7 +4,7 @@ Cross-language backend engine for service orchestration via WebSocket.
 
 ## Keywords
 
-iii, iii-sdk, iii engine, iii-dev, cross-language rpc, service orchestration, function registry, websocket engine, microservice coordinator, cross-process function calls, polyglot backend, backend engine
+iii, iii-sdk, iii engine, iii-dev, cross-language rpc, service orchestration, function registry, websocket engine, microservice coordinator, cross-process function calls, polyglot backend, backend engine, kv server, bridge client, exec module, iii console, queue trigger, log trigger, @iii-dev/sdk, docker iiidev, prometheus metrics, stream triggers
 
 ## Triggers
 
@@ -23,6 +23,16 @@ iii, iii-sdk, iii engine, iii-dev, cross-language rpc, service orchestration, fu
 - "ECONNREFUSED 49134"
 - "port 49134"
 - "type_not_found"
+- "iii kv server"
+- "iii queue trigger"
+- "iii log trigger"
+- "iii console"
+- "iii docker"
+- "iii bridge client"
+- "iii exec module"
+- "@iii-dev/sdk"
+- "iii prometheus metrics"
+- "iii stream join leave"
 
 ## Quick Start
 
@@ -41,19 +51,27 @@ npm install iii-sdk
 
 - Register functions callable from any connected service
 - Cross-language calls (TypeScript, Python, Rust)
-- HTTP and cron triggers via engine modules
+- HTTP, cron, queue, and log triggers via engine modules
 - Shared key-value state across services
-- Real-time durable streams
+- KV Server with file-based and in-memory backends
+- Real-time durable streams with join/leave triggers
+- Bridge Client for engine-to-engine mesh networking
 - Full OpenTelemetry integration (traces, metrics, logs)
+- Prometheus metrics endpoint (port 9464)
+- iii Console web UI for engine inspection
+- Docker deployment with iiidev/iii:latest
 - Automatic reconnection with exponential backoff
-- Docker Compose deployment pattern
+- Docker Compose deployment pattern (dev + production)
 
 ## When to Use
 
 - Building polyglot backends with services in multiple languages
 - Orchestrating cross-service function calls
-- Setting up iii engine with modules (API, state, streams, cron)
+- Setting up iii engine with modules (API, state, streams, cron, queue, logging)
 - Integrating iii-sdk into TypeScript/Python/Rust services
+- Using iii Console to inspect engine state and connected workers
+- Setting up KV Server, queue triggers, or log triggers
+- Connecting multiple iii engines via Bridge Client mesh
 
 ## When NOT to Use
 
@@ -69,4 +87,4 @@ npm install iii-sdk
 | Cross-language integration | ~15k tokens | ~5k tokens | ~67% |
 | State + triggers config | ~8k tokens | ~3k tokens | ~63% |
 
-**Errors prevented**: 7-field cron format, ESM module type, trigger field names (type vs trigger_type), engine path separators (:: vs dots), state call patterns, Docker networking, shutdown cleanup
+**Errors prevented**: 7-field cron format, ESM module type, trigger field names (type vs trigger_type), engine path separators (:: vs dots), state call patterns, Docker networking, shutdown cleanup, KV Server index vs scope params, @iii-dev/sdk npm 404, module class path singular/plural ambiguity, queue/log trigger config

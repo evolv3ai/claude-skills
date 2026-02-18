@@ -4,10 +4,16 @@ license: Apache-2.0
 description: |
   Build cross-language backends with the iii engine. Register functions in TypeScript,
   Python, or Rust callable from any connected service via WebSocket. Covers iii-sdk,
-  state, streams, triggers (HTTP/cron), OpenTelemetry, and Docker Compose patterns.
+  state, KV Server, streams, triggers (HTTP/cron/queue/log), Bridge Client mesh,
+  OpenTelemetry, Docker deployment, iii Console, and Prometheus metrics.
 
   Use when: setting up iii engine, cross-language function calls, iii-sdk integration,
-  registerTrigger configuration, or debugging "ECONNREFUSED 49134", "type_not_found".
+  registerTrigger configuration, KV Server storage, queue/log triggers, Docker deploy,
+  or debugging "ECONNREFUSED 49134", "type_not_found", "@iii-dev/sdk 404".
+metadata:
+  last_verified: "2026-02-17"
+  packages:
+    - iii-sdk@0.2.0
 ---
 
 # iii - Cross-Language Backend Engine
@@ -16,9 +22,12 @@ Script paths are relative to this skill's base directory.
 
 **Status**: Alpha (active development)
 **SDK**: `iii-sdk@0.2.0` (npm) | Python `iii` | Rust `iii_sdk`
+**Docker**: `iiidev/iii:latest`
 **License**: Apache-2.0
 **Docs**: https://iii.dev/docs
 **Last Verified**: 2026-02-17
+
+> **SDK Note**: The iii.dev docs reference `@iii-dev/sdk` with a `Bridge` class — this package does **not exist on npm** (404 as of 2026-02-17). Always install `iii-sdk` (no scope). The docs SDK uses different conventions (dot separators, `trigger_type`, `function_path`). See [Upcoming SDK](#upcoming-sdk-iii-devsdk) for translation guide.
 
 ---
 
@@ -40,6 +49,15 @@ Services connect to the iii engine over WebSocket. The engine handles routing, r
 ```bash
 curl -fsSL https://install.iii.dev/iii/main/install.sh | sh
 iii --version
+```
+
+Or run via Docker:
+
+```bash
+docker pull iiidev/iii:latest
+docker run -p 3111:3111 -p 49134:49134 \
+  -v ./iii-config.yaml:/app/config.yaml:ro \
+  iiidev/iii:latest
 ```
 
 ### 2. Create Engine Config (`iii-config.yaml`)
@@ -97,7 +115,41 @@ modules:
     config:
       adapter:
         class: modules::cron::KvCronAdapter
+
+  # --- New modules (from iii.dev docs) ---
+
+  - class: modules::kv_server::KvServer
+    config:
+      store_method: file_based
+      file_path: ./data/kv_store
+      save_interval_ms: 5000
+
+  - class: modules::observability::LoggingModule
+    config:
+      level: ${RUST_LOG:info}
+      format: json
+      adapter:
+        class: modules::observability::adapters::FileLogger
+        config:
+          file_path: app.log
+          save_interval_ms: 5000
+
+  - class: modules::bridge_client::BridgeClientModule
+    config:
+      url: ${REMOTE_III_URL:ws://127.0.0.1:49134}
+      service_id: bridge-client
+      forward:
+        - local_function: remote::kv::get
+          remote_function: kv_server::get
+          timeout_ms: 5000
+
+  - class: modules::shell::ExecModule
+    config:
+      exec:
+        - bun run --enable-source-maps worker.js
 ```
+
+> **Module class path note**: The 0.2.0 engine uses `modules::stream::StreamModule` (singular). The iii.dev docs show `modules::streams::StreamModule` (plural). Both may work depending on engine version. See `references/engine-modules.md` for full module config schemas.
 
 ### 3. Start the Engine
 
@@ -156,6 +208,8 @@ Test: `curl http://localhost:3111/health`
 - Start the iii engine **before** starting services
 - Use `getContext()` for logging inside function handlers (provides structured OTEL logging)
 - Use `Promise.allSettled()` when calling multiple remote functions in parallel (graceful partial failure)
+- Use `GET /health` on port 3111 to check engine health before connecting services
+- Use `index` (not `scope`) for KV Server function parameters — `scope` is for the State module only
 
 ### Never Do
 
@@ -165,6 +219,8 @@ Test: `curl http://localhost:3111/health`
 - Never use 6-field cron expressions - iii supports **7 fields** (seconds included): `"*/30 * * * * * *"`
 - Never call `registerTrigger` with `trigger_type` - the correct field is `type` (changed in 0.2.0)
 - Never import from `iii-sdk/state` or `iii-sdk/stream` for basic state operations - use `sdk.call("state::set", ...)` instead. Note: `iii-sdk/state` will be **removed in 0.3.0**
+- Never `npm install @iii-dev/sdk` — this scoped package does not exist on npm (404). Use `iii-sdk` instead
+- Never use dot separators in engine function paths — use `::` (double colon). `"kv_server::get"` not `"kv_server.get"`
 
 ---
 
@@ -224,13 +280,25 @@ const [a, b] = await Promise.allSettled([
 ### Built-in Functions
 
 ```typescript
-// State management
+// State management (uses 'scope')
 await call("state::set", { scope: "shared", key: "VERSION", value: 1 });
 const val = await call("state::get", { scope: "shared", key: "VERSION" });
+
+// KV Server (uses 'index' — NOT 'scope')
+await call("kv_server::set", { index: "default", key: "user:123", value: { name: "Alice" } });
+const user = await call("kv_server::get", { index: "default", key: "user:123" });
+await call("kv_server::delete", { index: "default", key: "user:123" });
+const keys = await call("kv_server::list_keys_with_prefix", { prefix: "user:" });
+
+// Queue — enqueue a message to a topic
+await call("enqueue", { topic: "user.created", data: { id: "123", email: "user@example.com" } });
 
 // Engine introspection
 const functions = await call("engine::functions::list", {});
 const workers = await call("engine::workers::list", {});
+
+// Health check (HTTP, not via SDK)
+// curl http://localhost:3111/health
 
 // Graceful shutdown (new in 0.2.0)
 await sdk.shutdown();  // Closes WebSocket, cleans up resources
@@ -282,6 +350,46 @@ registerTrigger({
   config: { expression: "*/30 * * * * * *" },  // Every 30 seconds
 });
 // Fields: seconds minutes hours day-of-month month day-of-week year
+```
+
+### Queue Trigger
+
+Invokes a function when a message is enqueued to a specific topic. Requires `QueueModule` in engine config.
+
+```typescript
+registerFunction({ id: "events::on-user-created" }, async (data) => {
+  const { logger } = getContext();
+  logger.info("User created", data);
+  // Process the queued message
+});
+
+registerTrigger({
+  type: "queue",
+  function_id: "events::on-user-created",
+  config: { topic: "user.created" },
+});
+
+// Enqueue from another service
+await call("enqueue", { topic: "user.created", data: { id: "123", email: "user@example.com" } });
+```
+
+### Log Trigger
+
+Invokes a function when log events match a level. Requires `LoggingModule` in engine config.
+
+```typescript
+registerFunction({ id: "monitoring::on-error" }, async (logEntry) => {
+  // logEntry: { trace_id, message, level, function_name, date }
+  const { logger } = getContext();
+  logger.info("Error captured", logEntry);
+  // Send alert, store in database, etc.
+});
+
+registerTrigger({
+  type: "log",
+  function_id: "monitoring::on-error",
+  config: { level: "error" },  // Optional: info, warn, error, debug (omit for all)
+});
 ```
 
 ---
@@ -367,6 +475,49 @@ See `references/api-reference.md` for the full `IState` interface with `get`, `s
 
 Real-time durable streams organized by stream name, group, and item. See `references/api-reference.md` for the full `IStream` interface.
 
+### Stream Triggers
+
+The Stream module adds `streams:join` and `streams:leave` trigger types, fired when clients connect/disconnect from stream subscriptions.
+
+```typescript
+registerFunction({ id: "presence::on-join" }, async (event) => {
+  // event: { subscription_id, stream_name, group_id, id, context }
+  const { logger } = getContext();
+  logger.info("User joined stream", { stream: event.stream_name, group: event.group_id });
+});
+
+registerTrigger({
+  type: "streams:join",
+  function_id: "presence::on-join",
+  config: {},  // No config needed
+});
+
+registerTrigger({
+  type: "streams:leave",
+  function_id: "presence::on-leave",
+  config: {},
+});
+```
+
+### Stream Adapters
+
+**KvStore** (file-based, no external deps — good for development):
+```yaml
+adapter:
+  class: modules::stream::adapters::KvStore
+  config:
+    store_method: file_based
+    file_path: ./data/streams_store
+```
+
+**Redis** (production, supports multi-instance via pub/sub):
+```yaml
+adapter:
+  class: modules::streams::adapters::RedisAdapter
+  config:
+    redis_url: ${REDIS_URL:redis://localhost:6379}
+```
+
 ---
 
 ## OpenTelemetry Integration
@@ -407,6 +558,15 @@ if (meter) {
 | `OTEL_METRICS_ENABLED` | - | Enable metrics export |
 | `OTEL_EXPORTER_TYPE` | `memory` | Exporter type (`memory` or `otlp`) |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4317` | OTLP endpoint |
+
+### Ports
+
+| Port | Service | Module |
+|------|---------|--------|
+| 3111 | REST API | `RestApiModule` |
+| 49134 | WebSocket (worker connections) | Engine core |
+| 3112 | Streams WebSocket | `StreamModule` |
+| 9464 | Prometheus metrics | `OtelModule` |
 
 ---
 
@@ -451,6 +611,90 @@ my-iii-project/
 
 ---
 
+## Docker Deployment
+
+### Single Container
+
+```bash
+docker pull iiidev/iii:latest
+
+docker run -p 3111:3111 -p 49134:49134 -p 3112:3112 -p 9464:9464 \
+  -v ./iii-config.yaml:/app/config.yaml:ro \
+  iiidev/iii:latest
+```
+
+### Production with Caddy (TLS)
+
+```bash
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Caddy reverse proxy routes:
+- `/api/*` → port 3111 (REST API)
+- `/ws` → port 49134 (WebSocket)
+- `/streams/*` → port 3112 (Streams)
+
+### Security Hardening
+
+```bash
+docker run --read-only --tmpfs /tmp \
+  --cap-drop=ALL --cap-add=NET_BIND_SERVICE \
+  --security-opt=no-new-privileges:true \
+  -v ./config.yaml:/app/config.yaml:ro \
+  iiidev/iii:latest
+```
+
+---
+
+## iii Console
+
+The iii Console is a web UI for inspecting engine state. Install via npm:
+
+```bash
+npm install -g @anthropic/iii-console  # Check iii.dev/docs for current install
+```
+
+The Console connects to the engine's REST API (port 3111) and provides:
+- Live function registry view
+- Connected workers list
+- Trigger configuration overview
+- State and KV Server browser
+
+---
+
+## Upcoming SDK (`@iii-dev/sdk`)
+
+The iii.dev docs reference `@iii-dev/sdk` with a `Bridge` class API. As of 2026-02-17, this package does **not exist on npm** (404). It likely represents a future SDK release.
+
+### Key Differences from `iii-sdk@0.2.0`
+
+| Aspect | `iii-sdk@0.2.0` (use this) | `@iii-dev/sdk` (docs only) |
+|--------|----------------------------|---------------------------|
+| Install | `npm install iii-sdk` | N/A — npm 404 |
+| Entry point | `init(address)` → `ISdk` | `new Bridge(url)` |
+| Function field | `id: "svc::fn"` | `function_path: "svc.fn"` |
+| Trigger field | `type: "http"` | `trigger_type: "api"` |
+| Invoke | `call()` / `callVoid()` | `invokeFunction()` / `invokeFunctionAsync()` |
+| Separator | `::` (double colon) | `.` (dot) |
+
+### Translating Docs Examples
+
+When reading iii.dev docs code samples, translate to `iii-sdk@0.2.0`:
+
+```typescript
+// DOCS example (won't work — @iii-dev/sdk not on npm):
+// bridge.registerFunction({ function_path: "users.create", handler: fn })
+// bridge.registerTrigger({ trigger_type: "api", function_path: "users.create", config: { ... } })
+
+// CORRECT translation for iii-sdk@0.2.0:
+registerFunction({ id: "users::create" }, fn);
+registerTrigger({ type: "http", function_id: "users::create", config: { api_path: "users", http_method: "POST" } });
+```
+
+See `references/api-reference.md` for the full `@iii-dev/sdk` type sketch and more translation examples.
+
+---
+
 ## Known Issues
 
 - **Alpha software**: API may change between releases
@@ -467,6 +711,7 @@ Based on `0.3.0-alpha.20260210122502`, expect these breaking changes in a future
 - **`iii-sdk/stream` renamed to `iii-sdk/streams`** (plural)
 - **Trigger field reverts**: `type` may change back to `trigger_type`
 - **`ISdk` type no longer exported** from the main entry point
+- **SDK transition**: The docs-only `@iii-dev/sdk` (Bridge class, dot separators) may become the official SDK. Monitor npm for `@iii-dev/sdk` availability
 
 ---
 
@@ -481,3 +726,7 @@ Based on `0.3.0-alpha.20260210122502`, expect these breaking changes in a future
 | Cron not firing | Wrong expression format | Use 7-field format: `sec min hour dom mon dow year` |
 | State returns null | Wrong scope or key | Check scope/key strings match exactly |
 | `trigger_type_not_found` | Used `trigger_type` instead of `type` (changed in 0.2.0) | Change field to `type` in `registerTrigger` |
+| KV Server timeout | KV Server module not in config | Add `modules::kv_server::KvServer` to `iii-config.yaml` |
+| `module class not found` | Wrong singular/plural path | Try `stream` vs `streams` in class path; check engine version |
+| `@iii-dev/sdk` npm 404 | Package not published | Use `iii-sdk` (no scope). `@iii-dev/sdk` is docs-only |
+| Queue messages not processing | Missing queue trigger or wrong topic | Verify `registerTrigger({ type: "queue", config: { topic } })` matches enqueue topic |
