@@ -11,9 +11,9 @@ description: |
   registerTrigger configuration, KV Server storage, queue/log triggers, Docker deploy,
   or debugging "ECONNREFUSED 49134", "type_not_found", "@iii-dev/sdk 404".
 metadata:
-  last_verified: "2026-02-17"
+  last_verified: "2026-02-18"
   packages:
-    - iii-sdk@0.2.0
+    - iii-sdk@0.3.0-alpha
 ---
 
 # iii - Cross-Language Backend Engine
@@ -21,11 +21,13 @@ metadata:
 Script paths are relative to this skill's base directory.
 
 **Status**: Alpha (active development)
-**SDK**: `iii-sdk@0.2.0` (npm) | Python `iii` | Rust `iii_sdk`
+**SDK**: `iii-sdk@0.3.0-alpha` (npm, current working) | `iii-sdk@0.2.0` (stable) | Python `iii` | Rust `iii_sdk`
 **Docker**: `iiidev/iii:latest`
 **License**: Apache-2.0
 **Docs**: https://iii.dev/docs
-**Last Verified**: 2026-02-17
+**Last Verified**: 2026-02-18
+
+> **SDK 0.3.0-alpha Breaking Change (verified 2026-02-18)**: The `registerTrigger` field is `trigger_type` (NOT `type`). HTTP triggers use `trigger_type: "api"` (NOT `"http"`). Using `type: "http"` causes silent 404s on all routes. This was confirmed in the tac-4-go rewrite from motia to direct iii-sdk.
 
 > **SDK Note**: The iii.dev docs reference `@iii-dev/sdk` with a `Bridge` class — this package does **not exist on npm** (404 as of 2026-02-17). Always install `iii-sdk` (no scope). The docs SDK uses different conventions (dot separators, `trigger_type`, `function_path`). See [Upcoming SDK](#upcoming-sdk-iii-devsdk) for translation guide.
 
@@ -184,7 +186,7 @@ const health = registerFunction({ id: "my-service::health" }, async () => {
 
 // Expose as HTTP endpoint via the engine's REST API module
 registerTrigger({
-  type: "http",
+  trigger_type: "api",
   function_id: health.id,
   config: { api_path: "health", http_method: "GET" },
 });
@@ -217,8 +219,9 @@ Test: `curl http://localhost:3111/health`
 - Never use `process.env` in function IDs (they must be static strings)
 - Never assume all services are available - handle missing services gracefully
 - Never use 6-field cron expressions - iii supports **7 fields** (seconds included): `"*/30 * * * * * *"`
-- Never call `registerTrigger` with `trigger_type` - the correct field is `type` (changed in 0.2.0)
-- Never import from `iii-sdk/state` or `iii-sdk/stream` for basic state operations - use `sdk.call("state::set", ...)` instead. Note: `iii-sdk/state` will be **removed in 0.3.0**
+- **iii-sdk 0.3.0-alpha**: Use `trigger_type` (NOT `type`) in `registerTrigger`. Use `"api"` (NOT `"http"`) for HTTP triggers. Use `"queue"` for queue triggers, `"cron"` for cron triggers
+- **iii-sdk 0.2.0**: Use `type` (NOT `trigger_type`). Use `"http"` for HTTP triggers
+- Never import from `iii-sdk/state` or `iii-sdk/stream` for basic state operations - use `sdk.call("state::set", ...)` instead. Removed in 0.3.0
 - Never `npm install @iii-dev/sdk` — this scoped package does not exist on npm (404). Use `iii-sdk` instead
 - Never use dot separators in engine function paths — use `::` (double colon). `"kv_server::get"` not `"kv_server.get"`
 
@@ -283,6 +286,7 @@ const [a, b] = await Promise.allSettled([
 // State management (uses 'scope')
 await call("state::set", { scope: "shared", key: "VERSION", value: 1 });
 const val = await call("state::get", { scope: "shared", key: "VERSION" });
+const items = await call("state::list", { scope: "shared" });
 
 // KV Server (uses 'index' — NOT 'scope')
 await call("kv_server::set", { index: "default", key: "user:123", value: { name: "Alice" } });
@@ -310,13 +314,14 @@ await sdk.shutdown();  // Closes WebSocket, cleans up resources
 
 ## Triggers
 
-### HTTP Trigger
+### HTTP Trigger (API)
 
 Exposes a function as an HTTP endpoint on the engine's REST API (default port 3111).
 
 ```typescript
+// iii-sdk 0.3.0-alpha (current working — use this)
 registerTrigger({
-  type: "http",
+  trigger_type: "api",
   function_id: "service::handler",
   config: {
     api_path: "users/:id",           // Path params supported
@@ -325,6 +330,8 @@ registerTrigger({
 });
 // Accessible at: http://localhost:3111/users/123
 ```
+
+> **Warning**: Using `type: "http"` (0.2.0 syntax) with iii engine 0.4.0+ causes silent 404s on all routes. Always use `trigger_type: "api"` with 0.3.0-alpha SDK.
 
 The handler receives an `ApiRequest` object:
 
@@ -345,7 +352,7 @@ Supports **7-field cron expressions** (seconds granularity):
 
 ```typescript
 registerTrigger({
-  type: "cron",
+  trigger_type: "cron",
   function_id: "service::cleanup",
   config: { expression: "*/30 * * * * * *" },  // Every 30 seconds
 });
@@ -357,19 +364,21 @@ registerTrigger({
 Invokes a function when a message is enqueued to a specific topic. Requires `QueueModule` in engine config.
 
 ```typescript
-registerFunction({ id: "events::on-user-created" }, async (data) => {
-  const { logger } = getContext();
-  logger.info("User created", data);
-  // Process the queued message
-});
+const consumer = registerFunction(
+  { id: "events::on-user-created" },
+  async (data) => {
+    console.log("User created", data);
+    return { ok: true };
+  }
+);
 
 registerTrigger({
-  type: "queue",
-  function_id: "events::on-user-created",
+  trigger_type: "queue",
+  function_id: consumer.id,
   config: { topic: "user.created" },
 });
 
-// Enqueue from another service
+// Enqueue from anywhere:
 await call("enqueue", { topic: "user.created", data: { id: "123", email: "user@example.com" } });
 ```
 
@@ -386,7 +395,7 @@ registerFunction({ id: "monitoring::on-error" }, async (logEntry) => {
 });
 
 registerTrigger({
-  type: "log",
+  trigger_type: "log",
   function_id: "monitoring::on-error",
   config: { level: "error" },  // Optional: info, warn, error, debug (omit for all)
 });
@@ -487,13 +496,13 @@ registerFunction({ id: "presence::on-join" }, async (event) => {
 });
 
 registerTrigger({
-  type: "streams:join",
+  trigger_type: "streams:join",
   function_id: "presence::on-join",
   config: {},  // No config needed
 });
 
 registerTrigger({
-  type: "streams:leave",
+  trigger_type: "streams:leave",
   function_id: "presence::on-leave",
   config: {},
 });
@@ -673,7 +682,7 @@ The iii.dev docs reference `@iii-dev/sdk` with a `Bridge` class API. As of 2026-
 | Install | `npm install iii-sdk` | N/A — npm 404 |
 | Entry point | `init(address)` → `ISdk` | `new Bridge(url)` |
 | Function field | `id: "svc::fn"` | `function_path: "svc.fn"` |
-| Trigger field | `type: "http"` | `trigger_type: "api"` |
+| Trigger field | `type: "http"` (0.2.0) / `trigger_type: "api"` (0.3.0-alpha) | `trigger_type: "api"` |
 | Invoke | `call()` / `callVoid()` | `invokeFunction()` / `invokeFunctionAsync()` |
 | Separator | `::` (double colon) | `.` (dot) |
 
@@ -686,9 +695,9 @@ When reading iii.dev docs code samples, translate to `iii-sdk@0.2.0`:
 // bridge.registerFunction({ function_path: "users.create", handler: fn })
 // bridge.registerTrigger({ trigger_type: "api", function_path: "users.create", config: { ... } })
 
-// CORRECT translation for iii-sdk@0.2.0:
+// CORRECT translation for iii-sdk@0.3.0-alpha:
 registerFunction({ id: "users::create" }, fn);
-registerTrigger({ type: "http", function_id: "users::create", config: { api_path: "users", http_method: "POST" } });
+registerTrigger({ trigger_type: "api", function_id: "users::create", config: { api_path: "users", http_method: "POST" } });
 ```
 
 See `references/api-reference.md` for the full `@iii-dev/sdk` type sketch and more translation examples.
@@ -703,15 +712,18 @@ See `references/api-reference.md` for the full `@iii-dev/sdk` type sketch and mo
 - **Reconnection**: SDK auto-reconnects with exponential backoff (1s initial, 30s max, infinite retries by default)
 - **CJS support**: 0.2.0 adds CommonJS exports alongside ESM - both `import` and `require` now work
 
-### Upcoming in 0.3.0 (from alpha pre-release)
+### 0.3.0-alpha Breaking Changes (confirmed working 2026-02-18)
 
-Based on `0.3.0-alpha.20260210122502`, expect these breaking changes in a future release:
+These are **current reality** with `iii-sdk@0.3.0-alpha.20260210122502` + iii engine 0.4.0:
 
-- **`iii-sdk/state` export removed** - Use `call("state::set", ...)` and `call("state::get", ...)` instead of the direct `IState` interface
+- **`trigger_type` replaces `type`** in `registerTrigger` — use `trigger_type: "api"` (NOT `type: "http"`)
+- **`"api"` replaces `"http"`** as the HTTP trigger type name
+- **`iii-sdk/state` export removed** — use `call("state::set", ...)` and `call("state::get", ...)`
 - **`iii-sdk/stream` renamed to `iii-sdk/streams`** (plural)
-- **Trigger field reverts**: `type` may change back to `trigger_type`
 - **`ISdk` type no longer exported** from the main entry point
 - **SDK transition**: The docs-only `@iii-dev/sdk` (Bridge class, dot separators) may become the official SDK. Monitor npm for `@iii-dev/sdk` availability
+
+> **Verified**: tac-4-go project uses direct iii-sdk 0.3.0-alpha with `trigger_type: "api"` and all 4 HTTP endpoints + queue + cron work correctly.
 
 ---
 
@@ -722,10 +734,11 @@ Based on `0.3.0-alpha.20260210122502`, expect these breaking changes in a future
 | `ECONNREFUSED 127.0.0.1:49134` | Engine not running | Start with `iii -c iii-config.yaml` |
 | Function call times out (30s) | Target service not connected | Start the service; check `engine::workers::list` |
 | `Cannot find module 'iii-sdk'` | SDK not installed | `npm install iii-sdk` |
-| HTTP endpoint returns 404 | Trigger not registered or wrong path | Verify `registerTrigger` config matches URL |
+| HTTP endpoint returns 404 | Wrong trigger field or type | With 0.3.0-alpha: use `trigger_type: "api"` (NOT `type: "http"`). Verify `api_path` matches URL |
 | Cron not firing | Wrong expression format | Use 7-field format: `sec min hour dom mon dow year` |
 | State returns null | Wrong scope or key | Check scope/key strings match exactly |
-| `trigger_type_not_found` | Used `trigger_type` instead of `type` (changed in 0.2.0) | Change field to `type` in `registerTrigger` |
+| `trigger_type_not_found` | SDK/engine version mismatch | 0.2.0: use `type`. 0.3.0-alpha: use `trigger_type` |
+| All routes 404 (silent) | Used `type: "http"` with 0.3.0-alpha SDK | Change to `trigger_type: "api"` — motia sends `"http"`, iii engine 0.4.0 expects `"api"` |
 | KV Server timeout | KV Server module not in config | Add `modules::kv_server::KvServer` to `iii-config.yaml` |
 | `module class not found` | Wrong singular/plural path | Try `stream` vs `streams` in class path; check engine version |
 | `@iii-dev/sdk` npm 404 | Package not published | Use `iii-sdk` (no scope). `@iii-dev/sdk` is docs-only |
