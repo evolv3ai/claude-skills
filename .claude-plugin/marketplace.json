@@ -7,18 +7,28 @@
   "metadata": {
     "description": "Production-tested skills for Claude Code",
     "version": "1.0.0",
-    "updated": "2026-02-14"
+    "updated": "2026-02-22"
   },
   "plugins": [
     {
       "name": "all",
-      "description": "All 21 production-tested skills for Claude Code.",
+      "description": "All 24 production-tested skills for Claude Code.",
       "source": "./"
     },
     {
       "name": "admin",
       "description": "Local machine administration for Windows, WSL, macOS, Linux. Install tools, check if software is installed, manage packages, configure dev environments. Works with winget, scoop, brew, apt, npm, pip, ",
       "source": "./skills/admin"
+    },
+    {
+      "name": "backblaze-b2",
+      "description": "Manage cloud storage with Backblaze B2 CLI (v4.x). Upload, download, sync files and folders to B2 buckets. Create and manage buckets, application keys, and lifecycle rules. Use when: backing up files ",
+      "source": "./skills/backblaze-b2"
+    },
+    {
+      "name": "cloudflare-cli",
+      "description": "Manage Cloudflare DNS records and zones from the terminal with the cf CLI (coollabsio/cloudflare-cli). Full DNS CRUD, zone listing, filtered queries, proxied record toggling, and JSON output for scrip",
+      "source": "./skills/cloudflare-cli"
     },
     {
       "name": "contabo",
@@ -29,6 +39,11 @@
       "name": "coolify",
       "description": "Installs and manages Coolify, an open-source self-hosted PaaS for deploying applications with Docker. Provides a Heroku-like experience on your own infrastructure. Use when: installing Coolify, deploy",
       "source": "./skills/coolify"
+    },
+    {
+      "name": "coolify-cli",
+      "description": "Manage Coolify self-hosted PaaS from the terminal. Multi-instance contexts, application lifecycle (deploy, logs, env sync), database provisioning with backups, service management, and CI/CD automation",
+      "source": "./skills/coolify-cli"
     },
     {
       "name": "deckmate",
@@ -52,7 +67,7 @@
     },
     {
       "name": "iii",
-      "description": "Build cross-language backends with the iii engine. Register functions in TypeScript, Python, or Rust callable from any connected service via WebSocket. Covers iii-sdk, state, streams, triggers (HTTP/c",
+      "description": "Build cross-language backends with the iii engine. Register functions in TypeScript, Python, or Rust callable from any connected service via WebSocket. Covers iii-sdk, state, KV Server, streams, trigg",
       "source": "./skills/iii"
     },
     {

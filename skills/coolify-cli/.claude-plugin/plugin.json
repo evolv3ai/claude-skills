@@ -1,0 +1,12 @@
+{
+  "name": "coolify-cli",
+  "description": "Manage Coolify self-hosted PaaS from the terminal. Multi-instance contexts, application lifecycle (deploy, logs, env sync), database provisioning with backups, service management, and CI/CD automation via JSON output. Use when: deploying apps via Coolify CLI, managing servers/databases/services, syncing environment variables, automating Coolify workflows, or troubleshooting cannot unmarshal array, 404 on service env update, context authentication failures.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}

@@ -1,0 +1,12 @@
+{
+  "name": "cloudflare-cli",
+  "description": "Manage Cloudflare DNS records and zones from the terminal with the cf CLI (coollabsio/cloudflare-cli). Full DNS CRUD, zone listing, filtered queries, proxied record toggling, and JSON output for scripting. Use when: managing DNS records via CLI, listing Cloudflare zones, creating/updating/deleting DNS records, automating Cloudflare DNS workflows, or troubleshooting zone-scoped token permission errors, cf: command not found, config file issues.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Jeremy Dawes",
+    "email": "jeremy@jezweb.net"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/jezweb/claude-skills",
+  "keywords": []
+}

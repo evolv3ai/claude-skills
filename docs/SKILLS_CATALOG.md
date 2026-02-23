@@ -1,25 +1,38 @@
 # Skills Catalog
 
-**21 production-ready skills** organized by category.
+**24 production-ready skills** organized by category.
 
 Total errors prevented: **0+**
 
-*Auto-generated on 2026-02-15 by `scripts/generate-skills-catalog.py`*
+*Auto-generated on 2026-02-22 by `scripts/generate-skills-catalog.py`*
 
 ---
 
 ## Quick Navigation
 
-- [Other](#other) (21 skills)
+- [Cloudflare Platform](#cloudflare-platform) (1 skills)
+- [Other](#other) (23 skills)
 
 ---
 
-## Other (21 skills)
+## Cloudflare Platform (1 skills)
+
+### cloudflare-cli
+Manage Cloudflare DNS records and zones from the terminal with the cf CLI (coollabsio/cloudflare-cli). Full DNS CRUD, zone listing, filtered queries, proxied record toggling, and JSON output for scrip
+
+---
+
+## Other (23 skills)
 
 ### admin
 Local machine administration for Windows, WSL, macOS, Linux. Install tools, check
 
 **Triggers**: `install`, `7zip`, `zip`, `winget`
+
+---
+
+### backblaze-b2
+Manage cloud storage with Backblaze B2 CLI (v4.x). Upload, download, sync files and folders to B2 buckets. Create and manage buckets, application keys, and lifecycle rules.
 
 ---
 
@@ -32,6 +45,11 @@ Deploys infrastructure on Contabo using Cloud VPS and Object Storage.
 Installs and manages Coolify, an open-source self-hosted PaaS for deploying applications with Docker.
 
 **Triggers**: `coolify`, `hosted PaaS`, `coolify installation`, `coolify web interface`
+
+---
+
+### coolify-cli
+Manage Coolify self-hosted PaaS from the terminal. Multi-instance contexts, application lifecycle (deploy, logs, env sync), database provisioning with backups, service management, and CI/CD automation
 
 ---
 
@@ -60,7 +78,9 @@ Deploys infrastructure on Hetzner Cloud with ARM64 or x86 servers.
 ### iii
 Build cross-language backends with the iii engine. Register functions in TypeScript,
 
-**Triggers**: `The handler receives an`, `object:`
+**Triggers**: `> **Warning**: Using`, `http`, `api`, `with 0.3.0-alpha SDK.
+
+The handler receives an`
 
 ---
 
